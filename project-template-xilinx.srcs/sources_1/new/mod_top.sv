@@ -124,9 +124,9 @@ module mod_top(
 
     // 生成彩条数据，分别取坐标低位作为 RGB 值
     // 警告：该图像生成方式仅供演示，请勿使用横纵坐标驱动大量逻辑！！
-    assign video_red = vdata < 200 ? hdata[8:1] : 8'b0;
-    assign video_green = vdata >= 200 && vdata < 400 ? hdata[8:1] : 8'b0;
-    assign video_blue = vdata >= 400 ? hdata[8:1] : 8'b0;
+    
+    // 注意：如果在video中进行了red、green、blue的赋值，那么这里就不能再对video_red,video_green、video_blue进行赋值了
+    // 否则会导致时序错误，综合不通过
 
     assign video_clk = clk_hdmi;
     video #(12, 800, 856, 976, 1040, 600, 637, 643, 666, 1, 1) u_video800x600at72 (
@@ -135,7 +135,10 @@ module mod_top(
         .vdata(vdata), //纵坐标
         .hsync(video_hsync),
         .vsync(video_vsync),
-        .data_enable(video_de)
+        .data_enable(video_de),
+        .red(video_red),
+        .green(video_green),
+        .blue(video_blue)
     );
 
     // 把 RGB 转化为 HDMI TMDS 信号并输出
