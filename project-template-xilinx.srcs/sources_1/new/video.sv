@@ -21,22 +21,23 @@ module video
     output wire vsync,
     output reg [WIDTH - 1:0] hdata,
     output reg [WIDTH - 1:0] vdata,
-    output reg [7:0] red,         // output reg是时序逻辑，output wire是组合逻辑
+    output reg [7:0] red,        
     output reg [7:0] green,
     output reg [7:0] blue,
     output wire data_enable
 );
 
-    parameter  BAR_WIDTH   =   HSIZE / 8  ; // 每个彩条的宽度
+    wire [23:0] rom_color; // 颜色数据
+    reg [18:0] rom_addr; // 颜色数据地址
+
     initial begin
         hdata = 'b0;
         vdata = 'b0;
         red = 'b0;
         green = 'b0;
-        blue = 'b0;   //语法：自动赋0，不需要前面的位数
+        blue = 'b0;   
+        rom_addr = 'b0;
     end
-    // 初始的水平、竖直计数器
-
     // hdata
     always @ (posedge clk)
     begin
@@ -51,62 +52,46 @@ module video
     begin
         if (hdata == (HMAX - 1)) 
         begin
-            if (vdata == (VMAX - 1))        // 当一行扫描完了才开始下一行
+            if (vdata == (VMAX - 1))        // 当一行扫描完了开始下一行
                 vdata <= 0;
             else
                 vdata <= vdata + 1;
         end
     end
 
+    parameter IMAGE_WIDTH = 244; // 图像宽度
+    parameter IMAGE_HEIGHT = 207; // 图像高度
+    parameter IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT; 
     // hsync & vsync & blank
     assign hsync = ((hdata >= HFP) && (hdata < HSP)) ? HSPP : !HSPP;
     assign vsync = ((vdata >= VFP) && (vdata < VSP)) ? VSPP : !VSPP;
     assign data_enable = ((hdata < HSIZE) & (vdata < VSIZE));
-
-    //注意区分hdata/vdata和hsync/vsync： 前者是纯粹的计数器，而后者代表了同步信号的高电平和低电平
-    //为什么要加上 C_H_SYNC_PULSE 和 C_H_BACK_PORCH？
-    //因为 显示器开始“真正显示图像”的位置，并不是从 R_h_cnt = 0 开始的，而是从 同步信号（HSYNC）和回扫间隔（Back Porch）之后 才开始！
-
+    assign picture_enable = ((hdata < IMAGE_WIDTH) & (vdata < IMAGE_HEIGHT)); // 画图使能信号
+    //注意区分hdata/vdata和hsync/vsync 前者是是纯粹的计数器，后者代表了同步信号的高电平和低电平
     always @ (posedge clk)
     begin
-        if(data_enable) begin
-            if (hdata < (BAR_WIDTH)) begin
-                red <= 8'hFF; // 红色分量
-                green <= 8'b0; // 绿色分量
-                blue <= 8'b0; // 蓝色分量
-            end else if (hdata < (BAR_WIDTH * 2)) begin
-                red <= 8'b0;
-                green <= 8'hFF; // 绿色分量
-                blue <= 8'b0;
-            end else if (hdata < (BAR_WIDTH * 3)) begin
-                red <= 8'b0;
-                green <= 8'b0;
-                blue <= 8'hFF; // 蓝色分量
-            end else if (hdata < (BAR_WIDTH * 4)) begin
-                red <= 8'hFF;
-                green <= 8'hFF; // 黄色分量
-                blue <= 8'b0;
-            end else if (hdata < (BAR_WIDTH * 5)) begin
-                red <= 8'b0;
-                green <= 8'hFF;
-                blue <= 8'hFF; // 青色分量
-            end else if (hdata < (BAR_WIDTH * 6)) begin
-                red <= 8'hFF;
-                green <= 8'b0;
-                blue <= 8'hFF; // 紫色分量
-            end else if (hdata < (BAR_WIDTH * 7)) begin
-                red <= 8'hFF;
-                green <= 8'hFF;
-                blue <= 8'hFF; // 白色分量
-            end else begin
-                red <= 'b0;
-                green <= 'b0;
-                blue <= 'b0;   // 黑色分量，关闭显示
-            end
+        if(picture_enable) begin
+            rom_addr <= vdata * IMAGE_WIDTH + hdata;
+            red <= rom_color[23:16]; // 取出红色分量
+            green <= rom_color[15:8]; 
+            blue <= rom_color[7:0];  
+            // if(rom_addr == IMAGE_SIZE - 1) begin
+            //     rom_addr <= 'b0; // 只要有递增的地方，一定要注意清空
+            // end else begin
+            //     rom_addr <= rom_addr + 1; // 递增地址
+            // end
         end else begin
             red <= 'b0;
             green <= 'b0;
-            blue <= 'b0;   // 黑色分量，关闭显示
+            blue <= 'b0;  
+            rom_addr <= rom_addr;
         end
     end 
+
+    blk_mem_gen_0 color_rom (       //这种格式就是调用模块执行
+        .clka(clk),
+        .ena(picture_enable), // 使能端，只读取合适范围内的数据
+        .addra(rom_addr), //    颜色地址
+        .douta(rom_color) // output [15 : 0] douta
+    );
 endmodule
