@@ -17,6 +17,10 @@ module mod_top(
     output wire [7:0] dpy_digit,   // 七段数码管笔段信号
     output wire [7:0] dpy_segment, // 七段数码管位扫描信号
 
+    output wire pmod1_io1,    // PMOD 接口引脚 1
+    input wire pmod1_io2,    // PMOD 接口引脚 2
+    output wire pmod1_io3,    // PMOD 接口引脚 3
+    output wire pmod1_io4,    // PMOD 接口引脚 4
     // 以下是一些被注释掉的外设接口
     // 若要使用，不要忘记去掉 io.xdc 中对应行的注释
 
@@ -64,13 +68,31 @@ module mod_top(
     // 使用 100MHz 时钟作为后续逻辑的时钟
     wire clk_in = clk_100m;
 
+
+    reg [1:0] rst_sync;
+    wire rst_synced;
+
+    // use rst_synced as asynchronous reset of all modules
+    // 复位信号同步逻辑
+    assign rst_synced = rst_sync[1];
+
+    always @(posedge clk_100m, posedge btn_rst) begin
+        if (btn_rst) begin
+            rst_sync <= 2'b11;
+        end else begin
+            rst_sync <= {rst_sync[0], btn_rst};
+        end
+    end
+
+
     // PLL 分频演示，从输入产生不同频率的时钟
     wire clk_hdmi;
     wire clk_locked;
     ip_pll u_ip_pll(
         .clk_in1  (clk_in    ),  // 输入 100MHz 时钟
-        .reset    (btn_rst   ),  // 复位信号，高有效
+        .reset    (rst_sync   ),  // 复位信号，高有效
         .clk_out1 (clk_hdmi  ),  // 50MHz 像素时钟
+        .clk_out2 (ps2_clk   ),  // 10MHz PS2 时钟
         .locked   (clk_locked)   // 高表示 50MHz 时钟已经稳定输出
     );
 
@@ -88,7 +110,7 @@ module mod_top(
     // 自增计数器，用于数码管演示
     reg [31:0] counter;
     always @(posedge clk_in) begin
-        if (btn_rst) begin
+        if (rst_sync) begin
             counter <= 32'b0;
             number <= 32'b0;
         end else begin
@@ -129,7 +151,7 @@ module mod_top(
     // 否则会导致时序错误，综合不通过
 
     assign video_clk = clk_hdmi;
-    video #(12, 800, 856, 976, 1040, 600, 637, 643, 666, 1, 1) u_video800x600at72 (
+    video #(12, 800, 856, 976, 1040, 600, 637, 643, 666, 1, 1) u_video800x600at72 ( //对模块进行实例化（可以实例化为多个）
         .clk(video_clk), 
         .hdata(hdata), //横坐标
         .vdata(vdata), //纵坐标
@@ -154,6 +176,30 @@ module mod_top(
         .TMDS_Clk_n  (hdmi_tmds_c_n),
         .TMDS_Data_p (hdmi_tmds_p),
         .TMDS_Data_n (hdmi_tmds_n)
+    );
+    reg [7:0] spi_cmd;
+    reg [7:0] spi_signal;
+    reg spi_start;
+    reg spi_end;
+    (* DONT_TOUCH *) ps2 u_ps2(
+        .ps2_clk(ps2_clk),          // 10MHz
+        .rst(rst_sync) ,      // 复位信号，低电平有效
+        .ret_cmd(spi_cmd),         // SPI 命令
+        .ret_signal(spi_signal),   // SPI 信号
+        .ret_start(spi_start),     // SPI 开始信号
+        .ret_end(spi_end),         // SPI 结束信号
+        .pmod_io1(pmod1_io1), // MOSI
+        .pmod_io2(pmod1_io2), // MISO
+        .pmod_io3(pmod1_io3), // SCLK
+        .pmod_io4(pmod1_io4)  // CS
+    );
+    // !!!!!!!!!!语法上，即使最后多加了一个逗号也会报错！
+    ila_0 u_ila_0 (
+        .clk(ps2_clk), // 时钟信号
+        .probe0(spi_start), // SPI 开始信号
+        .probe1(spi_end), // SPI 结束信号
+        .probe2(spi_cmd), // 8 位 SPI 命令
+        .probe3(spi_signal) // 8 位 SPI 信号
     );
 
 endmodule
