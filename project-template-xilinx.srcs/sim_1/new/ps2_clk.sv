@@ -65,8 +65,8 @@ module ps2_clk;
         .hdmi_tmds_c_n(),
         .hdmi_tmds_c_p()
     );
-    ps2 u_ps2(
-        .ps2_clk(clk_100m),    // 10MHz PS2 时钟输出
+    ps2_new u_ps2(
+        .ps2_clk(ps2_clk),    // 10MHz PS2 时钟输出
         .rst(rst_sync),       // 复位信号
         .pmod_io1(pmod1_io1), // MOSI
         .pmod_io2(pmod1_io2), // MISO
@@ -79,7 +79,7 @@ module ps2_clk;
     initial begin
         // 运行仿真一段时间
 
-        #1000000000;
+        #10000000000;
         
         $display("Simulation completed.");
         $stop;

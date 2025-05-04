@@ -1,3 +1,8 @@
+// 足球运动员模块
+
+// [TODO]如何选择游戏时钟的频率？
+
+
 module player(
     input wire clk,           // 和游戏的帧率相同
 
@@ -19,10 +24,8 @@ module player(
     output reg[7:0] angle_next; //下一个时刻的角度
     output reg[7:0] speed_next; //下一个时刻的速度
 
-    output reg[7:0] anim_stat;  //用于渲染不同的运动员动作
+    output reg[5:0] anim_stat;  //用于渲染不同的运动员动作
+    // 迈开腿这样的状态机切换频率，应该和人物的速度挂钩
 );
-
-
-
-
+    
 endmodule

@@ -11,7 +11,7 @@ module spi (
     output wire pmod_io1,    // MOSI
     input wire pmod_io2,     // MISO
     output wire pmod_io3,    // SCLK
-    output wire pmod_io4,    // CS
+    // CS引脚由上一层的ps2.sv控制
 
     // SPI 数据接口
     // 真正使用的接口给，
@@ -30,7 +30,6 @@ module spi (
 
 
     // 片选信号 (低电平有效)
-    assign pmod_io4 = (state == IDLE) ? 1'b1 : 1'b0; // 高电平空闲，低电平选中
     // MOSI 信号
     assign pmod_io1 = shift_reg[7];
     // SCLK 信号
@@ -54,6 +53,7 @@ module spi (
     // use rst_synced as asynchronous reset of all modules
     // 检测时钟边沿
 
+    reg [2:0] done_count; // 计数器，用于延时
 
     // 状态机逻辑
     always @(posedge clk or posedge rst) begin
@@ -64,6 +64,7 @@ module spi (
             shift_reg <= 8'b0;
             rx_data <= 8'b0;
             done <= 1'b0;
+            done_count <= 3'b0; // 初始化计数器
         end else begin
             case (state)
                 IDLE: begin
@@ -92,8 +93,14 @@ module spi (
                     end
                 end
                 DONE: begin
-                    done <= 1'b1;
-                    state <= IDLE; // 返回空闲状态
+                    //这里等待5个周期再进行状态转换
+                    if(done_count < 3'd5) begin
+                        done_count <= done_count + 1; // 增加计数器
+                    end else begin
+                        done <= 1'b1; // 设置完成信号
+                        state <= IDLE; // 返回空闲状态
+                        done_count <= 3'd0; // 重置计数器
+                    end
                 end
                 default: state <= IDLE;
             endcase
