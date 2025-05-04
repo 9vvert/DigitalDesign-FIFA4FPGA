@@ -1,11 +1,8 @@
 // 对外暴露的使用接口：模式（红灯/绿灯），是否准备好，具体的案件命令
 module ps2(
-    input  wire ps2_clk,          // 10MHz
+    input  wire ps2_clk,          // 100kHz， 10us一次
     input  wire rst,        // 复位信号，低电平有效
-    
-    output reg [31:0]round_number,
-
-    //暴露接口
+    output wire [31:0] debug_number,
     output reg [7:0] ps2_mode,
     output reg [7:0] btn_grp1,
     output reg [7:0] btn_grp2,
@@ -15,205 +12,194 @@ module ps2(
     output reg [7:0] lhandle_Y,
     output reg ready, // 是否准备好，1表示准备好，0表示正在读取数据
 
-    output wire pmod_io1,    // PMOD 接口引脚 1
-    input wire pmod_io2,    // PMOD 接口引脚 2
-    output wire pmod_io3,    // PMOD 接口引脚 3
-    output reg pmod_io4    // PMOD 接口引脚 4
+    output wire pmod_io1,    // MOSI
+    input wire pmod_io2,    // MISO
+    output wire pmod_io3,    // SCLK    //手动控制，不再使用外部时钟
+    output reg pmod_io4    // CS
 );
 // 分为8帧进行
 
-    (* KEEP *)reg spi_start;
+    assign debug_number[7:0] = btn_grp1;
+    assign debug_number[15:8] = btn_grp2;
+    assign debug_number[23:16] = lhandle_X;
+    assign debug_number[31:24] = lhandle_Y;
 
-    (* KEEP *)reg spi_end;
+    reg spi_start;
+    reg spi_end;
+    reg [7:0] spi_cmd;
+    reg [7:0] spi_dat;
 
-    (* KEEP *)reg [7:0] spi_cmd;
-
-    (* KEEP *)reg [7:0] spi_signal;
-
-    (* DONT_TOUCH *) spi PS2_1(
-        .clk(ps2_clk),         //分频，1MHz时钟
+    spi u_spi(
+        .clk(ps2_clk),
         .rst(rst),
-        .pmod_io1(pmod_io1), // MOSI
-        .pmod_io2(pmod_io2), // MISO
-        .pmod_io3(pmod_io3), // SCLK
-        .tx_data(spi_cmd), // 要发送的数据
-        .rx_data(spi_signal), // 接收的数据 
-        .start(spi_start), // 开始发送信号
-        .done(spi_end) // 发送完成信号
+        .pmod_io1(pmod_io1),
+        .pmod_io2(pmod_io2),
+        .pmod_io3(pmod_io3),
+        .cmd(spi_cmd),
+        .dat(spi_dat),
+        .start(spi_start),
+        .done(spi_end)
     );
 
-    reg [2:0] ps2_stat; // ps2线性状态机
+    reg [3:0] ps2_stat; // ps2线性状态机
+    reg first_flag;
 
-
-    reg first_flag; // 用于判断是否第一次进入状态机
-
-    //由于传入的rst_sync已经是同步的，所以可以去掉下面的posedge rst ? 
     reg [31:0] delay_counter;
+    reg [31:0] interval_counter;
 
-    always @(posedge ps2_clk  or posedge rst) begin
+    always @(posedge ps2_clk) begin
         if (rst) begin
-            ps2_stat <= 3'b0;       // 0代表什么都不做,1\2发送，3接受
-            first_flag <= 1'b1; // 0代表第一次进入状态机
-            delay_counter <= 32'b0; 
+            // 这里必须进行btn等的赋值，否则可能会被优化掉而无法正常工作
+            btn_grp1 <= 8'hFF;
+            btn_grp2 <= 8'hFF;
+            rhandle_X <= 8'd0;
+            rhandle_Y <= 8'd0;
+            lhandle_X <= 8'd0;
+            lhandle_Y <= 8'd0;
+            spi_cmd <= 8'd0;
+            ps2_stat <= 4'd0;
             pmod_io4 <= 1'b1; 
-            round_number <= 32'b0; 
-        end else if(delay_counter < 32'd2000000) begin      //延时20s
-            delay_counter <= delay_counter + 32'b1; // 延时计数器
+            first_flag <= 1'b1;
+            ready <= 1'b0;  
+            delay_counter <= 32'd0;
+            interval_counter <=32'd0;
+        end else if(delay_counter < 32'd1000000) begin
+            delay_counter <= delay_counter + 32'd1;
+        end else if(interval_counter == 32'd0) begin
+            interval_counter <= interval_counter + 32'd1;   //缓冲，保持ready的高电平
+        end else if(interval_counter < 32'd1000) begin
+            ready <= 1'b0;      
+            interval_counter <= interval_counter + 32'd1;
         end else begin
-            round_number <= round_number + 32'b1; 
-            if(ps2_stat == 3'b000) begin
-                /*****读取开始******/
-                pmod_io4 <= 1'b0; // CS拉低，表示开始通信
-                ready <= 1'b0;
-                
-                //第一帧，主机发送0x01，表示开始
-                spi_cmd <= 8'h01; 
-                if(first_flag) begin
-                    spi_start <= 1'b1; 
-                    first_flag <= 1'b0; 
+            if(ps2_stat == 4'd0) begin
+                //第0帧，发送0x01，接受随机值
+                spi_cmd <= 8'h01;
+                if(first_flag)begin
+                    first_flag <= 1'b0;
+                    pmod_io4 <= 1'b0;   //拉低CS 
+                    spi_start <= 1'b1;
                 end else begin
                     spi_start <= 1'b0;
                 end
-                
-                //只有当DONE == 1才能进行状态转换；（仅有一个周期，因为在IDLE状态也会设为0）
-                // DONE就是一个通知“完成，继续”的信号
                 if(spi_end) begin
-                    first_flag <= 1'b1; 
-                    spi_start <= 1'b0; 
-                    ps2_stat <= 3'b001; 
-                end else begin
-                    ps2_stat <= 3'b000; // 状态保持在空闲状态
+                    first_flag <= 1'b1;
+                    ps2_stat <= 4'd1;
                 end
-            end else if (ps2_stat == 3'b001) begin
-                //第二帧，主机发送0x42，PS2返回工作模式（红灯/绿灯）
+            end else if (ps2_stat == 4'd1) begin
+                //第一帧，发送0x42，返回ID(模式)
                 spi_cmd <= 8'h42;
-
-                if(first_flag) begin
-                    spi_start <= 1'b1; 
-                    first_flag <= 1'b0; 
+                if(first_flag)begin
+                    first_flag <= 1'b0;
+                    spi_start <= 1'b1;
                 end else begin
                     spi_start <= 1'b0;
                 end
                 if(spi_end) begin
-                    first_flag <= 1'b1; 
-                    spi_start <= 1'b0; 
-                    ps2_stat <= 3'b010; 
-                    ps2_mode <= spi_signal;
-                end else begin
-                    ps2_stat <= 3'b001; // 状态保持在发送状态
+                    ps2_mode <= spi_dat;
+                    first_flag <= 1'b1;
+                    ps2_stat <= 4'd2;
                 end
-            end else if (ps2_stat == 3'b010) begin
-                //第二帧，发送右侧震动WW值，返回第一组按钮值（按下为0）
-                spi_cmd <= 8'h0;       
-                
-                if(first_flag) begin
-                    spi_start <= 1'b1; 
-                    first_flag <= 1'b0; 
+            end else if (ps2_stat == 4'd2) begin
+                //第二帧，发送随机值，返回0x5A
+                spi_cmd <= 8'h00;
+                if(first_flag)begin
+                    first_flag <= 1'b0;
+                    spi_start <= 1'b1;
                 end else begin
                     spi_start <= 1'b0;
                 end
-
                 if(spi_end) begin
-                    first_flag <= 1'b1; 
-                    spi_start <= 1'b0; 
-                    ps2_stat <= 3'b011; 
-                    btn_grp1 <= spi_signal;
-                end else begin
-                    ps2_stat <= 3'b010; // 状态保持在发送状态
+                    //debug_number[7:0] <= spi_dat;
+                    first_flag <= 1'b1;
+                    ps2_stat <= 4'd3;
                 end
-            end else if (ps2_stat == 3'b011) begin
-                //第四帧：发送左侧震动YY值，返回第二组按钮值（按下为0）
-                spi_cmd <= 8'h0;        
-                
-                if(first_flag) begin
-                    spi_start <= 1'b1; 
-                    first_flag <= 1'b0; 
+            end else if (ps2_stat == 4'd3) begin
+                //第三帧，发送震动值，返回grp1_button
+                spi_cmd <= 8'h00;
+                if(first_flag)begin
+                    first_flag <= 1'b0;
+                    spi_start <= 1'b1;
                 end else begin
                     spi_start <= 1'b0;
                 end
-
                 if(spi_end) begin
-                    first_flag <= 1'b1; 
-                    spi_start <= 1'b0; 
-                    ps2_stat <= 3'b100; 
-                    btn_grp2 <= spi_signal;
-                end else begin
-                    ps2_stat <= 3'b011; // 状态保持在发送状态
+                    
+                    btn_grp1 <= spi_dat;
+                    first_flag <= 1'b1;
+                    ps2_stat <= 4'd4;
                 end
-            end else if (ps2_stat == 3'b100) begin
-                spi_cmd <= 8'hFF;      //随机值即可  
-                
-                if(first_flag) begin
-                    spi_start <= 1'b1; 
-                    first_flag <= 1'b0; 
+            end else if (ps2_stat == 4'd4) begin
+                //第四帧，发送震动值，返回grp2_button
+                spi_cmd <= 8'h00;
+                if(first_flag)begin
+                    first_flag <= 1'b0;
+                    spi_start <= 1'b1;
                 end else begin
                     spi_start <= 1'b0;
                 end
-
                 if(spi_end) begin
-                    first_flag <= 1'b1; 
-                    spi_start <= 1'b0; 
-                    ps2_stat <= 3'b101; 
-                    rhandle_X <= spi_signal;
-                end else begin
-                    ps2_stat <= 3'b100; // 状态保持在发送状态
+                    btn_grp2 <= spi_dat;
+                    first_flag <= 1'b1;
+                    ps2_stat <= 4'd5;
                 end
-            end else if (ps2_stat == 3'b101) begin
-                spi_cmd <= 8'hEE;      //随机值即可  
-                
-                if(first_flag) begin
-                    spi_start <= 1'b1; 
-                    first_flag <= 1'b0; 
+            end else if (ps2_stat == 4'd5) begin
+                //第五帧，发送随机值，返回RX
+                spi_cmd <= 8'h00;
+                if(first_flag)begin
+                    first_flag <= 1'b0;
+                    spi_start <= 1'b1;
                 end else begin
                     spi_start <= 1'b0;
                 end
-
                 if(spi_end) begin
-                    first_flag <= 1'b1; 
-                    spi_start <= 1'b0; 
-                    ps2_stat <= 3'b110; 
-                    rhandle_Y <= spi_signal;
-                end else begin
-                    ps2_stat <= 3'b101; // 状态保持在发送状态
+                    rhandle_X <= spi_dat;
+                    first_flag <= 1'b1;
+                    ps2_stat <= 4'd6;
                 end
-            end else if (ps2_stat == 3'b110) begin
-                spi_cmd <= 8'hDD;      //随机值即可  
-                
-                if(first_flag) begin
-                    spi_start <= 1'b1; 
-                    first_flag <= 1'b0; 
+            end else if (ps2_stat == 4'd6) begin
+                //第六帧，发送随机值，返回RY
+                spi_cmd <= 8'h00;
+                if(first_flag)begin
+                    first_flag <= 1'b0;
+                    spi_start <= 1'b1;
                 end else begin
                     spi_start <= 1'b0;
                 end
-
                 if(spi_end) begin
-                    first_flag <= 1'b1; 
-                    spi_start <= 1'b0; 
-                    ps2_stat <= 3'b111; 
-                    lhandle_X <= spi_signal;
-                end else begin
-                    ps2_stat <= 3'b110; // 状态保持在发送状态
+                    rhandle_Y <= spi_dat;
+                    first_flag <= 1'b1;
+                    ps2_stat <= 4'd7;
                 end
-            end else if (ps2_stat == 3'b111) begin
-                spi_cmd <= 8'hCC;      //随机值即可  
-                
-                if(first_flag) begin
-                    spi_start <= 1'b1; 
-                    first_flag <= 1'b0; 
+            end else if (ps2_stat == 4'd7) begin
+                //第七帧，发送随机值，返回LX
+                spi_cmd <= 8'h00;
+                if(first_flag)begin
+                    first_flag <= 1'b0;
+                    spi_start <= 1'b1;
                 end else begin
                     spi_start <= 1'b0;
                 end
-
                 if(spi_end) begin
-                    pmod_io4 <= 1'b1; // CS拉高，表示开始通信
-                    first_flag <= 1'b1; 
-                    spi_start <= 1'b0; 
-                    ps2_stat <= 3'b000; 
-                    lhandle_Y <= spi_signal;
-                    /*****读取完成******/
+                    lhandle_X <= spi_dat;
+                    first_flag <= 1'b1;
+                    ps2_stat <= 4'd8;
+                end
+            end else if (ps2_stat == 4'd8) begin
+                //第八帧，发送随机值，返回LY
+                spi_cmd <= 8'h00;
+                if(first_flag)begin
+                    first_flag <= 1'b0;
+                    spi_start <= 1'b1;
+                end else begin
+                    spi_start <= 1'b0;
+                end
+                if(spi_end) begin
                     ready <= 1'b1;
-                end else begin
-                    ps2_stat <= 3'b111; // 状态保持在发送状态
+                    interval_counter <= 32'd0;
+                    lhandle_Y <= spi_dat;
+                    first_flag <= 1'b1;
+                    pmod_io4 <= 1'b1;   //重新拉高CS
+                    ps2_stat <= 4'd0;
                 end
             end else begin
                 ps2_stat <= ps2_stat;

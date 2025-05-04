@@ -85,9 +85,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 2)) begin
                     if(btn_grp2[0] == 1'b1) begin
@@ -95,9 +95,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 3)) begin
                     red = rhandle_X;
@@ -115,9 +115,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 2)) begin
                     if(btn_grp2[1] == 1'b1) begin
@@ -125,9 +125,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 3)) begin
                     red = rhandle_Y;
@@ -145,9 +145,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 2)) begin
                     if(btn_grp2[2] == 1'b1) begin
@@ -155,9 +155,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 3)) begin
                     red = lhandle_X;
@@ -175,9 +175,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 2)) begin
                     if(btn_grp2[3] == 1'b1) begin
@@ -185,9 +185,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 3)) begin
                     red = lhandle_Y;
@@ -205,9 +205,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 2)) begin
                     if(btn_grp2[4] == 1'b1) begin
@@ -215,9 +215,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else begin
                     red <= 8'h0F;
@@ -231,9 +231,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 2)) begin
                     if(btn_grp2[5] == 1'b1) begin
@@ -241,9 +241,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else begin
                     red <= 8'h0F;
@@ -257,9 +257,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 2)) begin
                     if(btn_grp2[6] == 1'b1) begin
@@ -267,9 +267,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else begin
                     red <= 8'h0F;
@@ -283,9 +283,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else if(vdata < (BATCH_HEIGTH * 2)) begin
                     if(btn_grp2[7] == 1'b1) begin
@@ -293,9 +293,9 @@ module video
                         green <= 8'hFF;
                         blue <= 8'hFF;
                     end else begin
-                        red <= 8'b0;
-                        green <= 8'b0;
-                        blue <= 8'b0;   // 黑色分量，关闭显示
+                        red <= 8'h35;
+                        green <= 8'h35;
+                        blue <= 8'h35;   // 黑色分量，关闭显示
                     end
                 end else begin
                     red <= 8'h0F;

@@ -152,14 +152,7 @@ module mod_top(
     // 注意：如果在video中进行了red、green、blue的赋值，那么这里就不能再对video_red,video_green、video_blue进行赋值了
     // 否则会导致时序错误，综合不通过
 
-    reg [7:0] ps2_mode;
-    reg [7:0] btn_grp1;
-    reg [7:0] btn_grp2;
-    reg [7:0] rhandle_X;
-    reg [7:0] rhandle_Y;
-    reg [7:0] lhandle_X;
-    reg [7:0] lhandle_Y;
-    reg ready; 
+    
 
     reg ps2_clk;
     reg [9:0] ps2_clk_cnt;
@@ -177,17 +170,17 @@ module mod_top(
         end
     end
 
-    reg [7:0] i_ps2_mode;
-    reg [7:0] i_btn_grp1;
-    reg [7:0] i_btn_grp2;
-    reg [7:0] i_rhandle_X;
-    reg [7:0] i_rhandle_Y;
-    reg [7:0] i_lhandle_X;
-    reg [7:0] i_lhandle_Y;
+    reg [7:0] ps2_mode;
+    reg [7:0] btn_grp1;
+    reg [7:0] btn_grp2;
+    reg [7:0] rhandle_X;
+    reg [7:0] rhandle_Y;
+    reg [7:0] lhandle_X;
+    reg [7:0] lhandle_Y;
+    reg ready; 
 
-
-    ps2_new u_ps2(
-        .debug_number(number),
+    ps2 u_ps2(
+        // .debug_number(number),
         .ps2_clk(ps2_clk),          // 10kHz
         .rst(rst_sync) ,      // 复位信号，低电平有效
         .ps2_mode(ps2_mode), // 模式
@@ -204,17 +197,19 @@ module mod_top(
         .pmod_io4(pmod1_io4)  // CS
     );
     // !!!!!!!!!!语法上，即使最后多加了一个逗号也会报错！
-    always @(posedge clk_100m) begin
-        if(ready) begin
+    always @(posedge ps2_clk) begin
+        if(rst_sync) begin
+            number <= 32'd0;
+            //因为ready是在内部输出的，所以这里不应该再进行初始化
+        end else if(ready)begin
             //测试：ready=1代表这一个周期的手柄信号可以读取，
-            i_ps2_mode <= ps2_mode;
-            i_btn_grp1 <= btn_grp1;
-            i_btn_grp2 <= btn_grp2;
-            i_rhandle_X <= rhandle_X;
-            i_rhandle_Y <= rhandle_Y;
-            i_lhandle_X <= lhandle_X;
-            i_lhandle_Y <= lhandle_Y;
-        end 
+            number[7:0] <= btn_grp1;
+            number[15:8] <= btn_grp2;
+            number[23:16] <= rhandle_X;
+            number[31:24] <= rhandle_Y;
+        end else begin
+            number <= number;
+        end
     end
     
     assign video_clk = clk_hdmi;
@@ -228,12 +223,12 @@ module mod_top(
         .red(video_red),
         .green(video_green),
         .blue(video_blue),
-        .btn_grp1(i_btn_grp1),
-        .btn_grp2(i_btn_grp2),
-        .rhandle_X(i_rhandle_X),
-        .rhandle_Y(i_rhandle_Y),
-        .lhandle_X(i_lhandle_X),
-        .lhandle_Y(i_lhandle_Y)
+        .btn_grp1(btn_grp1),
+        .btn_grp2(btn_grp2),
+        .rhandle_X(rhandle_X),
+        .rhandle_Y(rhandle_Y),
+        .lhandle_X(lhandle_X),
+        .lhandle_Y(lhandle_Y)
     );
 
     // 把 RGB 转化为 HDMI TMDS 信号并输出
