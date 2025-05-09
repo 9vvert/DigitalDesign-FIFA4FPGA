@@ -3,69 +3,162 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="angle_tb_behav.wdb" id="1">
+      <db_ref path="ps2_clk_behav.wdb" id="1">
          <top_modules>
-            <top_module name="angle_tb" />
+            <top_module name="dvi_constants" />
             <top_module name="glbl" />
+            <top_module name="ps2_clk" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="13377496fs"></ZoomEndTime>
-      <Cursor1Time time="1000000fs"></Cursor1Time>
+      <ZoomEndTime time="66301fs"></ZoomEndTime>
+      <Cursor1Time time="16992323fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="175"></NameColumnWidth>
-      <ValueColumnWidth column_width="153"></ValueColumnWidth>
+      <ValueColumnWidth column_width="143"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="12" />
-   <wvobject fp_name="/angle_tb/ang1" type="array">
-      <obj_property name="ElementShortName">ang1[7:0]</obj_property>
-      <obj_property name="ObjectShortName">ang1[7:0]</obj_property>
+   <WVObjectSize size="35" />
+   <wvobject fp_name="/ps2_clk/pmod1_io1" type="logic">
+      <obj_property name="ElementShortName">pmod1_io1</obj_property>
+      <obj_property name="ObjectShortName">pmod1_io1</obj_property>
    </wvobject>
-   <wvobject fp_name="/angle_tb/ang2" type="array">
-      <obj_property name="ElementShortName">ang2[7:0]</obj_property>
-      <obj_property name="ObjectShortName">ang2[7:0]</obj_property>
+   <wvobject fp_name="/ps2_clk/pmod1_io2" type="logic">
+      <obj_property name="ElementShortName">pmod1_io2</obj_property>
+      <obj_property name="ObjectShortName">pmod1_io2</obj_property>
    </wvobject>
-   <wvobject fp_name="/angle_tb/add" type="array">
-      <obj_property name="ElementShortName">add[7:0]</obj_property>
-      <obj_property name="ObjectShortName">add[7:0]</obj_property>
+   <wvobject fp_name="/ps2_clk/pmod1_io3" type="logic">
+      <obj_property name="ElementShortName">pmod1_io3</obj_property>
+      <obj_property name="ObjectShortName">pmod1_io3</obj_property>
    </wvobject>
-   <wvobject fp_name="/angle_tb/sub" type="array">
-      <obj_property name="ElementShortName">sub[7:0]</obj_property>
-      <obj_property name="ObjectShortName">sub[7:0]</obj_property>
+   <wvobject fp_name="/ps2_clk/pmod1_io4" type="logic">
+      <obj_property name="ElementShortName">pmod1_io4</obj_property>
+      <obj_property name="ObjectShortName">pmod1_io4</obj_property>
    </wvobject>
-   <wvobject fp_name="/angle_tb/rel_val" type="array">
-      <obj_property name="ElementShortName">rel_val[7:0]</obj_property>
-      <obj_property name="ObjectShortName">rel_val[7:0]</obj_property>
+   <wvobject fp_name="/ps2_clk/clk_100m" type="logic">
+      <obj_property name="ElementShortName">clk_100m</obj_property>
+      <obj_property name="ObjectShortName">clk_100m</obj_property>
    </wvobject>
-   <wvobject fp_name="/angle_tb/rel_pos" type="array">
-      <obj_property name="ElementShortName">rel_pos[1:0]</obj_property>
-      <obj_property name="ObjectShortName">rel_pos[1:0]</obj_property>
+   <wvobject fp_name="/ps2_clk/btn_rst" type="logic">
+      <obj_property name="ElementShortName">btn_rst</obj_property>
+      <obj_property name="ObjectShortName">btn_rst</obj_property>
    </wvobject>
-   <wvobject fp_name="/angle_tb/ang" type="array">
-      <obj_property name="ElementShortName">ang[7:0]</obj_property>
-      <obj_property name="ObjectShortName">ang[7:0]</obj_property>
+   <wvobject fp_name="/ps2_clk/ps2_clk" type="logic">
+      <obj_property name="ElementShortName">ps2_clk</obj_property>
+      <obj_property name="ObjectShortName">ps2_clk</obj_property>
    </wvobject>
-   <wvobject fp_name="/angle_tb/x" type="array">
-      <obj_property name="ElementShortName">x[15:0]</obj_property>
-      <obj_property name="ObjectShortName">x[15:0]</obj_property>
+   <wvobject fp_name="/ps2_clk/clk_in" type="logic">
+      <obj_property name="ElementShortName">clk_in</obj_property>
+      <obj_property name="ObjectShortName">clk_in</obj_property>
    </wvobject>
-   <wvobject fp_name="/angle_tb/y" type="array">
-      <obj_property name="ElementShortName">y[15:0]</obj_property>
-      <obj_property name="ObjectShortName">y[15:0]</obj_property>
+   <wvobject fp_name="/ps2_clk/clk_hdmi" type="logic">
+      <obj_property name="ElementShortName">clk_hdmi</obj_property>
+      <obj_property name="ObjectShortName">clk_hdmi</obj_property>
    </wvobject>
-   <wvobject fp_name="/angle_tb/sin_value" type="array">
-      <obj_property name="ElementShortName">sin_value[9:0]</obj_property>
-      <obj_property name="ObjectShortName">sin_value[9:0]</obj_property>
+   <wvobject fp_name="/ps2_clk/clk_locked" type="logic">
+      <obj_property name="ElementShortName">clk_locked</obj_property>
+      <obj_property name="ObjectShortName">clk_locked</obj_property>
    </wvobject>
-   <wvobject fp_name="/angle_tb/cos_value" type="array">
-      <obj_property name="ElementShortName">cos_value[9:0]</obj_property>
-      <obj_property name="ObjectShortName">cos_value[9:0]</obj_property>
+   <wvobject fp_name="/ps2_clk/rst_sync" type="array">
+      <obj_property name="ElementShortName">rst_sync[1:0]</obj_property>
+      <obj_property name="ObjectShortName">rst_sync[1:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/angle_tb/tan_value" type="array">
-      <obj_property name="ElementShortName">tan_value[9:0]</obj_property>
-      <obj_property name="ObjectShortName">tan_value[9:0]</obj_property>
+   <wvobject fp_name="/ps2_clk/rst_synced" type="logic">
+      <obj_property name="ElementShortName">rst_synced</obj_property>
+      <obj_property name="ObjectShortName">rst_synced</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/ps2_clk" type="logic">
+      <obj_property name="ElementShortName">ps2_clk</obj_property>
+      <obj_property name="ObjectShortName">ps2_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/debug_number" type="array">
+      <obj_property name="ElementShortName">debug_number[31:0]</obj_property>
+      <obj_property name="ObjectShortName">debug_number[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/ps2_mode" type="array">
+      <obj_property name="ElementShortName">ps2_mode[7:0]</obj_property>
+      <obj_property name="ObjectShortName">ps2_mode[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/btn_grp1" type="array">
+      <obj_property name="ElementShortName">btn_grp1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">btn_grp1[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/btn_grp2" type="array">
+      <obj_property name="ElementShortName">btn_grp2[7:0]</obj_property>
+      <obj_property name="ObjectShortName">btn_grp2[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/rhandle_X" type="array">
+      <obj_property name="ElementShortName">rhandle_X[7:0]</obj_property>
+      <obj_property name="ObjectShortName">rhandle_X[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/rhandle_Y" type="array">
+      <obj_property name="ElementShortName">rhandle_Y[7:0]</obj_property>
+      <obj_property name="ObjectShortName">rhandle_Y[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/lhandle_X" type="array">
+      <obj_property name="ElementShortName">lhandle_X[7:0]</obj_property>
+      <obj_property name="ObjectShortName">lhandle_X[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/lhandle_Y" type="array">
+      <obj_property name="ElementShortName">lhandle_Y[7:0]</obj_property>
+      <obj_property name="ObjectShortName">lhandle_Y[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/ready" type="logic">
+      <obj_property name="ElementShortName">ready</obj_property>
+      <obj_property name="ObjectShortName">ready</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/pmod_io1" type="logic">
+      <obj_property name="ElementShortName">pmod_io1</obj_property>
+      <obj_property name="ObjectShortName">pmod_io1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/pmod_io2" type="logic">
+      <obj_property name="ElementShortName">pmod_io2</obj_property>
+      <obj_property name="ObjectShortName">pmod_io2</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/pmod_io3" type="logic">
+      <obj_property name="ElementShortName">pmod_io3</obj_property>
+      <obj_property name="ObjectShortName">pmod_io3</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/pmod_io4" type="logic">
+      <obj_property name="ElementShortName">pmod_io4</obj_property>
+      <obj_property name="ObjectShortName">pmod_io4</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/spi_start" type="logic">
+      <obj_property name="ElementShortName">spi_start</obj_property>
+      <obj_property name="ObjectShortName">spi_start</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/spi_end" type="logic">
+      <obj_property name="ElementShortName">spi_end</obj_property>
+      <obj_property name="ObjectShortName">spi_end</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/spi_cmd" type="array">
+      <obj_property name="ElementShortName">spi_cmd[7:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_cmd[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/spi_dat" type="array">
+      <obj_property name="ElementShortName">spi_dat[7:0]</obj_property>
+      <obj_property name="ObjectShortName">spi_dat[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/ps2_stat" type="array">
+      <obj_property name="ElementShortName">ps2_stat[3:0]</obj_property>
+      <obj_property name="ObjectShortName">ps2_stat[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/first_flag" type="logic">
+      <obj_property name="ElementShortName">first_flag</obj_property>
+      <obj_property name="ObjectShortName">first_flag</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/delay_counter" type="array">
+      <obj_property name="ElementShortName">delay_counter[31:0]</obj_property>
+      <obj_property name="ObjectShortName">delay_counter[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ps2_clk/u_ps2/interval_counter" type="array">
+      <obj_property name="ElementShortName">interval_counter[31:0]</obj_property>
+      <obj_property name="ObjectShortName">interval_counter[31:0]</obj_property>
    </wvobject>
 </wave_config>

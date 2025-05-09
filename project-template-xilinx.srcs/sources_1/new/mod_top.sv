@@ -170,47 +170,47 @@ module mod_top(
         end
     end
 
-    reg [7:0] ps2_mode;
-    reg [7:0] btn_grp1;
-    reg [7:0] btn_grp2;
-    reg [7:0] rhandle_X;
-    reg [7:0] rhandle_Y;
-    reg [7:0] lhandle_X;
-    reg [7:0] lhandle_Y;
-    reg ready; 
-
-    ps2 u_ps2(
-        // .debug_number(number),
-        .ps2_clk(ps2_clk),          // 10kHz
-        .rst(rst_sync) ,      // 复位信号，低电平有效
-        .ps2_mode(ps2_mode), // 模式
-        .btn_grp1(btn_grp1), // 按键组1
-        .btn_grp2(btn_grp2), // 按键组2
-        .rhandle_X(rhandle_X), // 右手柄 X 轴
-        .rhandle_Y(rhandle_Y), // 右手柄 Y 轴
-        .lhandle_X(lhandle_X), // 左手柄 X 轴
-        .lhandle_Y(lhandle_Y), // 左手柄 Y 轴
-        .ready(ready), // 是否准备好，1表示准备好，0表示正在读取数据
-        .pmod_io1(pmod1_io1), // MOSI
-        .pmod_io2(pmod1_io2), // MISO
-        .pmod_io3(pmod1_io3), // SCLK
-        .pmod_io4(pmod1_io4)  // CS
-    );
-    // !!!!!!!!!!语法上，即使最后多加了一个逗号也会报错！
-    always @(posedge ps2_clk) begin
+    reg game_clk;
+    reg [15:0] game_clk_cnt;
+    always @(posedge clk_100m) begin
         if(rst_sync) begin
-            number <= 32'd0;
-            //因为ready是在内部输出的，所以这里不应该再进行初始化
-        end else if(ready)begin
-            //测试：ready=1代表这一个周期的手柄信号可以读取，
-            number[7:0] <= btn_grp1;
-            number[15:8] <= btn_grp2;
-            number[23:16] <= rhandle_X;
-            number[31:24] <= rhandle_Y;
+            game_clk <= 1'b0;
+            game_clk_cnt <= 16'b0;
         end else begin
-            number <= number;
+            if(game_clk_cnt == 16'd49999) begin    // 50000次反转，1ms一次
+                game_clk <= ~game_clk; // 反转时钟
+                game_clk_cnt <= 16'b0;
+            end else begin
+                game_clk_cnt <= game_clk_cnt + 16'b1;
+            end
         end
     end
+
+    // // !!!!!!!!!!语法上，即使最后多加了一个逗号也会报错！
+    // always @(posedge ps2_clk) begin
+    //     if(rst_sync) begin
+    //         number <= 32'd0;
+    //         //因为ready是在内部输出的，所以这里不应该再进行初始化
+    //     end else if(ready)begin
+    //         //测试：ready=1代表这一个周期的手柄信号可以读取，
+    //         number[7:0] <= btn_grp1;
+    //         number[15:8] <= btn_grp2;
+    //         number[23:16] <= rhandle_X;
+    //         number[31:24] <= rhandle_Y;
+    //     end else begin
+    //         number <= number;
+    //     end
+    // end
+    game main(
+        .game_clk(game_clk),
+        .ps2_clk(ps2_clk),
+        .rst(rst_sync),
+        .debug_number(number),
+        .pmod_io1(pmod1_io1),
+        .pmod_io2(pmod1_io2),
+        .pmod_io3(pmod1_io3),
+        .pmod_io4(pmod1_io4)
+    );
     
     assign video_clk = clk_hdmi;
     video #(12, 800, 856, 976, 1040, 600, 637, 643, 666, 1, 1) u_video800x600at72 ( //对模块进行实例化（可以实例化为多个）
