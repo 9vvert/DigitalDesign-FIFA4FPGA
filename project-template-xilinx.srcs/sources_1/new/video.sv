@@ -27,14 +27,18 @@ module video
     output wire data_enable
 );
 
+    reg [23:0] rom_val;
+    reg [9:0] rom_addr;
     
     parameter IMG_WIDTH = 19, IMG_HEIGHT = 33;
     initial begin
+        rom_val <= 'b0;
         hdata = 'b0;
         vdata = 'b0;
         red = 'b0;
         green = 'b0;
         blue = 'b0;   //语法：自动赋0，不需要前面的位数
+        rom_addr = 'b0;
     end
     // 初始的水平、竖直计数器
 
@@ -59,9 +63,7 @@ module video
         end
     end
 
-    reg [23:0] rom_val;
-    wire [9:0] rom_addr;
-    assign rom_addr = IMG_WIDTH*vdata + hdata; 
+    
     blk_mem_gen_0 rom(
         .clka(clk),
         .ena(data_enable),
@@ -86,6 +88,11 @@ module video
                 red <= rom_val[23:16];
                 green <= rom_val[15:8];
                 blue <= rom_val[7:0];
+                if(rom_addr == IMG_WIDTH*IMG_HEIGHT-1)begin
+                    rom_addr <= 10'd0;
+                end else begin
+                    rom_addr <= rom_addr+10'd1;
+                end
             end else begin
                 red <= 8'h88;
                 green <= 8'h44;
