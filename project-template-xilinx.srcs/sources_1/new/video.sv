@@ -71,22 +71,27 @@ module video
     // hsync & vsync & blank
     assign hsync = ((hdata >= HFP) && (hdata < HSP)) ? HSPP : !HSPP;
     assign vsync = ((vdata >= VFP) && (vdata < VSP)) ? VSPP : !VSPP;
-    assign data_enable = ((hdata < IMG_WIDTH) & (vdata < IMG_HEIGHT));
+    assign data_enable = ((hdata < HSIZE) && (vdata < VSIZE));
 
+    wire img_enable;
+    assign img_enable = ((hdata < IMG_WIDTH) && (vdata < IMG_HEIGHT));
     //注意区分hdata/vdata和hsync/vsync： 前者是纯粹的计数器，而后者代表了同步信号的高电平和低电平
     //为什么要加上 C_H_SYNC_PULSE 和 C_H_BACK_PORCH？
     //因为 显示器开始“真正显示图像”的位置，并不是从 R_h_cnt = 0 开始的，而是从 同步信号（HSYNC）和回扫间隔（Back Porch）之后 才开始！
 
     always @ (posedge clk)
     begin
-        if(data_enable) begin
-            red <= rom_val[23:16];
-            green <= rom_val[15:8];
-            blue <= rom_val[7:0];
-        end else begin
-            red <= 8'h88;
-            green <= 8'h44;
-            blue <= 8'h33;
+        if(data_enable)begin
+            if(img_enable) begin
+                red <= rom_val[23:16];
+                green <= rom_val[15:8];
+                blue <= rom_val[7:0];
+            end else begin
+                red <= 8'h88;
+                green <= 8'h44;
+                blue <= 8'h33;
+            end
         end
+        
     end 
 endmodule
