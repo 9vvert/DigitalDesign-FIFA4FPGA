@@ -1,4 +1,6 @@
 // 对外暴露的使用接口：模式（红灯/绿灯），是否准备好，具体的案件命令
+
+// 粗略估计：每次读取ps2信号大约需要4.2ms时间
 module ps2(
     input  wire ps2_clk,          // 100kHz， 10us一次
     input  wire rst,        // 复位信号，低电平有效
@@ -67,7 +69,8 @@ module ps2(
             delay_counter <= delay_counter + 32'd1;
         end else if(interval_counter == 32'd0) begin
             interval_counter <= interval_counter + 32'd1;   //缓冲，保持ready的高电平
-        end else if(interval_counter < 32'd1000) begin
+            //[TODO]这里将延时时间缩小了10倍，如果后续出现不稳定的现象，就再该回去
+        end else if(interval_counter < 32'd100) begin
             ready <= 1'b0;      
             interval_counter <= interval_counter + 32'd1;
         end else begin

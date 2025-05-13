@@ -1,6 +1,7 @@
 // 管理game中最顶层的一些变量：
 // 可操作者和AI球员分布 / 持球者是谁 / 球的状态 / 
 
+// controller会接受所有的信号
 
 module controller(
     input controller_game_clk,
@@ -8,6 +9,8 @@ module controller(
 
     input [15:0] tackle_signal,
     input [15:0] shoot_signal, 
+    //切换信号
+    input [3:0] 
 
     //对球的控制信号输入，在controller模块会进行仲裁
     constrained_init.input_modport in_const_1,
