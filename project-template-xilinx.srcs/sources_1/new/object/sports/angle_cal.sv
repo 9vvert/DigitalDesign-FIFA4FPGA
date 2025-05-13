@@ -1,14 +1,18 @@
 module angle_caculator
 
 // 人物在任何时候都会有一个朝向，因此不用额外设置“无方向”这种特殊情况
-#(parameter INIT_ANGLE = 0, W_T = 12)
+#(parameter INIT_ANGLE = 0, W_T = 24)
 (
     input game_clk,
     input rst,
     input enable,
     input signal,       // 0代表顺时针，1代表逆时针
 
-    output [7:0] angle
+    output reg[7:0] angle,
+
+    //扩展
+    input set_angle_enable,
+    input [7:0] set_angle_val
     
 );
     reg [5:0] angle_counter;
@@ -18,6 +22,10 @@ module angle_caculator
         if(rst) begin
             angle_counter <= 6'd0;
             angle <= INIT_ANGLE;
+        end else if(set_angle_enable)begin
+            // 进入设置模式
+            angle <= set_angle_val;
+            angle_counter <= 6'd0;
         end else begin
             if(enable) begin
                 if(angle_counter == W_T - 1) begin

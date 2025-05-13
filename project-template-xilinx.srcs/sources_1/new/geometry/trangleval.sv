@@ -6,11 +6,6 @@
 
 // 给定一个角度，返回处理后的角度 
 // 前2个比特是象限(0-17, 18-35,36-53, 54-71)；后面
-function automatic[1:0] quadrant(
-    input [7:0] ang
-);
-    
-endfunction
 
 //给定一个0~17的值，返回正弦值*12
 function automatic [9:0] sin(
@@ -234,13 +229,15 @@ function automatic[7:0] vec2angle(
             //第一象限
             vec2angle = arctan(delta_x, delta_y);   // delta_x / delta_y
         end else begin
-            vec2angle = 8'd54;
+            vec2angle = 8'd18;
         end
     end else begin
         if(y1 > y2) begin
             vec2angle = 8'd36;
+        end else if(y1 < y2)begin
+            vec2angle = 8'd0; 
         end else begin
-            vec2angle = 8'd0;
+            vec2angle = 8'hFF;      // 表示0向量
         end
     end
 

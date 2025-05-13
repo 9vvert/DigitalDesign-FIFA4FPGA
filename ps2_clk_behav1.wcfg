@@ -3,162 +3,865 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="ps2_clk_behav.wdb" id="1">
+      <db_ref path="game_tb_behav.wdb" id="1">
          <top_modules>
-            <top_module name="dvi_constants" />
+            <top_module name="game_tb" />
             <top_module name="glbl" />
-            <top_module name="ps2_clk" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="66301fs"></ZoomEndTime>
-      <Cursor1Time time="16992323fs"></Cursor1Time>
+      <ZoomStartTime time="14334fs"></ZoomStartTime>
+      <ZoomEndTime time="1466335fs"></ZoomEndTime>
+      <Cursor1Time time="274334fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="175"></NameColumnWidth>
-      <ValueColumnWidth column_width="143"></ValueColumnWidth>
+      <ValueColumnWidth column_width="241"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="35" />
-   <wvobject fp_name="/ps2_clk/pmod1_io1" type="logic">
-      <obj_property name="ElementShortName">pmod1_io1</obj_property>
-      <obj_property name="ObjectShortName">pmod1_io1</obj_property>
+   <WVObjectSize size="211" />
+   <wvobject fp_name="/game_tb/game_clk" type="logic">
+      <obj_property name="ElementShortName">game_clk</obj_property>
+      <obj_property name="ObjectShortName">game_clk</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/pmod1_io2" type="logic">
-      <obj_property name="ElementShortName">pmod1_io2</obj_property>
-      <obj_property name="ObjectShortName">pmod1_io2</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/pmod1_io3" type="logic">
-      <obj_property name="ElementShortName">pmod1_io3</obj_property>
-      <obj_property name="ObjectShortName">pmod1_io3</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/pmod1_io4" type="logic">
-      <obj_property name="ElementShortName">pmod1_io4</obj_property>
-      <obj_property name="ObjectShortName">pmod1_io4</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/clk_100m" type="logic">
-      <obj_property name="ElementShortName">clk_100m</obj_property>
-      <obj_property name="ObjectShortName">clk_100m</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/btn_rst" type="logic">
-      <obj_property name="ElementShortName">btn_rst</obj_property>
-      <obj_property name="ObjectShortName">btn_rst</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/ps2_clk" type="logic">
-      <obj_property name="ElementShortName">ps2_clk</obj_property>
-      <obj_property name="ObjectShortName">ps2_clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/clk_in" type="logic">
-      <obj_property name="ElementShortName">clk_in</obj_property>
-      <obj_property name="ObjectShortName">clk_in</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/clk_hdmi" type="logic">
-      <obj_property name="ElementShortName">clk_hdmi</obj_property>
-      <obj_property name="ObjectShortName">clk_hdmi</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/clk_locked" type="logic">
-      <obj_property name="ElementShortName">clk_locked</obj_property>
-      <obj_property name="ObjectShortName">clk_locked</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/rst_sync" type="array">
-      <obj_property name="ElementShortName">rst_sync[1:0]</obj_property>
-      <obj_property name="ObjectShortName">rst_sync[1:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/rst_synced" type="logic">
-      <obj_property name="ElementShortName">rst_synced</obj_property>
-      <obj_property name="ObjectShortName">rst_synced</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/ps2_clk" type="logic">
-      <obj_property name="ElementShortName">ps2_clk</obj_property>
-      <obj_property name="ObjectShortName">ps2_clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/rst" type="logic">
+   <wvobject fp_name="/game_tb/rst" type="logic">
       <obj_property name="ElementShortName">rst</obj_property>
       <obj_property name="ObjectShortName">rst</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/debug_number" type="array">
-      <obj_property name="ElementShortName">debug_number[31:0]</obj_property>
-      <obj_property name="ObjectShortName">debug_number[31:0]</obj_property>
+   <wvobject fp_name="/game_tb/x1" type="array">
+      <obj_property name="ElementShortName">x1[15:0]</obj_property>
+      <obj_property name="ObjectShortName">x1[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/ps2_mode" type="array">
-      <obj_property name="ElementShortName">ps2_mode[7:0]</obj_property>
-      <obj_property name="ObjectShortName">ps2_mode[7:0]</obj_property>
+   <wvobject fp_name="/game_tb/y1" type="array">
+      <obj_property name="ElementShortName">y1[15:0]</obj_property>
+      <obj_property name="ObjectShortName">y1[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/btn_grp1" type="array">
-      <obj_property name="ElementShortName">btn_grp1[7:0]</obj_property>
-      <obj_property name="ObjectShortName">btn_grp1[7:0]</obj_property>
+   <wvobject fp_name="/game_tb/angle_1" type="array">
+      <obj_property name="ElementShortName">angle_1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">angle_1[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/btn_grp2" type="array">
-      <obj_property name="ElementShortName">btn_grp2[7:0]</obj_property>
-      <obj_property name="ObjectShortName">btn_grp2[7:0]</obj_property>
+   <wvobject fp_name="/game_tb/speed_1" type="array">
+      <obj_property name="ElementShortName">speed_1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">speed_1[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/rhandle_X" type="array">
-      <obj_property name="ElementShortName">rhandle_X[7:0]</obj_property>
-      <obj_property name="ObjectShortName">rhandle_X[7:0]</obj_property>
+   <wvobject fp_name="/game_tb/anim_stat_1" type="array">
+      <obj_property name="ElementShortName">anim_stat_1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">anim_stat_1[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/rhandle_Y" type="array">
-      <obj_property name="ElementShortName">rhandle_Y[7:0]</obj_property>
-      <obj_property name="ObjectShortName">rhandle_Y[7:0]</obj_property>
+   <wvobject fp_name="/game_tb/A_enable_1" type="logic">
+      <obj_property name="ElementShortName">A_enable_1</obj_property>
+      <obj_property name="ObjectShortName">A_enable_1</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/lhandle_X" type="array">
-      <obj_property name="ElementShortName">lhandle_X[7:0]</obj_property>
-      <obj_property name="ObjectShortName">lhandle_X[7:0]</obj_property>
+   <wvobject fp_name="/game_tb/A_signal_1" type="logic">
+      <obj_property name="ElementShortName">A_signal_1</obj_property>
+      <obj_property name="ObjectShortName">A_signal_1</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/lhandle_Y" type="array">
-      <obj_property name="ElementShortName">lhandle_Y[7:0]</obj_property>
-      <obj_property name="ObjectShortName">lhandle_Y[7:0]</obj_property>
+   <wvobject fp_name="/game_tb/W_enable_1" type="logic">
+      <obj_property name="ElementShortName">W_enable_1</obj_property>
+      <obj_property name="ObjectShortName">W_enable_1</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/ready" type="logic">
+   <wvobject fp_name="/game_tb/W_signal_1" type="logic">
+      <obj_property name="ElementShortName">W_signal_1</obj_property>
+      <obj_property name="ObjectShortName">W_signal_1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/x6" type="array">
+      <obj_property name="ElementShortName">x6[15:0]</obj_property>
+      <obj_property name="ObjectShortName">x6[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/y6" type="array">
+      <obj_property name="ElementShortName">y6[15:0]</obj_property>
+      <obj_property name="ObjectShortName">y6[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/angle_6" type="array">
+      <obj_property name="ElementShortName">angle_6[7:0]</obj_property>
+      <obj_property name="ObjectShortName">angle_6[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/speed_6" type="array">
+      <obj_property name="ElementShortName">speed_6[7:0]</obj_property>
+      <obj_property name="ObjectShortName">speed_6[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/anim_stat_6" type="array">
+      <obj_property name="ElementShortName">anim_stat_6[7:0]</obj_property>
+      <obj_property name="ObjectShortName">anim_stat_6[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/A_enable_6" type="logic">
+      <obj_property name="ElementShortName">A_enable_6</obj_property>
+      <obj_property name="ObjectShortName">A_enable_6</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/A_signal_6" type="logic">
+      <obj_property name="ElementShortName">A_signal_6</obj_property>
+      <obj_property name="ObjectShortName">A_signal_6</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/W_enable_6" type="logic">
+      <obj_property name="ElementShortName">W_enable_6</obj_property>
+      <obj_property name="ObjectShortName">W_enable_6</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/W_signal_6" type="logic">
+      <obj_property name="ElementShortName">W_signal_6</obj_property>
+      <obj_property name="ObjectShortName">W_signal_6</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/football_pos_x" type="array">
+      <obj_property name="ElementShortName">football_pos_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">football_pos_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/football_pos_y" type="array">
+      <obj_property name="ElementShortName">football_pos_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">football_pos_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/football_pos_z" type="array">
+      <obj_property name="ElementShortName">football_pos_z[15:0]</obj_property>
+      <obj_property name="ObjectShortName">football_pos_z[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/master_x" type="array">
+      <obj_property name="ElementShortName">master_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/master_y" type="array">
+      <obj_property name="ElementShortName">master_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/master_height" type="array">
+      <obj_property name="ElementShortName">master_height[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_height[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/master_angle" type="array">
+      <obj_property name="ElementShortName">master_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">master_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/master_radius" type="array">
+      <obj_property name="ElementShortName">master_radius[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_radius[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/init_angle" type="array">
+      <obj_property name="ElementShortName">init_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">init_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/init_speed" type="array">
+      <obj_property name="ElementShortName">init_speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">init_speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/init_vertical_speed" type="array">
+      <obj_property name="ElementShortName">init_vertical_speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">init_vertical_speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/init_vertical_signal" type="logic">
+      <obj_property name="ElementShortName">init_vertical_signal</obj_property>
+      <obj_property name="ObjectShortName">init_vertical_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/tackle_signal" type="array">
+      <obj_property name="ElementShortName">tackle_signal[15:0]</obj_property>
+      <obj_property name="ObjectShortName">tackle_signal[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/shoot_signal" type="array">
+      <obj_property name="ElementShortName">shoot_signal[15:0]</obj_property>
+      <obj_property name="ObjectShortName">shoot_signal[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/player_hold_stat" type="array">
+      <obj_property name="ElementShortName">player_hold_stat[15:0]</obj_property>
+      <obj_property name="ObjectShortName">player_hold_stat[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/football_being_held" type="logic">
+      <obj_property name="ElementShortName">football_being_held</obj_property>
+      <obj_property name="ObjectShortName">football_being_held</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/i" type="array">
+      <obj_property name="ElementShortName">i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/rand_r" type="array">
+      <obj_property name="ElementShortName">rand_r[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rand_r[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/rand_angle" type="array">
+      <obj_property name="ElementShortName">rand_angle[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rand_angle[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/player_game_clk" type="logic">
+      <obj_property name="ElementShortName">player_game_clk</obj_property>
+      <obj_property name="ObjectShortName">player_game_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/A_enable" type="logic">
+      <obj_property name="ElementShortName">A_enable</obj_property>
+      <obj_property name="ObjectShortName">A_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/A_signal" type="logic">
+      <obj_property name="ElementShortName">A_signal</obj_property>
+      <obj_property name="ObjectShortName">A_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/W_enable" type="logic">
+      <obj_property name="ElementShortName">W_enable</obj_property>
+      <obj_property name="ObjectShortName">W_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/W_signal" type="logic">
+      <obj_property name="ElementShortName">W_signal</obj_property>
+      <obj_property name="ObjectShortName">W_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/hold" type="logic">
+      <obj_property name="ElementShortName">hold</obj_property>
+      <obj_property name="ObjectShortName">hold</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/pos_x" type="array">
+      <obj_property name="ElementShortName">pos_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">pos_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/pos_y" type="array">
+      <obj_property name="ElementShortName">pos_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">pos_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/angle" type="array">
+      <obj_property name="ElementShortName">angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/speed" type="array">
+      <obj_property name="ElementShortName">speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/anim_stat" type="array">
+      <obj_property name="ElementShortName">anim_stat[7:0]</obj_property>
+      <obj_property name="ObjectShortName">anim_stat[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/PLAYER_INIT_X" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_X[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_X[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/PLAYER_INIT_Y" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_Y[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_Y[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/PLAYER_INIT_V" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_V[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_V[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_player_1/PLAYER_INIT_ANGLE" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_ANGLE[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_ANGLE[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/HFSM_game_clk" type="logic">
+      <obj_property name="ElementShortName">HFSM_game_clk</obj_property>
+      <obj_property name="ObjectShortName">HFSM_game_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/hold" type="logic">
+      <obj_property name="ElementShortName">hold</obj_property>
+      <obj_property name="ObjectShortName">hold</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/player_x" type="array">
+      <obj_property name="ElementShortName">player_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">player_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/player_y" type="array">
+      <obj_property name="ElementShortName">player_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">player_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/player_speed" type="array">
+      <obj_property name="ElementShortName">player_speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">player_speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/player_angle" type="array">
+      <obj_property name="ElementShortName">player_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">player_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/football_x" type="array">
+      <obj_property name="ElementShortName">football_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">football_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/football_y" type="array">
+      <obj_property name="ElementShortName">football_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">football_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/football_z" type="array">
+      <obj_property name="ElementShortName">football_z[15:0]</obj_property>
+      <obj_property name="ObjectShortName">football_z[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/left_angle" type="array">
+      <obj_property name="ElementShortName">left_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">left_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/right_angle" type="array">
+      <obj_property name="ElementShortName">right_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">right_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/action_cmd" type="array">
+      <obj_property name="ElementShortName">action_cmd[5:0]</obj_property>
+      <obj_property name="ObjectShortName">action_cmd[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/A_enable" type="logic">
+      <obj_property name="ElementShortName">A_enable</obj_property>
+      <obj_property name="ObjectShortName">A_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/A_signal" type="logic">
+      <obj_property name="ElementShortName">A_signal</obj_property>
+      <obj_property name="ObjectShortName">A_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/W_enable" type="logic">
+      <obj_property name="ElementShortName">W_enable</obj_property>
+      <obj_property name="ObjectShortName">W_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/W_signal" type="logic">
+      <obj_property name="ElementShortName">W_signal</obj_property>
+      <obj_property name="ObjectShortName">W_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/anmi_stat" type="logic">
+      <obj_property name="ElementShortName">anmi_stat</obj_property>
+      <obj_property name="ObjectShortName">anmi_stat</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/player_tackle_signal" type="logic">
+      <obj_property name="ElementShortName">player_tackle_signal</obj_property>
+      <obj_property name="ObjectShortName">player_tackle_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/player_shoot_signal" type="logic">
+      <obj_property name="ElementShortName">player_shoot_signal</obj_property>
+      <obj_property name="ObjectShortName">player_shoot_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/action_message" type="logic">
+      <obj_property name="ElementShortName">action_message</obj_property>
+      <obj_property name="ObjectShortName">action_message</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/player_stat" type="array">
+      <obj_property name="ElementShortName">player_stat[5:0]</obj_property>
+      <obj_property name="ObjectShortName">player_stat[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/turn_parameter" type="array">
+      <obj_property name="ElementShortName">turn_parameter[7:0]</obj_property>
+      <obj_property name="ObjectShortName">turn_parameter[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/current_speed_max" type="array">
+      <obj_property name="ElementShortName">current_speed_max[7:0]</obj_property>
+      <obj_property name="ObjectShortName">current_speed_max[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/rel_angle" type="array">
+      <obj_property name="ElementShortName">rel_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">rel_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/rel_pos" type="array">
+      <obj_property name="ElementShortName">rel_pos[1:0]</obj_property>
+      <obj_property name="ObjectShortName">rel_pos[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/FSM_restart" type="logic">
+      <obj_property name="ElementShortName">FSM_restart</obj_property>
+      <obj_property name="ObjectShortName">FSM_restart</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/tackle_counter" type="array">
+      <obj_property name="ElementShortName">tackle_counter[2:0]</obj_property>
+      <obj_property name="ObjectShortName">tackle_counter[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/tackle_start" type="logic">
+      <obj_property name="ElementShortName">tackle_start</obj_property>
+      <obj_property name="ObjectShortName">tackle_start</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/tackle_done" type="logic">
+      <obj_property name="ElementShortName">tackle_done</obj_property>
+      <obj_property name="ObjectShortName">tackle_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/last_tackle_done" type="logic">
+      <obj_property name="ElementShortName">last_tackle_done</obj_property>
+      <obj_property name="ObjectShortName">last_tackle_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/tackle_message" type="array">
+      <obj_property name="ElementShortName">tackle_message[1:0]</obj_property>
+      <obj_property name="ObjectShortName">tackle_message[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/cancel" type="logic">
+      <obj_property name="ElementShortName">cancel</obj_property>
+      <obj_property name="ObjectShortName">cancel</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/tackle_AE" type="logic">
+      <obj_property name="ElementShortName">tackle_AE</obj_property>
+      <obj_property name="ObjectShortName">tackle_AE</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/tackle_AS" type="logic">
+      <obj_property name="ElementShortName">tackle_AS</obj_property>
+      <obj_property name="ObjectShortName">tackle_AS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/tackle_WE" type="logic">
+      <obj_property name="ElementShortName">tackle_WE</obj_property>
+      <obj_property name="ObjectShortName">tackle_WE</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/tackle_WS" type="logic">
+      <obj_property name="ElementShortName">tackle_WS</obj_property>
+      <obj_property name="ObjectShortName">tackle_WS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/message" type="array">
+      <obj_property name="ElementShortName">message[1:0]</obj_property>
+      <obj_property name="ObjectShortName">message[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/PLAYER_MAX_V" type="array">
+      <obj_property name="ElementShortName">PLAYER_MAX_V[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_MAX_V[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/INIT_STAT" type="array">
+      <obj_property name="ElementShortName">INIT_STAT[31:0]</obj_property>
+      <obj_property name="ObjectShortName">INIT_STAT[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/IDLE" type="array">
+      <obj_property name="ElementShortName">IDLE[7:0]</obj_property>
+      <obj_property name="ObjectShortName">IDLE[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/TURN" type="array">
+      <obj_property name="ElementShortName">TURN[7:0]</obj_property>
+      <obj_property name="ObjectShortName">TURN[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/TACKLE" type="array">
+      <obj_property name="ElementShortName">TACKLE[7:0]</obj_property>
+      <obj_property name="ObjectShortName">TACKLE[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/SHOOT" type="array">
+      <obj_property name="ElementShortName">SHOOT[7:0]</obj_property>
+      <obj_property name="ObjectShortName">SHOOT[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/Tackle_FSM_game_clk" type="logic">
+      <obj_property name="ElementShortName">Tackle_FSM_game_clk</obj_property>
+      <obj_property name="ObjectShortName">Tackle_FSM_game_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/tackle_start" type="logic">
+      <obj_property name="ElementShortName">tackle_start</obj_property>
+      <obj_property name="ObjectShortName">tackle_start</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/done" type="logic">
+      <obj_property name="ElementShortName">done</obj_property>
+      <obj_property name="ObjectShortName">done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/cancel" type="logic">
+      <obj_property name="ElementShortName">cancel</obj_property>
+      <obj_property name="ObjectShortName">cancel</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/player_x" type="array">
+      <obj_property name="ElementShortName">player_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">player_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/player_y" type="array">
+      <obj_property name="ElementShortName">player_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">player_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/player_angle" type="array">
+      <obj_property name="ElementShortName">player_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">player_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/player_speed" type="array">
+      <obj_property name="ElementShortName">player_speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">player_speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/football_x" type="array">
+      <obj_property name="ElementShortName">football_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">football_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/football_y" type="array">
+      <obj_property name="ElementShortName">football_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">football_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/football_z" type="array">
+      <obj_property name="ElementShortName">football_z[15:0]</obj_property>
+      <obj_property name="ObjectShortName">football_z[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/A_enable" type="logic">
+      <obj_property name="ElementShortName">A_enable</obj_property>
+      <obj_property name="ObjectShortName">A_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/A_signal" type="logic">
+      <obj_property name="ElementShortName">A_signal</obj_property>
+      <obj_property name="ObjectShortName">A_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/W_enable" type="logic">
+      <obj_property name="ElementShortName">W_enable</obj_property>
+      <obj_property name="ObjectShortName">W_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/W_signal" type="logic">
+      <obj_property name="ElementShortName">W_signal</obj_property>
+      <obj_property name="ObjectShortName">W_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/message" type="array">
+      <obj_property name="ElementShortName">message[1:0]</obj_property>
+      <obj_property name="ObjectShortName">message[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/follow_enable" type="logic">
+      <obj_property name="ElementShortName">follow_enable</obj_property>
+      <obj_property name="ObjectShortName">follow_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/follow_AE" type="logic">
+      <obj_property name="ElementShortName">follow_AE</obj_property>
+      <obj_property name="ObjectShortName">follow_AE</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/follow_AS" type="logic">
+      <obj_property name="ElementShortName">follow_AS</obj_property>
+      <obj_property name="ObjectShortName">follow_AS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/follow_WE" type="logic">
+      <obj_property name="ElementShortName">follow_WE</obj_property>
+      <obj_property name="ObjectShortName">follow_WE</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/follow_WS" type="logic">
+      <obj_property name="ElementShortName">follow_WS</obj_property>
+      <obj_property name="ObjectShortName">follow_WS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/ready" type="logic">
       <obj_property name="ElementShortName">ready</obj_property>
       <obj_property name="ObjectShortName">ready</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/pmod_io1" type="logic">
-      <obj_property name="ElementShortName">pmod_io1</obj_property>
-      <obj_property name="ObjectShortName">pmod_io1</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/last_tackle_start" type="logic">
+      <obj_property name="ElementShortName">last_tackle_start</obj_property>
+      <obj_property name="ObjectShortName">last_tackle_start</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/pmod_io2" type="logic">
-      <obj_property name="ElementShortName">pmod_io2</obj_property>
-      <obj_property name="ObjectShortName">pmod_io2</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/stat" type="array">
+      <obj_property name="ElementShortName">stat[5:0]</obj_property>
+      <obj_property name="ObjectShortName">stat[5:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/pmod_io3" type="logic">
-      <obj_property name="ElementShortName">pmod_io3</obj_property>
-      <obj_property name="ObjectShortName">pmod_io3</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/player_football_angle" type="array">
+      <obj_property name="ElementShortName">player_football_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">player_football_angle[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/pmod_io4" type="logic">
-      <obj_property name="ElementShortName">pmod_io4</obj_property>
-      <obj_property name="ObjectShortName">pmod_io4</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/delta_angle" type="array">
+      <obj_property name="ElementShortName">delta_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">delta_angle[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/spi_start" type="logic">
-      <obj_property name="ElementShortName">spi_start</obj_property>
-      <obj_property name="ObjectShortName">spi_start</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/delta_pos" type="array">
+      <obj_property name="ElementShortName">delta_pos[1:0]</obj_property>
+      <obj_property name="ObjectShortName">delta_pos[1:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/spi_end" type="logic">
-      <obj_property name="ElementShortName">spi_end</obj_property>
-      <obj_property name="ObjectShortName">spi_end</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/TOL_DIS1" type="array">
+      <obj_property name="ElementShortName">TOL_DIS1[31:0]</obj_property>
+      <obj_property name="ObjectShortName">TOL_DIS1[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/spi_cmd" type="array">
-      <obj_property name="ElementShortName">spi_cmd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">spi_cmd[7:0]</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/TOL_DIS2" type="array">
+      <obj_property name="ElementShortName">TOL_DIS2[31:0]</obj_property>
+      <obj_property name="ObjectShortName">TOL_DIS2[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/spi_dat" type="array">
-      <obj_property name="ElementShortName">spi_dat[7:0]</obj_property>
-      <obj_property name="ObjectShortName">spi_dat[7:0]</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/TOL_ANGLE" type="array">
+      <obj_property name="ElementShortName">TOL_ANGLE[31:0]</obj_property>
+      <obj_property name="ObjectShortName">TOL_ANGLE[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/ps2_stat" type="array">
-      <obj_property name="ElementShortName">ps2_stat[3:0]</obj_property>
-      <obj_property name="ObjectShortName">ps2_stat[3:0]</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/IDLE" type="array">
+      <obj_property name="ElementShortName">IDLE[5:0]</obj_property>
+      <obj_property name="ObjectShortName">IDLE[5:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/first_flag" type="logic">
-      <obj_property name="ElementShortName">first_flag</obj_property>
-      <obj_property name="ObjectShortName">first_flag</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/SOFT_JUDGE" type="array">
+      <obj_property name="ElementShortName">SOFT_JUDGE[5:0]</obj_property>
+      <obj_property name="ObjectShortName">SOFT_JUDGE[5:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/delay_counter" type="array">
-      <obj_property name="ElementShortName">delay_counter[31:0]</obj_property>
-      <obj_property name="ObjectShortName">delay_counter[31:0]</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/STRICT_JUDGE" type="array">
+      <obj_property name="ElementShortName">STRICT_JUDGE[5:0]</obj_property>
+      <obj_property name="ObjectShortName">STRICT_JUDGE[5:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/ps2_clk/u_ps2/interval_counter" type="array">
-      <obj_property name="ElementShortName">interval_counter[31:0]</obj_property>
-      <obj_property name="ObjectShortName">interval_counter[31:0]</obj_property>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/FOLLOW" type="array">
+      <obj_property name="ElementShortName">FOLLOW[5:0]</obj_property>
+      <obj_property name="ObjectShortName">FOLLOW[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/DONE" type="array">
+      <obj_property name="ElementShortName">DONE[5:0]</obj_property>
+      <obj_property name="ObjectShortName">DONE[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/football_game_clk" type="logic">
+      <obj_property name="ElementShortName">football_game_clk</obj_property>
+      <obj_property name="ObjectShortName">football_game_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/being_held" type="logic">
+      <obj_property name="ElementShortName">being_held</obj_property>
+      <obj_property name="ObjectShortName">being_held</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/master_x" type="array">
+      <obj_property name="ElementShortName">master_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/master_y" type="array">
+      <obj_property name="ElementShortName">master_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/master_height" type="array">
+      <obj_property name="ElementShortName">master_height[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_height[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/master_angle" type="array">
+      <obj_property name="ElementShortName">master_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">master_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/master_radius" type="array">
+      <obj_property name="ElementShortName">master_radius[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_radius[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/init_angle" type="array">
+      <obj_property name="ElementShortName">init_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">init_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/init_speed" type="array">
+      <obj_property name="ElementShortName">init_speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">init_speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/init_vertical_speed" type="array">
+      <obj_property name="ElementShortName">init_vertical_speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">init_vertical_speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/init_vertical_signal" type="logic">
+      <obj_property name="ElementShortName">init_vertical_signal</obj_property>
+      <obj_property name="ObjectShortName">init_vertical_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/pos_x" type="array">
+      <obj_property name="ElementShortName">pos_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">pos_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/pos_y" type="array">
+      <obj_property name="ElementShortName">pos_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">pos_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/pos_z" type="array">
+      <obj_property name="ElementShortName">pos_z[15:0]</obj_property>
+      <obj_property name="ObjectShortName">pos_z[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/anim_stat" type="array">
+      <obj_property name="ElementShortName">anim_stat[7:0]</obj_property>
+      <obj_property name="ObjectShortName">anim_stat[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/set_enable" type="logic">
+      <obj_property name="ElementShortName">set_enable</obj_property>
+      <obj_property name="ObjectShortName">set_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/speed" type="array">
+      <obj_property name="ElementShortName">speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/vertical_speed" type="array">
+      <obj_property name="ElementShortName">vertical_speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">vertical_speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/vertical_signal" type="logic">
+      <obj_property name="ElementShortName">vertical_signal</obj_property>
+      <obj_property name="ObjectShortName">vertical_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/free_out_x" type="array">
+      <obj_property name="ElementShortName">free_out_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">free_out_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/free_out_y" type="array">
+      <obj_property name="ElementShortName">free_out_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">free_out_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/free_out_z" type="array">
+      <obj_property name="ElementShortName">free_out_z[15:0]</obj_property>
+      <obj_property name="ObjectShortName">free_out_z[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/A_enable" type="logic">
+      <obj_property name="ElementShortName">A_enable</obj_property>
+      <obj_property name="ObjectShortName">A_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/A_signal" type="logic">
+      <obj_property name="ElementShortName">A_signal</obj_property>
+      <obj_property name="ObjectShortName">A_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/VA_enable" type="logic">
+      <obj_property name="ElementShortName">VA_enable</obj_property>
+      <obj_property name="ObjectShortName">VA_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/VA_signal" type="logic">
+      <obj_property name="ElementShortName">VA_signal</obj_property>
+      <obj_property name="ObjectShortName">VA_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/football_stat" type="array">
+      <obj_property name="ElementShortName">football_stat[5:0]</obj_property>
+      <obj_property name="ObjectShortName">football_stat[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/simu_stat" type="array">
+      <obj_property name="ElementShortName">simu_stat[5:0]</obj_property>
+      <obj_property name="ObjectShortName">simu_stat[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/INIT_X" type="array">
+      <obj_property name="ElementShortName">INIT_X[31:0]</obj_property>
+      <obj_property name="ObjectShortName">INIT_X[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/INIT_Y" type="array">
+      <obj_property name="ElementShortName">INIT_Y[31:0]</obj_property>
+      <obj_property name="ObjectShortName">INIT_Y[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/INIT_Z" type="array">
+      <obj_property name="ElementShortName">INIT_Z[31:0]</obj_property>
+      <obj_property name="ObjectShortName">INIT_Z[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/ENTER_CONST" type="array">
+      <obj_property name="ElementShortName">ENTER_CONST[5:0]</obj_property>
+      <obj_property name="ObjectShortName">ENTER_CONST[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/ENTER_FREE" type="array">
+      <obj_property name="ElementShortName">ENTER_FREE[5:0]</obj_property>
+      <obj_property name="ObjectShortName">ENTER_FREE[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_football/SIMU_FREE" type="array">
+      <obj_property name="ElementShortName">SIMU_FREE[5:0]</obj_property>
+      <obj_property name="ObjectShortName">SIMU_FREE[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/controller_game_clk" type="logic">
+      <obj_property name="ElementShortName">controller_game_clk</obj_property>
+      <obj_property name="ObjectShortName">controller_game_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/tackle_signal" type="array">
+      <obj_property name="ElementShortName">tackle_signal[15:0]</obj_property>
+      <obj_property name="ObjectShortName">tackle_signal[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/shoot_signal" type="array">
+      <obj_property name="ElementShortName">shoot_signal[15:0]</obj_property>
+      <obj_property name="ObjectShortName">shoot_signal[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/master_x" type="array">
+      <obj_property name="ElementShortName">master_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/master_y" type="array">
+      <obj_property name="ElementShortName">master_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/master_height" type="array">
+      <obj_property name="ElementShortName">master_height[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_height[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/master_angle" type="array">
+      <obj_property name="ElementShortName">master_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">master_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/master_radius" type="array">
+      <obj_property name="ElementShortName">master_radius[15:0]</obj_property>
+      <obj_property name="ObjectShortName">master_radius[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/init_speed" type="array">
+      <obj_property name="ElementShortName">init_speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">init_speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/init_angle" type="array">
+      <obj_property name="ElementShortName">init_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">init_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/init_vertical_speed" type="array">
+      <obj_property name="ElementShortName">init_vertical_speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">init_vertical_speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/init_vertical_signal" type="logic">
+      <obj_property name="ElementShortName">init_vertical_signal</obj_property>
+      <obj_property name="ObjectShortName">init_vertical_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/football_being_held" type="logic">
+      <obj_property name="ElementShortName">football_being_held</obj_property>
+      <obj_property name="ObjectShortName">football_being_held</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/player_hold_stat" type="array">
+      <obj_property name="ElementShortName">player_hold_stat[15:0]</obj_property>
+      <obj_property name="ObjectShortName">player_hold_stat[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/last_tackle_signal" type="array">
+      <obj_property name="ElementShortName">last_tackle_signal[15:0]</obj_property>
+      <obj_property name="ObjectShortName">last_tackle_signal[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/last_shoot_signal" type="array">
+      <obj_property name="ElementShortName">last_shoot_signal[15:0]</obj_property>
+      <obj_property name="ObjectShortName">last_shoot_signal[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/try_to_hold" type="array">
+      <obj_property name="ElementShortName">try_to_hold[15:0]</obj_property>
+      <obj_property name="ObjectShortName">try_to_hold[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_controller/try_to_shoot" type="array">
+      <obj_property name="ElementShortName">try_to_shoot[15:0]</obj_property>
+      <obj_property name="ObjectShortName">try_to_shoot[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/game_clk" type="logic">
+      <obj_property name="ElementShortName">game_clk</obj_property>
+      <obj_property name="ObjectShortName">game_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/enable" type="logic">
+      <obj_property name="ElementShortName">enable</obj_property>
+      <obj_property name="ObjectShortName">enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/obj_x" type="array">
+      <obj_property name="ElementShortName">obj_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">obj_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/obj_y" type="array">
+      <obj_property name="ElementShortName">obj_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">obj_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/obj_angle" type="array">
+      <obj_property name="ElementShortName">obj_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">obj_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/obj_speed" type="array">
+      <obj_property name="ElementShortName">obj_speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">obj_speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/aim_x" type="array">
+      <obj_property name="ElementShortName">aim_x[15:0]</obj_property>
+      <obj_property name="ObjectShortName">aim_x[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/aim_y" type="array">
+      <obj_property name="ElementShortName">aim_y[15:0]</obj_property>
+      <obj_property name="ObjectShortName">aim_y[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/A_enable" type="logic">
+      <obj_property name="ElementShortName">A_enable</obj_property>
+      <obj_property name="ObjectShortName">A_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/A_signal" type="logic">
+      <obj_property name="ElementShortName">A_signal</obj_property>
+      <obj_property name="ObjectShortName">A_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/W_enable" type="logic">
+      <obj_property name="ElementShortName">W_enable</obj_property>
+      <obj_property name="ObjectShortName">W_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/W_signal" type="logic">
+      <obj_property name="ElementShortName">W_signal</obj_property>
+      <obj_property name="ObjectShortName">W_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/mid_angle" type="array">
+      <obj_property name="ElementShortName">mid_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">mid_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/current_speed_max" type="array">
+      <obj_property name="ElementShortName">current_speed_max[7:0]</obj_property>
+      <obj_property name="ObjectShortName">current_speed_max[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/rel_pos" type="array">
+      <obj_property name="ElementShortName">rel_pos[1:0]</obj_property>
+      <obj_property name="ObjectShortName">rel_pos[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/rel_val" type="array">
+      <obj_property name="ElementShortName">rel_val[7:0]</obj_property>
+      <obj_property name="ObjectShortName">rel_val[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/V_MAX" type="array">
+      <obj_property name="ElementShortName">V_MAX[31:0]</obj_property>
+      <obj_property name="ObjectShortName">V_MAX[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/V1" type="array">
+      <obj_property name="ElementShortName">V1[31:0]</obj_property>
+      <obj_property name="ObjectShortName">V1[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/V2" type="array">
+      <obj_property name="ElementShortName">V2[31:0]</obj_property>
+      <obj_property name="ObjectShortName">V2[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/V3" type="array">
+      <obj_property name="ElementShortName">V3[31:0]</obj_property>
+      <obj_property name="ObjectShortName">V3[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_tb/u_HFSM_1/u_Tackle_FSM/u_follow/V4" type="array">
+      <obj_property name="ElementShortName">V4[31:0]</obj_property>
+      <obj_property name="ObjectShortName">V4[31:0]</obj_property>
    </wvobject>
 </wave_config>
