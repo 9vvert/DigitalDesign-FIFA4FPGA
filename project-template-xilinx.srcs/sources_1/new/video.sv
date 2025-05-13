@@ -27,7 +27,8 @@ module video
     output wire data_enable
 );
 
-    parameter  BAR_WIDTH   =   HSIZE / 8  ; // 每个彩条的宽度
+    
+    parameter IMG_WIDTH = 19, IMG_HEIGHT = 33;
     initial begin
         hdata = 'b0;
         vdata = 'b0;
@@ -58,10 +59,19 @@ module video
         end
     end
 
+    reg [23:0] rom_val;
+    wire [9:0] rom_addr;
+    assign rom_addr = IMG_WIDTH*vdata + hdata; 
+    blk_mem_gen_0 rom(
+        .clka(clk),
+        .ena(data_enable),
+        .addra(rom_addr),
+        .douta(rom_val)
+    );
     // hsync & vsync & blank
     assign hsync = ((hdata >= HFP) && (hdata < HSP)) ? HSPP : !HSPP;
     assign vsync = ((vdata >= VFP) && (vdata < VSP)) ? VSPP : !VSPP;
-    assign data_enable = ((hdata < HSIZE) & (vdata < VSIZE));
+    assign data_enable = ((hdata < IMG_WIDTH) & (vdata < IMG_HEIGHT));
 
     //注意区分hdata/vdata和hsync/vsync： 前者是纯粹的计数器，而后者代表了同步信号的高电平和低电平
     //为什么要加上 C_H_SYNC_PULSE 和 C_H_BACK_PORCH？
@@ -70,43 +80,13 @@ module video
     always @ (posedge clk)
     begin
         if(data_enable) begin
-            if (hdata < (BAR_WIDTH)) begin
-                red <= 8'hFF; // 红色分量
-                green <= 8'b0; // 绿色分量
-                blue <= 8'b0; // 蓝色分量
-            end else if (hdata < (BAR_WIDTH * 2)) begin
-                red <= 8'b0;
-                green <= 8'hFF; // 绿色分量
-                blue <= 8'b0;
-            end else if (hdata < (BAR_WIDTH * 3)) begin
-                red <= 8'b0;
-                green <= 8'b0;
-                blue <= 8'hFF; // 蓝色分量
-            end else if (hdata < (BAR_WIDTH * 4)) begin
-                red <= 8'hFF;
-                green <= 8'hFF; // 黄色分量
-                blue <= 8'b0;
-            end else if (hdata < (BAR_WIDTH * 5)) begin
-                red <= 8'b0;
-                green <= 8'hFF;
-                blue <= 8'hFF; // 青色分量
-            end else if (hdata < (BAR_WIDTH * 6)) begin
-                red <= 8'hFF;
-                green <= 8'b0;
-                blue <= 8'hFF; // 紫色分量
-            end else if (hdata < (BAR_WIDTH * 7)) begin
-                red <= 8'hFF;
-                green <= 8'hFF;
-                blue <= 8'hFF; // 白色分量
-            end else begin
-                red <= 'b0;
-                green <= 'b0;
-                blue <= 'b0;   // 黑色分量，关闭显示
-            end
+            red <= rom_val[23:16];
+            green <= rom_val[15:8];
+            blue <= rom_val[7:0];
         end else begin
-            red <= 'b0;
-            green <= 'b0;
-            blue <= 'b0;   // 黑色分量，关闭显示
+            red <= 8'h88;
+            green <= 8'h44;
+            blue <= 8'h33;
         end
     end 
 endmodule
