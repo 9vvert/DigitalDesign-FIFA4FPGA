@@ -112,6 +112,28 @@ module mod_top(
         .led_com (led_com     )
     );
 
+    module img_reader u_reader(
+    input clk_100m,
+    input rst,
+    // SD 卡（SPI 模式）
+    output wire        sd_sclk,     // SPI 时钟
+    output wire        sd_mosi,     // 数据输出
+    input  wire        sd_miso,     // 数据输入
+    output wire        sd_cs,       // SPI 片选，低有效
+    input  wire        sd_cd,       // 卡插入检测，0 表示有卡插入
+    input  wire        sd_wp,       // 写保护检测，0 表示写保护状态
+    //对外接口
+    input load_start,  
+    output load_end,                // 加载完成
+    input [31:0] sd_src_addr,       // SD卡
+    input [15:0] in_width,         
+    input [15:0] in_height,        // 最终读取的数据量为：img_width*img_height*3 bytes
+    output reg [7:0] mem [511:0],
+    output reg batch_valid,         // 有<=512字节可以读取
+    output reg [9:0] valid_count,   // 因为每次是按照扇区来读取，所以有些数值可能是无效的
+);
+
+
     // 图像输出演示，分辨率 800x600@72Hz，像素时钟为 50MHz，显示渐变色彩条
     wire [11:0] hdata;  // 当前横坐标
     wire [11:0] vdata;  // 当前纵坐标
