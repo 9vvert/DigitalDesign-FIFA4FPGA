@@ -1,7 +1,7 @@
 /*******  img_reader ********/
 // 读取SD卡指定位置，特定大小的文件
 // 该时钟为5MHz，较慢，外部可以使用高频时钟，捕捉其上升沿
-module img_reader(
+module sd_IO(
     input clk_100m,
     input rst,
     // SD 卡（SPI 模式）
@@ -12,7 +12,7 @@ module img_reader(
     input  wire        sd_cd,       // 卡插入检测，0 表示有卡插入
     input  wire        sd_wp,       // 写保护检测，0 表示写保护状态
     //对外接口
-    input read_start,  
+    input read_start,               // 因为SD卡频率较慢，外界必须等待一段时间才能将raed_start降低
     output read_end,                // 加载完成
     input [31:0] sd_src_addr,       // SD卡
     output reg [7:0] mem [511:0]
@@ -65,8 +65,7 @@ module img_reader(
     localparam IDLE = 3'd3;         //闲置状态
     localparam DONE = 3'd4;
 
-    reg [8:0] read_byte;
-    reg [1:0] delay_counter;    //用于finish阶段
+    reg [8:0] read_byte;            // 每次读取一个字节
     always @(posedge clk_sd_spi) begin
         if (rst) begin
             batch_valid <= 1'b0;
@@ -77,7 +76,6 @@ module img_reader(
             totalBytes <= 32'd0;
             state_reg <= IDLE;
             read_byte <= 9'b0;
-            delay_counter <= 2'd0;
         end else begin
             casez(state_reg)
                 IDLE:begin
@@ -105,13 +103,8 @@ module img_reader(
                     end
                 end
                 default: begin
-                    if(delay_counter == 2'd0)begin
-                        delay_counter <= 2'd1;
-                    end else begin
-                        delay_counter <= 2'd0;
-                        read_end <= 1'b0;
-                        state_reg <= IDLE;
-                    end
+                    read_end <= 1'b0;
+                    state_reg <= IDLE;
                 end
             endcase
         end

@@ -28,13 +28,13 @@ module mod_top(
     // inout  wire       ps2_mouse_clk,     // PS/2 时钟信号
     // inout  wire       ps2_mouse_data,    // PS/2 数据信号
 
-    // SD 卡（SPI 模式）
-    // output wire        sd_sclk,     // SPI 时钟
-    // output wire        sd_mosi,     // 数据输出
-    // input  wire        sd_miso,     // 数据输入
-    // output wire        sd_cs,       // SPI 片选，低有效
-    // input  wire        sd_cd,       // 卡插入检测，0 表示有卡插入
-    // input  wire        sd_wp,       // 写保护检测，0 表示写保护状态
+    //SD 卡（SPI 模式）
+    output wire        sd_sclk,     // SPI 时钟
+    output wire        sd_mosi,     // 数据输出
+    input  wire        sd_miso,     // 数据输入
+    output wire        sd_cs,       // SPI 片选，低有效
+    input  wire        sd_cd,       // 卡插入检测，0 表示有卡插入
+    input  wire        sd_wp,       // 写保护检测，0 表示写保护状态
 
     // RGMII 以太网接口
     // output wire        rgmii_clk125,
@@ -153,6 +153,34 @@ module mod_top(
     // output reg batch_valid,         // 有<=512字节可以读取
     // output reg [9:0] valid_count,   // 因为每次是按照扇区来读取，所以有些数值可能是无效的
     // );
+
+
+    /*************   SD卡    *************/
+    reg sd_read_start;
+    reg sd_read_end;
+    reg [31:0] sd_addr;
+    reg [7:0] sd_buffer[511:0];
+    sd_IO u_sd_IO(
+        .clk_100m(clk_100m),
+        .rst(~clk_locked),
+        // SD 卡（SPI 模式）
+        .sd_sclk(sd_sclk),     // SPI 时钟
+        .sd_mosi(sd_mosi),     // 数据输出
+        .sd_miso(sd_miso),     // 数据输入
+        .sd_cs(sd_cs),       // SPI 片选，低有效
+        .sd_cd(sd_cd),       // 卡插入检测，0 表示有卡插入
+        .sd_wp(sd_wp),       // 写保护检测，0 表示写保护状态
+        //对外接口
+        .read_start(sd_read_start),               // 因为SD卡频率较慢，外界必须等待一段时间才能将raed_start降低
+        .read_end(sd_read_end),                // 加载完成
+        .sd_src_addr(sd_addr),       // SD卡
+        .mem(sd_buffer)
+    );
+
+
+
+
+
 
     reg [7:0] read_R;
     reg [7:0] read_G;
