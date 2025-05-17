@@ -22,9 +22,14 @@ module mod_top_tb();
 
     always #5 clock = ~clock; // 100MHz
 
-    mod_top dut(
-        .clk_100m(clock),
-        .btn_rst(reset)
+
+    video u_video800x600at72 (
+    .clk(clock)
     );
+
+    // mod_top dut(
+    //     .clk_100m(clock),
+    //     .btn_rst(reset)
+    // );
 
 endmodule

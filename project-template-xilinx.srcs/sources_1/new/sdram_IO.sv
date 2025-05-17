@@ -24,13 +24,13 @@ module sdram_IO(
     input sys_clk_i,  // 400MHz
     input clk_ref_i,  // 200MHz
     input sys_rst,
+    output reg [7:0] sdram_info,
     //对外暴露的接口
     input [1:0] sdram_cmd,          //命令，  0无效，1读取，2写入
     input [29:0] operate_addr,      //地址
     input [63:0] write_data,
     output reg [63:0] read_data,
     output reg cmd_done             //这一轮命令结束
-
 );
 
     
@@ -71,6 +71,8 @@ module sdram_IO(
             cmd_done <= 1'b0;
             delay_counter <= 2'd0;
         end else begin
+            sdram_info[6:4] <= state;
+            sdram_info[1:0] <= sdram_cmd;
             if (state == WAIT_INIT) begin                // init只需要一次
                 // wait for init_calib_complete
                 if (init_calib_complete) begin

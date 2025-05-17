@@ -133,28 +133,6 @@ module mod_top(
         .led_com (led_com     )
     );
 
-    // img_reader u_reader(
-    // input clk_100m,
-    // input rst,
-    // // SD 卡（SPI 模式）
-    // output wire        sd_sclk,     // SPI 时钟
-    // output wire        sd_mosi,     // 数据输出
-    // input  wire        sd_miso,     // 数据输入
-    // output wire        sd_cs,       // SPI 片选，低有效
-    // input  wire        sd_cd,       // 卡插入检测，0 表示有卡插入
-    // input  wire        sd_wp,       // 写保护检测，0 表示写保护状态
-    // //对外接口
-    // input load_start,  
-    // output load_end,                // 加载完成
-    // input [31:0] sd_src_addr,       // SD卡
-    // input [15:0] in_width,         
-    // input [15:0] in_height,        // 最终读取的数据量为：img_width*img_height*3 bytes
-    // output reg [7:0] mem [511:0],
-    // output reg batch_valid,         // 有<=512字节可以读取
-    // output reg [9:0] valid_count,   // 因为每次是按照扇区来读取，所以有些数值可能是无效的
-    // );
-
-
     /*************   SD卡    *************/
     reg sd_read_start;
     reg sd_read_end;
@@ -177,14 +155,7 @@ module mod_top(
         .mem(sd_buffer)
     );
 
-
-
-
-
-
-    reg [7:0] read_R;
-    reg [7:0] read_G;
-    reg [7:0] read_B;
+    /***********  SDRAM  ************/
     reg [2:0] sdram_controller_stat;    //
     wire ui_clk;                    // SDRAM时钟，用于和显存相关的所有时序逻辑
     wire ui_clk_sync_rst;
@@ -196,7 +167,6 @@ module mod_top(
     reg cmd_done;
     reg last_cmd_done;
     wire sdram_init_calib_complete; //检测到为高的时候，SDRAM正式进入可用状态
-    /***********  SDRAM  ************/
     sdram_IO u_sdram_IO(
         .ui_clk(ui_clk),
         .ui_clk_sync_rst(ui_clk_sync_rst),
@@ -221,6 +191,7 @@ module mod_top(
         .clk_ref_i(clk_ref),  // 200MHz
         .sys_rst(!clk_locked),
 
+        // .sdram_info(number[7:0]),
         //对外接口
         .sdram_cmd(sdram_cmd),          //命令，  0无效，1读取，2写入
         .operate_addr(sdram_addr),      //地址
@@ -228,46 +199,138 @@ module mod_top(
         .read_data(sdram_read_data),
         .cmd_done(cmd_done)             //这一轮命令结束
     );
+    
+    /******************  ImgLoader  ****************/
+    reg load_start;
+    reg load_end;
+    reg last_load_end;
+    reg [11:0] img_width;
+    reg [11:0] img_height;
+    reg [31:0] sd_start_addr;
+    reg [29:0] sdram_start_addr;
+    //控制信息
+    wire loader_sd_read_start;
+    wire [31:0] loader_curr_sd_addr;
+    ///////////// 一定一定要检查信号宽度，2025.5.15日我因为loader_sdram_cmd误写成一位而被折磨了2个小时
+    wire [1:0] loader_sdram_cmd;
+    wire [29:0] loader_curr_sdram_addr;
+    wire [63:0] loader_sdram_buffer;
+    async_ImgLoader u_async_ImgLoader(
+        //数据总信息
+        // .debug_number(number),
+        .ui_clk(ui_clk),       // 仍旧使用显存的时钟频率
+        .ui_rst(ui_clk_sync_rst),
+        .load_start(load_start),           //开始加载一个命令
+        .load_end(load_end),        //图片加载结束，可以开始下一次加载
+        .in_width(img_width),         
+        .in_height(img_height),        // 最终读取的数据量为：img_width*img_height*3 bytes
+        .sd_start_addr(sd_start_addr),    // SD卡图片的起始地址
+        .sdram_start_addr(sdram_start_addr),  // SDRAM待写入的起始地址
+        // .loader_info(number[31:8]),
+        //SD
+        .loader_sd_read_end(sd_read_end),
+        .loader_sd_read_start(loader_sd_read_start),
+        .loader_curr_sd_addr(loader_curr_sd_addr),
+        .loader_sd_buffer(sd_buffer),      // 从sd卡读取的数据
+        //SDRAM
+        .loader_sdram_write_end(cmd_done),
+        .loader_sdram_cmd(loader_sdram_cmd),           // SDRAM输出命令，这里仅仅使用2来写入
+        .loader_curr_sdram_addr(loader_curr_sdram_addr),      // SDRAM输出的地址
+        .loader_sdram_buffer(loader_sdram_buffer)          // 向SDRAM输出的数据
+    );
+    /*************   显存仲裁器   ************/
+    localparam [3:0] UNINIT=0 ,IDLE=1, LOAD=2, RENDER=3, SHOW1=4,SHOW2=5,SHOW3=6,SHOW4=7;
+    reg [3:0]vm_stat;       //显存状态
+    reg last_sdram_read_end;
+    reg [15:0] a1;
+    reg [15:0] a2;
+    reg [15:0] a3;
+    reg [15:0] a4;
+    reg [63:0] delay_show_counter;  //用于交替显示数字
     always @(posedge ui_clk)begin       //显存逻辑：使用sdram输出的时钟
         if(ui_clk_sync_rst)begin
-            sdram_init_done <= 1'b0;
-            sdram_controller_stat <= 3'd0;
-            last_cmd_done<= 1'b0;
+            vm_stat <= UNINIT;
+            a1<=0;
+            a2<=0;
+            a3<=0;
+            a4<=0;
+            load_start <= 1'b0;
+            last_load_end <= 1'b0;
+            last_sdram_read_end <= 0;
+            delay_show_counter <= 0;
         end else begin
-            if(sdram_init_calib_complete)begin
-                sdram_init_done <= 1'b1;
-            end
-            if(sdram_init_done)begin
-                if(sdram_controller_stat == 3'd0)begin
-                    number[8:8] = 1;
-                    // 尝试写入8个字节
-                    sdram_write_data <= {8'h0a,8'h2a,8'h4a,8'h6a,8'h8a,8'haa,8'hca,8'hea};
-                    sdram_addr <= 'd16;
-                    sdram_cmd = 2;
-                    if( (~last_cmd_done) & cmd_done)begin   //捕捉上升时刻
-                        number[9:9] = 1;
-                        sdram_cmd = 0;      // 及时撤销命令 
-                        sdram_controller_stat <= 3'd1;
-                    end
-                end else if(sdram_controller_stat == 3'd1)begin
-                    number[10:10] = 1;
-                    sdram_addr <= 'd16;
-                    sdram_cmd = 1;
-                    if( (~last_cmd_done) & cmd_done)begin
-                        number[11:11] = 1;
-                        sdram_cmd = 0;
-                        sdram_controller_stat <= 3'd2;
-                    end
+            if(vm_stat == UNINIT)begin
+                if(sdram_init_calib_complete)begin
+                    vm_stat <= LOAD;        // SDRAM初始化完成，进入Load Sources状态
+                end
+            end else if(vm_stat == LOAD)begin
+                //仲裁器，将SDRAM的接口与ImgLoader对接
+                sd_read_start <= loader_sd_read_start;
+                sd_addr <= loader_curr_sd_addr;
+                sdram_cmd <= loader_sdram_cmd;
+                sdram_addr <= loader_curr_sdram_addr;
+                sdram_write_data <= loader_sdram_buffer;
+                //
+                img_width <= 32;
+                img_height <= 32;
+                sd_start_addr <= 5120 ;         //SD卡的第十个扇区
+                sdram_start_addr <= 512;        //从SDRAM的512号地址开始
+                load_start <= 1'b1;     //开始加载数据
+                if( (~last_load_end) & load_end )begin
+                    load_start <= 1'b0;
+                    vm_stat <= SHOW1;
+                end
+            end else if(vm_stat == SHOW1)begin
+                // 从SDRAM中取样
+                sdram_cmd <= 2'd1;
+                sdram_addr <= 792;
+                if( (~last_sdram_read_end) & cmd_done)begin
+                    sdram_cmd <= 2'd0;
+                    a1 <= sdram_read_data [63:48];
+                    vm_stat <= SHOW2;
+                end
+            end else if(vm_stat == SHOW2)begin
+                // 从SDRAM中取样
+                sdram_cmd <= 2'd1;
+                sdram_addr <= 1246;
+                if( (~last_sdram_read_end) & cmd_done)begin
+                    sdram_cmd <= 2'd0;
+                    a2 <= sdram_read_data [63:48];
+                    vm_stat <= SHOW3;
+                end
+            end else if(vm_stat == SHOW3)begin
+                // 从SDRAM中取样
+                sdram_cmd <= 1;
+                sdram_addr <= 1696;
+                if( (~last_sdram_read_end) & cmd_done)begin
+                    sdram_cmd <= 0;
+                    a3 <= sdram_read_data [63:48];
+                    vm_stat <= SHOW4;
+                end
+            end else if(vm_stat == SHOW4)begin
+                // 从SDRAM中取样
+                sdram_cmd <= 1;
+                sdram_addr <= 2532;
+                if( (~last_sdram_read_end) & cmd_done)begin
+                    sdram_cmd <= 0;
+                    a4 <= sdram_read_data [63:48];
+                    vm_stat <= RENDER;
+                end
+            end else begin
+                if(delay_show_counter < 64'd100000000)begin
+                    number [31:16] <= a1;
+                    number [15:0] <= a2;
+                    delay_show_counter <= delay_show_counter + 1;
+                end else if(delay_show_counter < 64'd200000000)begin
+                    number [31:16] <= a3;
+                    number [15:0] <= a4;
+                    delay_show_counter <= delay_show_counter + 1;
                 end else begin
-                    read_R <= sdram_read_data[7:0];
-                    read_G <= sdram_read_data[15:8];
-                    read_B <= sdram_read_data[23:16];
-                    number[7:0] <= sdram_read_data[7:0];
-                    number[31:24] <= sdram_read_data[63:56];
+                    delay_show_counter <= 0;
                 end
             end
-
-            last_cmd_done = cmd_done;
+            last_sdram_read_end <= cmd_done;     //
+            last_load_end <= load_end;
         end
     end
 
@@ -284,7 +347,7 @@ module mod_top(
 
     // 生成彩条数据，分别取坐标低位作为 RGB 值
     // 警告：该图像生成方式仅供演示，请勿使用横纵坐标驱动大量逻辑！！
-    
+     
     // 注意：如果在video中进行了red、green、blue的赋值，那么这里就不能再对video_red,video_green、video_blue进行赋值了
     // 否则会导致时序错误，综合不通过
 
@@ -296,6 +359,10 @@ module mod_top(
         .hsync(video_hsync),
         .vsync(video_vsync),
         .data_enable(video_de),
+        .a1(a1),
+        .a2(a2),
+        .a3(a3),
+        .a4(a4),
         .red(video_red),
         .green(video_green),
         .blue(video_blue)
@@ -307,8 +374,8 @@ module mod_top(
         .vid_pVDE   (video_de),
         .vid_pHSync (video_hsync),
         .vid_pVSync (video_vsync),
-        // .vid_pData  ({video_red, video_blue, video_green}),
-        .vid_pData  ({read_R, read_B, read_G}),
+        .vid_pData  ({video_red, video_blue, video_green}),
+        // .vid_pData  ({read_R, read_B, read_G}),
         .aRst       (~clk_locked),
 
         .TMDS_Clk_p  (hdmi_tmds_c_p),

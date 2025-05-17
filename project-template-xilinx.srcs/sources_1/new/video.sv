@@ -1,41 +1,61 @@
 `timescale 1ns / 1ps
-//
-// WIDTH: bits in register hdata & vdata
-// HSIZE: horizontal size of visible field 
-// HFP: horizontal front of pulse
-// HSP: horizontal stop of pulse
-// HMAX: horizontal max size of value
-// VSIZE: vertical size of visible field 
-// VFP: vertical front of pulse
-// VSP: vertical stop of pulse
-// VMAX: vertical max size of value
-// HSPP: horizontal synchro pulse polarity (0 - negative, 1 - positive)
-// VSPP: vertical synchro pulse polarity (0 - negative, 1 - positive)
-//
+/*****************   video.sv  *****************/
+// 作用：通过RAM实现显存的二级缓冲
 module video
 //这里是接受的参数，在mod.top里已经赋值过了，下面的应该是缺省参数，填错了并不影响
-#(parameter WIDTH = 12, HSIZE = 640, HFP = 16, HSP = 48, HMAX = 6, VSIZE = 480, VFP = 10, VSP = 33, VMAX = 6, HSPP = 96, VSPP = 2)
+#(parameter WIDTH = 12, HSIZE = 1280, HFP = 1720, HSP = 1760, HMAX = 1980, VSIZE = 720, VFP = 725, VSP = 730, VMAX = 750, HSPP = 1, VSPP = 1)
 (
+    //和显存的交互
+    input wire ui_clk,
+    output reg fill_batch,  //拉高这个信号表示需要填充40KB的缓存数据
+    input [63:0] write_data,    //显存通过这三个信号来写入数据
+    input [13:0] write_addr,
+    input write_enable,
+    
+    //和HDMI的交互
     input wire clk,
     output wire hsync,
     output wire vsync,
     output reg [WIDTH - 1:0] hdata,
     output reg [WIDTH - 1:0] vdata,
-    output reg [7:0] red,         // output reg是时序逻辑，output wire是组合逻辑
-    output reg [7:0] green,
-    output reg [7:0] blue,
+    output [7:0] red,         // output reg是时序逻辑，output wire是组合逻辑
+    output [7:0] green,
+    output [7:0] blue,
     output wire data_enable
 );
+    logic [WIDTH - 1:0] next_hdata;
+    logic [WIDTH - 1:0] next_vdata;
 
+    localparam READ_SKIP = 20480;
+    localparam WRITE_SKIP = 5120;
+    wire [15:0] read_ram_addr;
+    wire [13:0] write_ram_addr;
+
+    wire [15:0] pixel_data;     // 实时连接RAM的输出端口
+    reg ram_flag;       // 如果为0，则读取0-40KB，写到40-80K ; 如果为1则交换
+    blk_mem_gen_1 u_ram(
+        //WRITE
+        .clka(ui_clk),
+        .ena(1'b1),
+        .wea(write_enable),         //用来写
+        .addra(write_ram_addr),
+        .dina(write_data),
+        //READ
+        .clkb(clk),
+        .enb(1'b1),              //持续读取
+        .addrb(read_ram_addr),
+        .doutb(pixel_data)
+    );
     
     parameter IMG_WIDTH = 19, IMG_HEIGHT = 33;
     initial begin
+        ram_flag = 'b0;
         hdata = 'b0;
         vdata = 'b0;
-        red = 'b0;
-        green = 'b0;
-        blue = 'b0;   //语法：自动赋0，不需要前面的位数
     end
+    assign read_ram_addr = (ram_flag ? READ_SKIP : 0) + HSIZE * next_vdata[3:0] + next_hdata;
+    assign write_ram_addr = (ram_flag ? 0 : WRITE_SKIP) + write_addr;       // 在输入的基础上增加一层基地址变换
+    //[TODO]这里的大小端还需要后续测试
     // 初始的水平、竖直计数器
 
     // hdata
@@ -58,41 +78,76 @@ module video
                 vdata <= vdata + 1;
         end
     end
+    // 交换batch，使用显存时钟的逻辑
+    reg [WIDTH - 1:0] last_vdata; 
+    reg [1:0] fill_batch_cnt;
+    always @(posedge ui_clk) begin
+        if ((last_vdata < VSIZE) && (vdata >= VSIZE)) begin
+            ram_flag <= ~ram_flag;      //交换batch
+            fill_batch_cnt <= 2'b10;
+        end else if (fill_batch_cnt != 0) begin
+            fill_batch_cnt <= fill_batch_cnt - 1; 
+        end
+        last_vdata <= vdata;
+    end
+    always @(posedge ui_clk) begin
+        fill_batch <= (fill_batch_cnt != 0);    // fill_batch信号会保持多个ui_clk周期
+    end
+    // next_hdata & next_vdata
+    // always_comb begin
+    //     if(hdata >= HSIZE-1)begin
+    //         next_hdata = 0;
+    //         if(next_vdata == 15)begin       // 需要增加一个对next_vdata的同步逻辑
+    //             //交换batch
+    //             next_vdata = 0;
+    //         end else begin
+    //             next_vdata = next_hdata + 1;    
+    //         end
+    //     end else begin
+    //         next_vdata = next_vdata;
+    //         next_hdata = hdata + 1;        //使用当前的hdata + 1
+    //     end
+    // end
 
-    // reg [23:0] rom_val;
-    // wire [9:0] rom_addr;
-    // assign rom_addr = IMG_WIDTH*vdata + hdata; 
-    // blk_mem_gen_0 rom(
-    //     .clka(clk),
-    //     .ena(data_enable),
-    //     .addra(rom_addr),
-    //     .douta(rom_val)
-    // );
-    // hsync & vsync & blank
+
+    always_comb begin
+        // --- 1. 计算下一个像素坐标 ---
+        if (hdata < HSIZE - 2) begin
+            next_hdata = hdata + 2;
+            if(vdata < VSIZE)begin
+                next_vdata = vdata;
+            end else begin
+                next_vdata = 0;
+            end
+        end else if(hdata == HMAX - 1)begin     //一行的最后，这种情况下，需要预测下一行的第二个像素
+            next_hdata = 1;
+            if(vdata < VSIZE - 1)begin
+                next_vdata = vdata + 1;
+            end else begin
+                next_vdata = 0;
+            end
+
+        end else begin
+            next_hdata = 0;
+            if(vdata < VSIZE - 1)begin
+                next_vdata = vdata + 1;
+            end else begin
+                next_vdata = 0;
+            end
+        end
+
+    end
+
+    //hsync/vsync ：用于提示HDMI切换到下一个像素
     assign hsync = ((hdata >= HFP) && (hdata < HSP)) ? HSPP : !HSPP;
     assign vsync = ((vdata >= VFP) && (vdata < VSP)) ? VSPP : !VSPP;
     assign data_enable = ((hdata < HSIZE) && (vdata < VSIZE));
+    assign red = data_enable ? ({pixel_data[15:11], pixel_data[15:13]}) : 0;
+    assign green = data_enable ? ({pixel_data[10:5], pixel_data[10:9]}) : 0;
+    assign blue = data_enable ? ({pixel_data[4:0], pixel_data[4:2]}) : 0;
+    // always @(posedge clk)begin
+    //     // 只需要根据当前的hdata和vdata，计算出“下一个要获得的像素地址”即可
+    //     // 每个ram batch能够提供16行的缓存
 
-    // wire img_enable;
-    // assign img_enable = ((hdata < IMG_WIDTH) && (vdata < IMG_HEIGHT));
-    //注意区分hdata/vdata和hsync/vsync： 前者是纯粹的计数器，而后者代表了同步信号的高电平和低电平
-    //为什么要加上 C_H_SYNC_PULSE 和 C_H_BACK_PORCH？
-    //因为 显示器开始“真正显示图像”的位置，并不是从 R_h_cnt = 0 开始的，而是从 同步信号（HSYNC）和回扫间隔（Back Porch）之后 才开始！
-
-    always @ (posedge clk)
-    begin
-        if(data_enable)begin
-            // if(img_enable) begin
-            //     red <= rom_val[23:16];
-            //     green <= rom_val[15:8];
-            //     blue <= rom_val[7:0];
-            // end else begin
-            //     red <= 8'h88;
-            //     green <= 8'h44;
-            //     blue <= 8'h33;
-            // end
-            ;
-        end
-        
-    end 
+    // end
 endmodule

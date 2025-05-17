@@ -1,6 +1,7 @@
 /*******  img_reader ********/
 // 读取SD卡指定位置，特定大小的文件
 // 该时钟为5MHz，较慢，外部可以使用高频时钟，捕捉其上升沿
+// 和SDRAM不同，SD卡不需要外界等待初始化
 module sd_IO(
     input clk_100m,
     input rst,
@@ -13,7 +14,7 @@ module sd_IO(
     input  wire        sd_wp,       // 写保护检测，0 表示写保护状态
     //对外接口
     input read_start,               // 因为SD卡频率较慢，外界必须等待一段时间才能将raed_start降低
-    output read_end,                // 加载完成
+    output reg read_end,                // 加载完成
     input [31:0] sd_src_addr,       // SD卡
     output reg [7:0] mem [511:0]
 );
@@ -68,12 +69,8 @@ module sd_IO(
     reg [8:0] read_byte;            // 每次读取一个字节
     always @(posedge clk_sd_spi) begin
         if (rst) begin
-            batch_valid <= 1'b0;
             sdc_address <= 32'b0;
             sdc_read <= 1'b0;
-            img_height <= 16'd0;
-            img_width <= 16'd0;
-            totalBytes <= 32'd0;
             state_reg <= IDLE;
             read_byte <= 9'b0;
         end else begin
