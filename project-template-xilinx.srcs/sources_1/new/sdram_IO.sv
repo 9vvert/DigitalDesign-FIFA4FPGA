@@ -1,5 +1,7 @@
 //[TODO] sdram, sdcard以及上层时钟的频率不同，需要使用一个统一的时钟循环！
-module sdram_IO(
+module sdram_IO
+#(parameter FIXED = 0)
+(
     //下面输出SDRAM的时钟，用于和显存相关的活动
     output wire ui_clk,
     output wire ui_clk_sync_rst,

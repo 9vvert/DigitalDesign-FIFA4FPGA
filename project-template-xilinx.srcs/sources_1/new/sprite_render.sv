@@ -2,12 +2,13 @@
 // 作用：进行一轮图层渲染，将SDRAM中存储的图片数据放到指定显存区域
 // [TODO]有一个想法：考虑到背景层的渲染会占用大量的时间，如果后续卡顿的话，可以提供一种新的方法：
 //          每次刷新的时候，并不将整张背景重新拷贝，而是用背景上的一个区域“填补”到原图像的位置
+import type_declare::*;
 module sprite_render
 // 显存参数（后续会将显存坐标映射到具体的SDRAM内存地址）
-#(parameter VM_WIDTH = 640, VM_HEIGHT = 480)        
+#(parameter VM_WIDTH = (TEST_DEBUG ? TEST_HSIZE : 1280), VM_HEIGHT =(TEST_DEBUG ? TEST_VSIZE : 720))        
 (
     //控制参数
-    input ui_clk,
+    input sprite_render_ui_clk,
     input ui_rst,
     input mode,     // 0:将线性存储的数据渲染到显存的指定坐标；  1：将背景的某一块补全
                     // 计划：第一次将背景加载到一块和显存等大的地方，此后就从这里来“复制”一块，进行填补
@@ -22,6 +23,7 @@ module sprite_render
     // mode = 0 时， sprite_addr有效
     input [29:0] sprite_addr,    // 图片数据存放的地址（线性存储）
     // mode = 1 时， 下列有效
+    // 这种情况只有在背景裁剪的情况下会使用，bg_hpos和bg_vpos和hpos, vpos恒相等
     input [29:0] vm_background_start,   //背景在显存中另外开辟一个区域，和显存等大
     input [11:0] bg_hpos,
     input [11:0] bg_vpos,
@@ -49,7 +51,7 @@ module sprite_render
 
     
     localparam [2:0] IDLE=0, READ=1, WRITE=2, DONE=3;
-    always@(posedge ui_clk)begin
+    always@(posedge sprite_render_ui_clk)begin
         if(ui_rst)begin
             render_stat <= IDLE;
             sprite_buffer <= 64'd0;

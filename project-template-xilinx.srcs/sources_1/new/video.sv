@@ -1,12 +1,14 @@
 `timescale 1ns / 1ps
 /*****************   video.sv  *****************/
 // 作用：通过RAM实现显存的二级缓冲
+
 module video
 //这里是接受的参数，在mod.top里已经赋值过了，下面的应该是缺省参数，填错了并不影响
-#(parameter WIDTH = 12, HSIZE = 1280, HFP = 1720, HSP = 1760, HMAX = 1980, VSIZE = 720, VFP = 725, VSP = 730, VMAX = 750, HSPP = 1, VSPP = 1)
+#(parameter WIDTH = 12, HSIZE = 1280, HFP = 1390, HSP = 1430, HMAX = 1650, VSIZE = 720, VFP = 725, VSP = 730, VMAX = 750, HSPP = 1, VSPP = 1)
 (
     //和显存的交互
     input wire ui_clk,
+    //[TODO]对fill_batch进行一层同步
     output reg fill_batch,  //拉高这个信号表示需要填充40KB的缓存数据
     input [63:0] write_data,    //显存通过这三个信号来写入数据
     input [13:0] write_addr,
@@ -23,10 +25,11 @@ module video
     output [7:0] blue,
     output wire data_enable
 );
+
     logic [WIDTH - 1:0] next_hdata;
     logic [WIDTH - 1:0] next_vdata;
 
-    localparam READ_SKIP = 20480;
+    localparam READ_SKIP = 20480;           // 和RAM容量有关，不需要随着显示屏的大小改变
     localparam WRITE_SKIP = 5120;
     wire [15:0] read_ram_addr;
     wire [13:0] write_ram_addr;
@@ -46,15 +49,42 @@ module video
         .addrb(read_ram_addr),
         .doutb(pixel_data)
     );
-    
-    parameter IMG_WIDTH = 19, IMG_HEIGHT = 33;
+
     initial begin
         ram_flag = 'b0;
         hdata = 'b0;
         vdata = 'b0;
     end
+
+
+    // 交换batch，使用显存时钟的逻辑
+    // 每16行进行一次交换
+    // [TODO]以后测试的时候，如果修改的分辨率，一定要保持单次读取batch是16行或者其倍数
+    reg [WIDTH - 1:0] last_hdata; 
+    reg [1:0] fill_batch_cnt;
+    always @(posedge clk) begin
+        if ((vdata[3:0]==15) && (vdata < VSIZE) && (last_hdata < HSIZE) && (hdata >= HSIZE)) begin
+            ram_flag <= ~ram_flag;      //交换batch
+            fill_batch_cnt <= 2'b10;
+        end else if (fill_batch_cnt != 0) begin
+            fill_batch_cnt <= fill_batch_cnt - 1; 
+        end
+        last_hdata <= hdata;
+    end
+    always @(posedge clk) begin
+        fill_batch <= (fill_batch_cnt != 0);    // fill_batch信号会保持多个hdmi_clk周期
+    end
+
+    // 将clk时钟域下的ram_flag同步到ui_clk下
+    reg ram_flag_clk1, ram_flag_clk2;
+    always @(posedge ui_clk) begin
+        ram_flag_clk1 <= ram_flag;
+        ram_flag_clk2 <= ram_flag_clk1;
+    end
+
+    // 可能是这里导致了时序问题？ 
     assign read_ram_addr = (ram_flag ? READ_SKIP : 0) + HSIZE * next_vdata[3:0] + next_hdata;
-    assign write_ram_addr = (ram_flag ? 0 : WRITE_SKIP) + write_addr;       // 在输入的基础上增加一层基地址变换
+    assign write_ram_addr = (ram_flag_clk2 ? 0 : WRITE_SKIP) + write_addr;       // 在输入的基础上增加一层基地址变换
     //[TODO]这里的大小端还需要后续测试
     // 初始的水平、竖直计数器
 
@@ -78,21 +108,9 @@ module video
                 vdata <= vdata + 1;
         end
     end
-    // 交换batch，使用显存时钟的逻辑
-    reg [WIDTH - 1:0] last_vdata; 
-    reg [1:0] fill_batch_cnt;
-    always @(posedge ui_clk) begin
-        if ((last_vdata < VSIZE) && (vdata >= VSIZE)) begin
-            ram_flag <= ~ram_flag;      //交换batch
-            fill_batch_cnt <= 2'b10;
-        end else if (fill_batch_cnt != 0) begin
-            fill_batch_cnt <= fill_batch_cnt - 1; 
-        end
-        last_vdata <= vdata;
-    end
-    always @(posedge ui_clk) begin
-        fill_batch <= (fill_batch_cnt != 0);    // fill_batch信号会保持多个ui_clk周期
-    end
+
+    
+    
     // next_hdata & next_vdata
     // always_comb begin
     //     if(hdata >= HSIZE-1)begin

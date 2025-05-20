@@ -7,12 +7,17 @@
 // 前16个MB留给素材
 parameter KB = 1024;
 parameter MB = 1024*KB;
+// 这些BUF的开始位置不需要随着分辨率改变
 parameter BUF1_START = 16*MB, BUF2_START = 18*MB, BG_FRAME_START = 20*MB;
+parameter OBJ_NUM = 2;
+import type_declare::*;
 module vm_manager
-// 测试阶段，只绘制2个物体
-#(parameter OBJ_NUM = 2)        
+// 测试阶段，只绘制2个物体 
 (
+    output reg [31:0]debug_number,
+    input [3:0] btn_push,
     input clk_100m,       // 100MHz
+    input rst,
     input clk_locked,     // 复位信号
     input clk_ddr,       // 400MHz
     input clk_ref,       // 200MHz
@@ -40,7 +45,8 @@ module vm_manager
     output wire [0 :0] ddr3_dm,
     output wire [0 :0] ddr3_odt,
     //数据，和game.sv对接 [TODO]
-    input [11:0] y_pos[0:OBJ_NUM-1],           //用y值来判断渲染顺序
+    input [11:0] y_pos[OBJ_NUM-1:0],           //用y值来判断渲染顺序
+    input Render_Param_t in_render_param[OBJ_NUM-1:0],          //具体参数，用来表示渲染的位置，以及采用什么图片素材
 
 
 
@@ -52,8 +58,10 @@ module vm_manager
     output [63:0] write_data,   //[TODO]研究SRAM的字节序，注意进行顺序变换
     output [13:0] write_addr,   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
     output write_enable,        //写入显存的使能信号
-    
+    output out_ui_clk
 );
+
+
     /*************   SD卡    *************/
     reg sd_read_start;
     reg sd_read_end;
@@ -76,7 +84,7 @@ module vm_manager
         .mem(sd_buffer)
     );
 
-    /***********  SDRAM  ************/
+    // /***********  SDRAM  ************/
     reg [2:0] sdram_controller_stat;    //
     wire ui_clk;                 // 由SDRAM输出
     wire ui_rst;
@@ -119,14 +127,56 @@ module vm_manager
         .cmd_done(cmd_done)             //这一轮命令结束
     );
 
-    /*************   manager FSM  **************/
 
-    localparam TURN = 45;   //每一帧进行45次交换
+    // /*****************  模拟SD卡和SDRAM   *****************/
+    // /**************  模拟SD卡 **************/
+    // reg sd_read_start;
+    // reg sd_read_end;
+    // reg [31:0] sd_addr;
+    // reg [7:0] sd_buffer[511:0];
+    // // Fake SD card model
+    // fake_sd u_fake_sd (
+    //     .clk_100m (clk_100m),
+    //     .rst (rst),
+    //     .read_start (sd_read_start),
+    //     .read_end (sd_read_end),
+    //     .sd_src_addr (sd_addr),
+    //     .mem (sd_buffer)
+    // );
+    // // /**************  模拟SDRAM **************/
+    // wire ui_clk;                 // 由SDRAM输出
+    // wire ui_rst;
+    // reg [1:0]sdram_cmd;
+    // reg [29:0]sdram_addr;
+    // reg [63:0]sdram_write_data;
+    // reg [63:0]sdram_read_data;
+    // reg cmd_done;
+    // wire sdram_init_calib_complete; //检测到为高的时候，SDRAM正式进入可用状态
+    // // Fake SDRAM model
+    // fake_sdram u_fake_sdram (
+    //     .clk_100m(clk_100m),
+    //     .ui_clk(ui_clk),
+    //     .ui_clk_sync_rst(ui_rst),
+    //     .init_calib_complete(sdram_init_calib_complete),
+    //     .sdram_cmd(sdram_cmd),
+    //     .operate_addr(sdram_addr),
+    //     .write_data(sdram_write_data),
+    //     .read_data(sdram_read_data),
+    //     .cmd_done(cmd_done)
+    // );
+
+    /*************   manager FSM  **************/
+    // [change]
+    localparam TURN = TEST_DEBUG ? 9 : 45;   //每一帧进行45次交换
     reg [5:0] frame_counter; //和TURN一起使用
     localparam [3:0] START = 0, INIT = 1, RENDER = 3, SWITCH = 4, IDLE = 5, SORT=6, DONE=7, FINISH=8;
     reg [3:0] manager_stat;  
     reg vm_flag;           //用于表示分区状态
+    reg [1:0] sort_counter;      // 排序计数器，在第一个周期赋值
     reg have_sorted;      // 是否已经完成排序; 每次交换显存后，开始新的一帧，就需要进行重置
+    reg [4:0] render_counter;     // 当前渲染了几个图形
+
+    assign out_ui_clk = ui_clk;
 
     /****************  vm_init  ****************/
     reg init_start;
@@ -136,9 +186,10 @@ module vm_manager
     wire [1:0] init_sdram_cmd;       
     wire [29:0] init_curr_sdram_addr;
     wire [63:0] init_sdram_buffer;
+    vm_init u_vm_init(
         // 总控制
-        .ui_clk(ui_clk),
-        .ui_clk_sync_rst(ui_rst),
+        .vm_init_ui_clk(ui_clk),
+        .vm_init_ui_rst(ui_rst),
         .init_start(init_start),
         .init_end(init_end),
         // SDRAM和SD卡向内输入的信息
@@ -161,8 +212,10 @@ module vm_manager
     wire [29:0] switch_operate_addr;
     wire switch_end;
     reg last_switch_end;    //捕捉上升沿
-    vm_switch(
-        .ui_clk(ui_clk),
+    vm_switch u_vm_switch(
+        .debug_number(debug_number),
+        .btn_push(btn_push),
+        .vm_switch_ui_clk(ui_clk),
         .ui_rst(ui_rst),
         //和上层的接口
         .vm_flag(vm_flag),           //负责交换分区; 0代表用BUF2，1代表用BUF1
@@ -173,7 +226,7 @@ module vm_manager
         .sdram_cmd(switch_sdram_cmd),          //命令，  0无效，1读取，2写入
         .operate_addr(switch_operate_addr),      //地址
         .read_data(sdram_read_data),
-        .cmd_done(cmd_done)             //这一轮命令结束
+        .cmd_done(cmd_done),             //这一轮命令结束
         //与video的接口
         .write_data(write_data),   //[TODO]研究SRAM的字节序，注意进行顺序变换
         .write_addr(write_addr),   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
@@ -182,18 +235,18 @@ module vm_manager
     /***************   sort ************************/
     reg sort_start;
     reg [11:0] data_in [0:31]; // 输入数据
-    wire [4:0] index [0:31];   // 输出排序后的序号
+    reg [4:0] index [0:31];   // 输出排序后的序号
     wire sort_done;                 // 排序完成信号
     reg last_sort_done;             // 捕捉上升沿
-    sort u_sort (
-        // 大约需要4us完成排序，绰绰有余
-        .clk(ui_clk),
-        .rst(ui_rst),
-        .start(sort_start),
-        .data_in(data_in),
-        .index(index),
-        .done(sort_done)
-    );
+    // sort u_sort (
+    //     // 大约需要4us完成排序，绰绰有余
+    //     .clk(ui_clk),
+    //     .rst(ui_rst),
+    //     .start(sort_start),
+    //     .data_in(data_in),
+    //     .index(index),
+    //     .done(sort_done)
+    // );
 
     /****************  vm_renderer  ****************/
     reg draw_begin;
@@ -203,8 +256,8 @@ module vm_manager
     wire [29:0] render_operate_addr;
     wire [63:0] render_write_data;
     Render_Param_t render_param;   // 物体的参数
-    vm_renderer(
-        .ui_clk(ui_clk),
+    vm_renderer u_vm_renderer(
+        .vm_renderer_ui_clk(ui_clk),
         .ui_rst(ui_rst),
         //和上层的接口
         .vm_flag(vm_flag),         //负责交换分区; 0代表用BUF2，1代表用BUF1
@@ -220,16 +273,29 @@ module vm_manager
         .cmd_done(cmd_done)
     );
 
+    // 进行batch信号的同步
+    reg batch_free1, batch_free2;
+    always @(posedge ui_clk)begin
+        batch_free1 <= batch_free;
+        batch_free2 <= batch_free1;
+    end
+
     
     always@(posedge ui_clk)begin
         if(ui_rst)begin
             manager_stat <= IDLE;
+            sort_counter <= 2'd0;
             have_sorted <= 1'b0;
             frame_counter <= 6'd0;
             vm_flag <= 1'b0;
+            render_counter <= 0;
             //vm_init
             init_start <= 1'b0;
+            index[31] <= 5'd0;
+            index[30] <= 5'd1;
             //
+            switch_begin <= 1'b0;
+
         end else begin
             case(manager_stat)
                 START:begin
@@ -255,32 +321,60 @@ module vm_manager
                 IDLE:begin
                     // 这里时刻监听，当接收到video.sv发送的batch_free信号时，进行交换
                     // [TODO]后续进行检查，看这里应该捕捉上升沿还是持续检测
-                    if(batch_free)begin
+                    if(batch_free2)begin
                         manager_stat <= SWITCH;
                     end
                 end
                 SORT:begin
-                    sort_start <= 1'b1;
-                    //[TODO]这里进行数据的初步处理
-                    if(~last_sort_done & sort_done)begin
-                        
-                        manager_stat <= DONE;
-                        have_sorted <= 1'b1;    // 这一帧已经完成排序
-                        sort_start <= 1'b0;
-                    end
+                    // if(sort_counter == 2'd0)begin
+                    //     for(int i=0; i<32; i=i+1)begin
+                    //         if(i < OBJ_NUM)begin
+                    //             data_in[i] <= y_pos[i];   // 这里需要进行数据的传递
+                    //         end else begin
+                    //             data_in[i] <= 12'd0;   // 这里需要进行数据的传递
+                    //         end
+                    //     end
+                    //     sort_counter <= sort_counter + 2'd1;
+                    // end else begin
+                    //     sort_start <= 1'b1;
+                    //     //[TODO]这里进行数据的初步处理
+                    //     if(~last_sort_done & sort_done)begin
+                    //         manager_stat <= DONE;
+                    //         have_sorted <= 1'b1;    // 这一帧已经完成排序
+                    //         sort_start <= 1'b0;
+                    //     end
+                    // end
+
+                    //[TODO]测试阶段，暂时不加排序
+                    index[31] <= 5'd0;
+                    index[30] <= 5'd1;
+                    have_sorted <= 1'b1;
+                    manager_stat <= DONE;
                 end
                 RENDER:begin
                     // 绘制一个图形
-                    draw_begin <= 1'b1;
-                    
-                    sdram_cmd <= render_sdram_cmd;
-                    sdram_addr <= render_operate_addr;
-                    sdram_write_data <= render_write_data;
-                    // [TODO]这里进行数据的初步处理，并给render_param赋值
-                    if(~last_draw_end & draw_end)begin
-                        draw_begin <= 1'b0;
-                        manager_stat <= DONE;
-                    end
+                    // if(render_counter < OBJ_NUM)begin
+
+                    //     draw_begin <= 1'b1;
+                        
+                    //     sdram_cmd <= render_sdram_cmd;
+                    //     sdram_addr <= render_operate_addr;
+                    //     sdram_write_data <= render_write_data;
+                    //     // [TODO]这里进行数据的初步处理，并给render_param赋值
+                    //     // 31是vpos最大的一个，这里应该从vpos小的图形开始渲染
+                    //     render_param <= in_render_param[ index[32 - OBJ_NUM + render_counter] ];
+                    //     if(~last_draw_end & draw_end)begin
+                    //         render_counter <= render_counter + 1;
+                    //         draw_begin <= 1'b0;
+                    //         manager_stat <= DONE;
+                    //     end
+                    // end else begin
+                    //     manager_stat <= DONE;       //已经绘制完毕，直接进入IDLE状态
+                    // end
+
+
+                    // DEBUG : 跳过RENDER，看是否还会花屏。如果是，那么很可能是交换的问题
+                    manager_stat <= DONE;
                 end
                 SWITCH:begin
                     switch_begin <= 1'b1;
@@ -295,11 +389,16 @@ module vm_manager
                             manager_stat <= SORT;
                         end
                     end
+
+                    // DEBUG： 跳过switch，检查是不是hdmi本身的问题
                 end
                 DONE:begin
                     // DONE代表一个周期
                     if(frame_counter == TURN - 1)begin
                         frame_counter <= 6'd0;      // 这会影响vm_switch中的地址计算 [TODO]检查
+                        have_sorted <= 0;           //[TODO]检查有没有其它需要清零的变量
+                        sort_counter <= 0;
+                        render_counter <= 0;
                         vm_flag <= ~vm_flag;      //交换分区
                     end else begin
                         frame_counter <= frame_counter + 1;
@@ -312,6 +411,4 @@ module vm_manager
         last_draw_end <= draw_end;
         last_switch_end <= switch_end;
     end
-
-    
 endmodule

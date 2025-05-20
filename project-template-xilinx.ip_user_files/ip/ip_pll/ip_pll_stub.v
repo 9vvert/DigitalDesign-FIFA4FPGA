@@ -1,7 +1,7 @@
 // Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
-// Date        : Wed May 14 20:35:36 2025
+// Date        : Tue May 20 00:38:17 2025
 // Host        : DESKTOP-A6KM8RF running 64-bit major release  (build 9200)
 // Command     : write_verilog -force -mode synth_stub
 //               C:/Users/cnmd/digital-design-grp-09/project-template-xilinx.srcs/sources_1/ip/ip_pll/ip_pll_stub.v

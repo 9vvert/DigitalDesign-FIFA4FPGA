@@ -1,6 +1,7 @@
 /*********   资源管理器   *********/
 // 将SDRAM和SD卡统一管理
 // 在INIT阶段，将SD卡中的数据读取到
+import type_declare::*;
 module sources_namager(
     input clk_100m,
     input rst,

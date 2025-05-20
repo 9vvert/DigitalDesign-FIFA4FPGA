@@ -7,7 +7,7 @@
 module async_ImgLoader(
     //数据总信息
     // output reg [31:0]debug_number,
-    input ui_clk,       // 仍旧使用显存的时钟频率
+    input imgloader_ui_clk,       // 仍旧使用显存的时钟频率
     input ui_rst,
     input load_start,           //开始加载一个命令
     output reg load_end,        //图片加载结束，可以开始下一次加载
@@ -44,7 +44,7 @@ module async_ImgLoader(
     reg [7:0] buffer[511:0];        //缓冲区，用来存放从SD卡读取来的数据
     reg [6:0] sector_counter;    //每一个扇区需要读取64次
     reg done_delay_counter;         //用于最后延时释放load_done信号
-    always@(posedge ui_clk)begin
+    always@(posedge imgloader_ui_clk)begin
         if(ui_rst)begin
             done_delay_counter <= 0;
             sector_counter <= 0;

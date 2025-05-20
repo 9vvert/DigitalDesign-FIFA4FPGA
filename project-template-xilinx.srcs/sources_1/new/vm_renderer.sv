@@ -1,25 +1,17 @@
 /***********  vm_renderer  ***********/
 // 根据三元组<上一时刻的位置， 这一时刻的位置， 素材编号>，建立一个渲染任务序列
 // 渲染优先级：所有背景剪切优先级都最高，然后是辅助层（顺序无所谓），最后是按照y值进行排序的物体(外界将x,y,z进行变换，这里仅仅输入渲染的位置)
-typedef struct packed {
-    logic [2:0] type;       //要渲染的对象类型（填补背景：0 | A方人物：1 | B方人物：2 | 足球：3 | 辅助块：4）
-    logic [11:0] h_pos;
-    logic [11:0] v_pos;     
-    logic [7:0] angle;      //朝向的目标，对于人物和辅助块都有用
-    logic [3:0] stat;       //物体的状态，对于人来说是action，对于足球来说是在几个图层之间进行切换
-    logic [11:0] width;      //对应图片的宽度
-    logic [11:0] height;     //对应图片的高度
-} Render_Param_t;           
+import type_declare::*;   
 
 module vm_renderer
-#(parameter VM_WIDTH = 1280, VM_HEIGHT = 720)
+#(parameter VM_WIDTH = TEST_DEBUG ? TEST_HSIZE : 1280, VM_HEIGHT = TEST_DEBUG ? TEST_VSIZE : 720)
 (
-    input ui_clk,
+    input vm_renderer_ui_clk,
     input ui_rst,
     //和上层的接口
     input vm_flag,         //负责交换分区; 0代表用BUF2，1代表用BUF1
     input draw_begin,         
-    output draw_end,
+    output reg draw_end,
     input Render_Param_t render_param,
     // 与SDRAM交互的信号
     output reg[1:0] sdram_cmd,          //命令，  0无效，1读取，2写入
@@ -52,6 +44,8 @@ module vm_renderer
     logic [7:0] angle;
     logic [3:0] stat;
     logic [29:0] result_addr;
+    assign angle = render_param.angle;
+    assign stat = render_param.stat;
     always_comb begin
         // 计算方向值
         if (angle >= 68 || angle <= 4)
@@ -75,7 +69,7 @@ module vm_renderer
         result_addr = ((direction * 100) + (stat * 10)) * 512;
     end
     sprite_render u_sprite_render(
-        .ui_clk(ui_clk),
+        .sprite_render_ui_clk(vm_renderer_ui_clk),
         .ui_rst(ui_rst),
         .mode(mode),         // 0:将线性存储的数据渲染到显存的指定坐标；  1：将背景的某一块补全
         .render_begin(render_begin),
@@ -95,11 +89,11 @@ module vm_renderer
         .write_data(write_data),
         .read_data(read_data),
         .cmd_done(cmd_done)
-    )
+    );
 
     /***********  渲染状态机  ***********/
     reg last_render_end;      //捕捉上升沿
-    always @(posedge ui_clk)begin
+    always @(posedge vm_renderer_ui_clk)begin
         if(ui_rst)begin
             done_delay_counter <= 1'b0;
             render_stat <= IDLE;
@@ -110,55 +104,42 @@ module vm_renderer
                     render_stat <= RENDER;
                 end
             end else if(render_stat == RENDER)begin
+                // dst 渲染目标帧的起始位置、渲染坐标、图片大小
+                vm_start <= (vm_flag ? BUF2_START : BUF1_START);
+                half_img_height <= (render_param.height >> 1);
+                half_img_width <= (render_param.width >> 1);
+                h_pos <= render_param.h_pos;
+                v_pos <= render_param.v_pos;
                 //type中，除了填补背景会直接改变sprite_render的mode外，其余的type只是为了公式化寻找目标
-                if(render_param.type == 0)begin
+                if(render_param.render_type == 0)begin
                     mode <= 1'b1;
                     render_begin <= 1'b1;
-                    half_img_height <= (render_param.height >> 1);
-                    half_img_width <= (render_param.width >> 1);
                     // src
-                    //[TODO]这里要和其它地方对接，检查地址计算的方法是否一样!!!
-                    
-                    // dst
-                    h_pos <= render_param.h_pos;
-                    v_pos <= render_param.v_pos;
-                    vm_start <= (vm_flag ? BUF2_START : BUF1_START);
-
+                    vm_background_start <= BG_FRAME_START;
+                    bg_hpos <= render_param.h_pos;
+                    bg_vpos <= render_param.v_pos;
                     if(~last_render_end & render_end)begin
                         render_begin <= 1'b0;
                         draw_end <= 1'b1;
                         render_stat <= DONE;
                     end
-                end else if(render_param.type == 1)begin
+                end else if(render_param.render_type == 1)begin
                     mode <= 1'b0;
                     render_begin <= 1'b1;
-                    half_img_height <= (render_param.height >> 1);
-                    half_img_width <= (render_param.width >> 1);
                     // src
                     sprite_addr <= result_addr; // 在always_comb中计算
-                    // dst
-                    h_pos <= render_param.h_pos;
-                    v_pos <= render_param.v_pos;
-                    vm_start <= (vm_flag ? BUF2_START : BUF1_START);
 
                     if(~last_render_end & render_end)begin
                         render_begin <= 1'b0;
                         draw_end <= 1'b1;
                         render_stat <= DONE;
                     end
-                end else if(render_param.type == 2)begin
+                end else if(render_param.render_type == 2)begin
                     mode <= 1'b0;
                     render_begin <= 1'b1;
-                    half_img_height <= (render_param.height >> 1);
-                    half_img_width <= (render_param.width >> 1);
                     // src
                     //[TODO]检查这里新增的base_addr是否正确
                     sprite_addr <= result_addr + 1000*512; // 在always_comb中计算
-                    
-                    // dst
-                    h_pos <= render_param.h_pos;
-                    v_pos <= render_param.v_pos;
-                    vm_start <= (vm_flag ? BUF2_START : BUF1_START);
 
                     if(~last_render_end & render_end)begin
                         render_begin <= 1'b0;
