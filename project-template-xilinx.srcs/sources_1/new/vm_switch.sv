@@ -20,7 +20,7 @@ module vm_switch
     //与SDRAM的接口
     output reg [1:0] sdram_cmd,          //命令，  0无效，1读取，2写入
     output reg [29:0] operate_addr,      //地址
-    input reg [63:0] read_data,
+    input reg [63:l0] read_data,
     input reg cmd_done,             //这一轮命令结束
     //与video的接口
     output reg [63:0] write_data,   //[TODO]研究SRAM的字节序，注意进行顺序变换

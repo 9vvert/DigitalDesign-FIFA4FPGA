@@ -51,28 +51,13 @@ module test_sram(
     output wire [3: 0] base_ram_be_n,   // SRAM 字节使能，低有效。如果不使用字节使能，请保持为0
     output wire        base_ram_ce_n,   // SRAM 片选，低有效
     output wire        base_ram_oe_n,   // SRAM 读使能，低有效
-    output wire        base_ram_we_n,   // SRAM 写使能，低有效
+    output wire        base_ram_we_n   // SRAM 写使能，低有效
 
-    // HDMI 图像输出
-    output wire [2:0] hdmi_tmds_n,    // HDMI TMDS 数据信号
-    output wire [2:0] hdmi_tmds_p,    // HDMI TMDS 数据信号
-    output wire       hdmi_tmds_c_n,  // HDMI TMDS 时钟信号
-    output wire       hdmi_tmds_c_p   // HDMI TMDS 时钟信号
 
     );
-
+    assign base_ram_be_n = 0;
     // 使用 100MHz 时钟作为后续逻辑的时钟
     wire clk_in = clk_100m;
-
-    // PLL 分频演示，从输入产生不同频率的时钟
-    wire clk_hdmi;
-    wire clk_locked;
-    ip_pll u_ip_pll(
-        .clk_in1  (clk_in    ),  // 输入 100MHz 时钟
-        .reset    (btn_rst   ),  // 复位信号，高有效
-        .clk_out1 (clk_hdmi  ),  // 50MHz 像素时钟
-        .locked   (clk_locked)   // 高表示 50MHz 时钟已经稳定输出
-    );
 
     // 七段数码管扫描演示
     reg [31:0] number;
@@ -85,58 +70,115 @@ module test_sram(
         .segment (dpy_segment )
     );
 
-    reg [31:0] sram_write_data;
+    reg [31:0] buffer[11:0];        //读取12个数据
+    reg sram_io_req;
+    reg [19:0] times;
+    reg wr;
+    reg [19:0] addr;
+    reg [31:0] din;
+    wire [31:0] dout;
 
-    assign base_ram_data = (base_ram_oe_n) ? sram_write_data : 32'bz;
-    reg [7:0] sram_counter;     //
-    always@(posedge clk_100m or posedge btn_rst)begin
+    sram_IO u_sram_IO(
+        .clk(clk_100m),
+        .rst(btn_rst),
+        .req(sram_io_req),
+        .times(times),
+        .addr(addr),
+        .wr(wr),
+        .din(din),
+        .dout(dout),
+        .base_ram_data(base_ram_data),
+        .base_ram_addr(base_ram_addr),
+        .base_ram_be_n(base_ram_be_n),
+        .base_ram_ce_n(base_ram_ce_n),
+        .base_ram_oe_n(base_ram_oe_n),
+        .base_ram_we_n(base_ram_we_n)
+    );
+    reg [3:0] stat;
+    reg [7:0] sram_cnt;
+    reg [31:0] show_counter;
+    localparam [3:0] IDLE=0, READ1=1, READ2=2, WRITE1=3, WRITE2=4, WRITE3=5, PRE_READ=6, PRE_WRITE=7,DONE=8;
+    always@(posedge clk_100m)begin
         if(btn_rst)begin
-            sram_counter <= 8'd0;
+            sram_cnt <= 0;
+            stat <= IDLE;
+            wr <= 0;
+            addr <= 0;
+            show_counter <= 0;
         end else begin
-            if(sram_counter = 0)begin
-                base_ram_oe_n <= 1'b1;
-                base_ram_ce_n <= 1'b0;      // 片选
-                base_ram_we_n <= 1'b1;
-            end else if(sram_counter == 1)begin
-                // write 1
-                base_ram_addr <= 20'd64;
-                sram_write_data <= 32'h12345678;
-                base_ram_ce_n <= 1'b0;
-                base_ram_oe_n <= 1'b1;
-                base_ram_we_n <= 1'b0;
-            end else if(sram_counter == 2)begin
-                base_ram_addr <= 20'd64;
-                sram_write_data <= 32'h12345678;
-                base_ram_ce_n <= 1'b0;
-                base_ram_oe_n <= 1'b1;
-                base_ram_we_n <= 1'b1;      // 将we拉高，但是片选仍然为0
-            end else if(sram_counter == 3)begin
-                base_ram_addr <= 20'd64;
-                sram_write_data <= 32'h12345678;
-                base_ram_ce_n <= 1'b0;
-                base_ram_oe_n <= 1'b1;
-                base_ram_we_n <= 1'b1;
-            end else if(sram_counter == 4)begin
-            end else if(sram_counter == 5)begin
-            end else begin
-            end
+            case(stat)
+                IDLE: begin
+                    wr <= 1;
+                    // 必须在拉高wr的同时输入din
+                    addr <= sram_cnt;   //使用计数器作为地址
+                    din <= {sram_cnt, sram_cnt+8'd1, sram_cnt+8'd2,sram_cnt +8'd3};
+                    stat <= PRE_WRITE;
+                    sram_io_req <= 1;       //拉高请求
+                end 
+                PRE_READ:begin
+                    addr <= sram_cnt;
+                    times <= 'd12;
+                    stat <= READ1;
+                end
+                PRE_WRITE:begin
+                    wr <= 1;
+                    times <= 'd12;
+                    
+                    stat <= WRITE1;
+                end
+                READ1: begin
+                    stat <= READ2;
+                end
+                READ2: begin
+                    //安全拉低req
+                    buffer[sram_cnt] <= dout; 
+                    sram_io_req <= 0;
+                    if(sram_cnt == times)begin
+                        stat <= DONE;
+                    end else begin
+                        wr <= 0;
+                        addr <= sram_cnt;
+                        sram_cnt <= sram_cnt + 1;
+                        stat <= READ1;
+                    end
+                end
+                WRITE1: begin
+                    stat <= WRITE2;
+                end
+                WRITE2: begin
+                    sram_io_req <= 0;
+                    stat <= WRITE3;
+                end
+                WRITE3: begin
+                    if(sram_cnt == times)begin
+                        sram_cnt <= 0;
+                        sram_io_req <= 1;
+                        wr <= 0;
+                        stat <= PRE_READ;
+                    end else begin
+                        addr <= sram_cnt;
+                        din <= {sram_cnt+1, sram_cnt+8'd2, sram_cnt+8'd3,sram_cnt +8'd4};
+                        sram_cnt <= sram_cnt + 1;
+                        stat <= WRITE1;
+                    end
+                end
+                DONE:begin
+                    if(show_counter == 32'd100000000)begin
+                        show_counter <= 0;
+                        number[15:0] <= sram_cnt;
+                        number[31:16] <= buffer[sram_cnt];
+                        if(sram_cnt >= 11)begin
+                            sram_cnt <= 0;
+                        end else begin
+                            sram_cnt <= sram_cnt + 1;
+                        end
+                    end else begin
+                        show_counter <= show_counter +  1;
+                    end
+                end
+            endcase
         end
     end
-
-    // // 自增计数器，用于数码管演示
-    // reg [31:0] counter;
-    // always @(posedge clk_in) begin
-    //     if (btn_rst) begin
-    //         counter <= 32'b0;
-    //         number <= 32'b0;
-    //     end else begin
-    //         counter <= counter + 32'b1;
-    //         if (counter == 32'd5_000_000) begin
-    //             counter <= 32'b0;
-    //             number <= number + 32'b1;
-    //         end
-    //     end
-    // end
 
     // LED 演示
     wire [31:0] leds;
@@ -148,47 +190,6 @@ module test_sram(
 
         .led_bit (led_bit     ),
         .led_com (led_com     )
-    );
-
-    // 图像输出演示，分辨率 800x600@72Hz，像素时钟为 50MHz，显示渐变色彩条
-    wire [11:0] hdata;  // 当前横坐标
-    wire [11:0] vdata;  // 当前纵坐标
-    wire [7:0] video_red; // 红色分量
-    wire [7:0] video_green; // 绿色分量
-    wire [7:0] video_blue; // 蓝色分量
-    wire video_clk; // 像素时钟
-    wire video_hsync;
-    wire video_vsync;
-
-    // 生成彩条数据，分别取坐标低位作为 RGB 值
-    // 警告：该图像生成方式仅供演示，请勿使用横纵坐标驱动大量逻辑！！
-    assign video_red = vdata < 200 ? hdata[8:1] : 8'b0;
-    assign video_green = vdata >= 200 && vdata < 400 ? hdata[8:1] : 8'b0;
-    assign video_blue = vdata >= 400 ? hdata[8:1] : 8'b0;
-
-    assign video_clk = clk_hdmi;
-    video #(12, 800, 856, 976, 1040, 600, 637, 643, 666, 1, 1) u_video800x600at72 (
-        .clk(video_clk), 
-        .hdata(hdata), //横坐标
-        .vdata(vdata), //纵坐标
-        .hsync(video_hsync),
-        .vsync(video_vsync),
-        .data_enable(video_de)
-    );
-
-    // 把 RGB 转化为 HDMI TMDS 信号并输出
-    ip_rgb2dvi u_ip_rgb2dvi (
-        .PixelClk   (video_clk),
-        .vid_pVDE   (video_de),
-        .vid_pHSync (video_hsync),
-        .vid_pVSync (video_vsync),
-        .vid_pData  ({video_red, video_blue, video_green}),
-        .aRst       (~clk_locked),
-
-        .TMDS_Clk_p  (hdmi_tmds_c_p),
-        .TMDS_Clk_n  (hdmi_tmds_c_n),
-        .TMDS_Data_p (hdmi_tmds_p),
-        .TMDS_Data_n (hdmi_tmds_n)
     );
 
 endmodule
