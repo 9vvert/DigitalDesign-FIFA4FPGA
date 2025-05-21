@@ -150,8 +150,8 @@ module vm_top(
 
     /***********  渲染 *************/
     wire ui_clk;
-    wire [63:0] write_data;
-    wire [13:0] write_addr;
+    wire [31:0] write_data;
+    wire [14:0] write_addr;
     wire write_enable;
     wire batch_free;                // 请求batch 的信号
     reg [11:0] y_pos[1:0];

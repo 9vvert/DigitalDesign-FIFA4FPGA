@@ -32,7 +32,14 @@ module sprite_render
     output reg [29:0] operate_addr,      //地址
     output reg [63:0] write_data,
     input [63:0] read_data,
-    input cmd_done   
+    input cmd_done,
+    //控制SRAM [TODO] 需要处理奇数时的特殊情况
+    output reg sram_io_req,        //读写请求
+    output reg [19:0] times,       //读写次数
+    output reg wr,                 //是否选择“写”
+    output reg [19:0] addr,
+    output reg [31:0] din,          // 渲染信息
+    input wire [31:0] dout
 );
     // mode==0
     reg [29:0] src_addr;

@@ -35,8 +35,8 @@ module vm_manager_tb;
     wire batch_free;
     reg [11:0] y_pos[OBJ_NUM-1:0];
     Render_Param_t in_render_param[OBJ_NUM-1:0]; 
-    wire [63:0] write_data;
-    wire [13:0] write_addr;
+    wire [31:0] write_data;
+    wire [14:0] write_addr;
     wire write_enable;
 
     video #(TEST_WIDTH, TEST_HSIZE, TEST_HFP, TEST_HSP, TEST_HMAX, TEST_VSIZE, TEST_VFP, TEST_VFP, TEST_VMAX, TEST_HSPP, TEST_VSPP)
@@ -71,7 +71,6 @@ module vm_manager_tb;
         y_pos[1] = 10;
         in_render_param[1] = '{render_type:2, h_pos: 128, v_pos:64, angle: 18, stat: 2, width: 32, height:32};
         #10000;
-        $finish;
     end
 
 endmodule

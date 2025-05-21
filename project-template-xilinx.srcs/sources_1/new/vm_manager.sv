@@ -8,7 +8,9 @@
 parameter KB = 1024;
 parameter MB = 1024*KB;
 // 这些BUF的开始位置不需要随着分辨率改变
-parameter BUF1_START = 16*MB, BUF2_START = 18*MB, BG_FRAME_START = 20*MB;
+// parameter BUF1_START = 16*MB, BUF2_START = 18*MB, BG_FRAME_START = 20*MB;
+parameter BUF1_START = 0, BUF2_START = 524288;      // SRAM的地址偏移
+parameter BG_FRAME_START = 20*MB;
 parameter OBJ_NUM = 2;
 import type_declare::*;
 module vm_manager
@@ -44,6 +46,13 @@ module vm_manager
     output wire [0 :0] ddr3_cs_n,
     output wire [0 :0] ddr3_dm,
     output wire [0 :0] ddr3_odt,
+    //SRAM接口
+    inout  wire [31:0] base_ram_data,   // SRAM 数据
+    output wire [19:0] base_ram_addr,   // SRAM 地址
+    output wire [3: 0] base_ram_be_n,   // SRAM 字节使能，低有效。如果不使用字节使能，请保持为0
+    output wire        base_ram_ce_n,   // SRAM 片选，低有效
+    output wire        base_ram_oe_n,   // SRAM 读使能，低有效
+    output wire        base_ram_we_n,   // SRAM 写使能，低有效
     //数据，和game.sv对接 [TODO]
     input [11:0] y_pos[OBJ_NUM-1:0],           //用y值来判断渲染顺序
     input Render_Param_t in_render_param[OBJ_NUM-1:0],          //具体参数，用来表示渲染的位置，以及采用什么图片素材
@@ -55,95 +64,37 @@ module vm_manager
     input batch_free,       // 当RAM进行一轮交换后，会发送这个信号，并持续相当长一段周期，保证能够接受到
                             // 这个信号仅仅是用来切换到switcher
     //[TODO]检查和switch中的宽度是否一致，以及在空闲时候，switch输出的值是否会干扰正常逻辑
-    output [63:0] write_data,   //[TODO]研究SRAM的字节序，注意进行顺序变换
-    output [13:0] write_addr,   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
+    output [31:0] write_data,   //[TODO]研究SRAM的字节序，注意进行顺序变换
+    output [14:0] write_addr,   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
     output write_enable,        //写入显存的使能信号
     output out_ui_clk
 );
 
 
-    /*************   SD卡    *************/
-    reg sd_read_start;
-    reg sd_read_end;
-    reg [31:0] sd_addr;
-    reg [7:0] sd_buffer[511:0];
-    sd_IO u_sd_IO(
-        .clk_100m(clk_100m),
-        .rst(~clk_locked),
-        // SD 卡（SPI 模式）
-        .sd_sclk(sd_sclk),     // SPI 时钟
-        .sd_mosi(sd_mosi),     // 数据输出
-        .sd_miso(sd_miso),     // 数据输入
-        .sd_cs(sd_cs),       // SPI 片选，低有效
-        .sd_cd(sd_cd),       // 卡插入检测，0 表示有卡插入
-        .sd_wp(sd_wp),       // 写保护检测，0 表示写保护状态
-        //对外接口
-        .read_start(sd_read_start),               // 因为SD卡频率较慢，外界必须等待一段时间才能将raed_start降低
-        .read_end(sd_read_end),                // 加载完成
-        .sd_src_addr(sd_addr),       // SD卡
-        .mem(sd_buffer)
-    );
-
-    // /***********  SDRAM  ************/
-    reg [2:0] sdram_controller_stat;    //
-    wire ui_clk;                 // 由SDRAM输出
-    wire ui_rst;
-    reg [1:0]sdram_cmd;
-    reg [29:0]sdram_addr;
-    reg [63:0]sdram_write_data;
-    reg [63:0]sdram_read_data;
-    reg cmd_done;
-    wire sdram_init_calib_complete; //检测到为高的时候，SDRAM正式进入可用状态
-    sdram_IO u_sdram_IO(
-        .ui_clk(ui_clk),
-        .ui_clk_sync_rst(ui_rst),
-        .init_calib_complete(sdram_init_calib_complete),
-        .ddr3_dq(ddr3_dq),
-        .ddr3_dqs_n(ddr3_dqs_n),
-        .ddr3_dqs_p(ddr3_dqs_p),
-        .ddr3_addr(ddr3_addr),
-        .ddr3_ba(ddr3_ba),
-        .ddr3_ras_n(ddr3_ras_n),
-        .ddr3_cas_n(ddr3_cas_n),
-        .ddr3_we_n(ddr3_we_n),
-        .ddr3_reset_n(ddr3_reset_n),
-        .ddr3_ck_p(ddr3_ck_p),
-        .ddr3_ck_n(ddr3_ck_n),
-        .ddr3_cke(ddr3_cke),
-        .ddr3_cs_n(ddr3_cs_n),
-        .ddr3_dm(ddr3_dm),
-        .ddr3_odt(ddr3_odt),
-
-        .sys_clk_i(clk_ddr),  // 400MHz
-        .clk_ref_i(clk_ref),  // 200MHz
-        .sys_rst(!clk_locked),
-
-        // .sdram_info(number[7:0]),
-        //对外接口
-        .sdram_cmd(sdram_cmd),          //命令，  0无效，1读取，2写入
-        .operate_addr(sdram_addr),      //地址
-        .write_data(sdram_write_data),
-        .read_data(sdram_read_data),
-        .cmd_done(cmd_done)             //这一轮命令结束
-    );
-
-
-    // /*****************  模拟SD卡和SDRAM   *****************/
-    // /**************  模拟SD卡 **************/
+    // /*************   SD卡    *************/
     // reg sd_read_start;
     // reg sd_read_end;
     // reg [31:0] sd_addr;
     // reg [7:0] sd_buffer[511:0];
-    // // Fake SD card model
-    // fake_sd u_fake_sd (
-    //     .clk_100m (clk_100m),
-    //     .rst (rst),
-    //     .read_start (sd_read_start),
-    //     .read_end (sd_read_end),
-    //     .sd_src_addr (sd_addr),
-    //     .mem (sd_buffer)
+    // sd_IO u_sd_IO(
+    //     .clk_100m(clk_100m),
+    //     .rst(~clk_locked),
+    //     // SD 卡（SPI 模式）
+    //     .sd_sclk(sd_sclk),     // SPI 时钟
+    //     .sd_mosi(sd_mosi),     // 数据输出
+    //     .sd_miso(sd_miso),     // 数据输入
+    //     .sd_cs(sd_cs),       // SPI 片选，低有效
+    //     .sd_cd(sd_cd),       // 卡插入检测，0 表示有卡插入
+    //     .sd_wp(sd_wp),       // 写保护检测，0 表示写保护状态
+    //     //对外接口
+    //     .read_start(sd_read_start),               // 因为SD卡频率较慢，外界必须等待一段时间才能将raed_start降低
+    //     .read_end(sd_read_end),                // 加载完成
+    //     .sd_src_addr(sd_addr),       // SD卡
+    //     .mem(sd_buffer)
     // );
-    // // /**************  模拟SDRAM **************/
+
+    // // /***********  SDRAM  ************/
+    // reg [2:0] sdram_controller_stat;    //
     // wire ui_clk;                 // 由SDRAM输出
     // wire ui_rst;
     // reg [1:0]sdram_cmd;
@@ -152,18 +103,101 @@ module vm_manager
     // reg [63:0]sdram_read_data;
     // reg cmd_done;
     // wire sdram_init_calib_complete; //检测到为高的时候，SDRAM正式进入可用状态
-    // // Fake SDRAM model
-    // fake_sdram u_fake_sdram (
-    //     .clk_100m(clk_100m),
+    // sdram_IO u_sdram_IO(
     //     .ui_clk(ui_clk),
     //     .ui_clk_sync_rst(ui_rst),
     //     .init_calib_complete(sdram_init_calib_complete),
-    //     .sdram_cmd(sdram_cmd),
-    //     .operate_addr(sdram_addr),
+    //     .ddr3_dq(ddr3_dq),
+    //     .ddr3_dqs_n(ddr3_dqs_n),
+    //     .ddr3_dqs_p(ddr3_dqs_p),
+    //     .ddr3_addr(ddr3_addr),
+    //     .ddr3_ba(ddr3_ba),
+    //     .ddr3_ras_n(ddr3_ras_n),
+    //     .ddr3_cas_n(ddr3_cas_n),
+    //     .ddr3_we_n(ddr3_we_n),
+    //     .ddr3_reset_n(ddr3_reset_n),
+    //     .ddr3_ck_p(ddr3_ck_p),
+    //     .ddr3_ck_n(ddr3_ck_n),
+    //     .ddr3_cke(ddr3_cke),
+    //     .ddr3_cs_n(ddr3_cs_n),
+    //     .ddr3_dm(ddr3_dm),
+    //     .ddr3_odt(ddr3_odt),
+
+    //     .sys_clk_i(clk_ddr),  // 400MHz
+    //     .clk_ref_i(clk_ref),  // 200MHz
+    //     .sys_rst(!clk_locked),
+
+    //     // .sdram_info(number[7:0]),
+    //     //对外接口
+    //     .sdram_cmd(sdram_cmd),          //命令，  0无效，1读取，2写入
+    //     .operate_addr(sdram_addr),      //地址
     //     .write_data(sdram_write_data),
     //     .read_data(sdram_read_data),
-    //     .cmd_done(cmd_done)
+    //     .cmd_done(cmd_done)             //这一轮命令结束
     // );
+
+    /*****************  模拟SD卡和SDRAM   *****************/
+    /**************  模拟SD卡 **************/
+    reg sd_read_start;
+    reg sd_read_end;
+    reg [31:0] sd_addr;
+    reg [7:0] sd_buffer[511:0];
+    // Fake SD card model
+    fake_sd u_fake_sd (
+        .clk_100m (clk_100m),
+        .rst (rst),
+        .read_start (sd_read_start),
+        .read_end (sd_read_end),
+        .sd_src_addr (sd_addr),
+        .mem (sd_buffer)
+    );
+    // /**************  模拟SDRAM **************/
+    wire ui_clk;                 // 由SDRAM输出
+    wire ui_rst;
+    reg [1:0]sdram_cmd;
+    reg [29:0]sdram_addr;
+    reg [63:0]sdram_write_data;
+    reg [63:0]sdram_read_data;
+    reg cmd_done;
+    wire sdram_init_calib_complete; //检测到为高的时候，SDRAM正式进入可用状态
+    // Fake SDRAM model
+    fake_sdram u_fake_sdram (
+        .clk_100m(clk_100m),
+        .ui_clk(ui_clk),
+        .ui_clk_sync_rst(ui_rst),
+        .init_calib_complete(sdram_init_calib_complete),
+        .sdram_cmd(sdram_cmd),
+        .operate_addr(sdram_addr),
+        .write_data(sdram_write_data),
+        .read_data(sdram_read_data),
+        .cmd_done(cmd_done)
+    );
+
+    /****************   SRAM   *****************/
+
+    wire sram_io_req;        //读写请求
+    wire [19:0] times;       //读写次数
+    wire wr;                 //是否选择“写”
+    wire [19:0] addr;        
+    wire [31:0] din;    //switch 用不到din
+    wire [31:0] dout;
+
+    sram_IO u_sram_IO(
+        .clk(ui_clk),       // 100MHz
+        .rst(ui_rst),
+        .req(sram_io_req),
+        .times(times),
+        .addr(addr),
+        .wr(wr),
+        .din(din),
+        .dout(dout),
+        .base_ram_data(base_ram_data),
+        .base_ram_addr(base_ram_addr),
+        .base_ram_be_n(base_ram_be_n),
+        .base_ram_ce_n(base_ram_ce_n),
+        .base_ram_oe_n(base_ram_oe_n),
+        .base_ram_we_n(base_ram_we_n)
+    );
 
     /*************   manager FSM  **************/
     // [change]
@@ -208,13 +242,16 @@ module vm_manager
 
     /****************  vm_switch  ****************/
     reg switch_begin;
-    wire [1:0] switch_sdram_cmd;
-    wire [29:0] switch_operate_addr;
     wire switch_end;
     reg last_switch_end;    //捕捉上升沿
+    // SRAM接口
+    wire switch_sram_io_req;
+    wire [19:0] switch_sram_times;
+    wire switch_sram_wr;
+    wire [19:0] switch_sram_addr;
+    wire [31:0] switch_sram_dout;
     vm_switch u_vm_switch(
         .debug_number(debug_number),
-        .btn_push(btn_push),
         .vm_switch_ui_clk(ui_clk),
         .ui_rst(ui_rst),
         //和上层的接口
@@ -222,11 +259,12 @@ module vm_manager
         .switch_begin(switch_begin),             // 开始新一轮的交换（上层的vm_manager.sv需要严格控制交换次数）
         .switch_end(switch_end),         //本轮的batch交换完成
         .frame_counter(frame_counter),  //和上层的交换次数对接
-        //与SDRAM的接口
-        .sdram_cmd(switch_sdram_cmd),          //命令，  0无效，1读取，2写入
-        .operate_addr(switch_operate_addr),      //地址
-        .read_data(sdram_read_data),
-        .cmd_done(cmd_done),             //这一轮命令结束
+        //与SRAM的接口
+        .sram_io_req(switch_sram_io_req),            // 读写请求，在req为高的时候读取wr，
+        .times(switch_sram_times),     // 连续执行多少次操作
+        .wr(switch_sram_wr),             // 1:写, 0:读
+        .addr(switch_sram_addr),           // 20位地址        //需要及时更新
+        .dout(switch_sram_dout),           // 读出数据
         //与video的接口
         .write_data(write_data),   //[TODO]研究SRAM的字节序，注意进行顺序变换
         .write_addr(write_addr),   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
@@ -252,10 +290,18 @@ module vm_manager
     reg draw_begin;
     wire draw_end;
     reg last_draw_end;
+    // sdram， 素材
     wire [1:0] render_sdram_cmd;
     wire [29:0] render_operate_addr;
     wire [63:0] render_write_data;
     Render_Param_t render_param;   // 物体的参数
+    // sram 参数
+    wire render_sram_io_req;
+    wire [19:0] render_sram_times;
+    wire render_sram_wr;
+    wire [19:0] render_sram_addr;
+    wire [31:0] render_sram_dout;
+    wire [31:0] render_sram_din;
     vm_renderer u_vm_renderer(
         .vm_renderer_ui_clk(ui_clk),
         .ui_rst(ui_rst),
@@ -270,11 +316,36 @@ module vm_manager
         .write_data(render_write_data),
         //[TODO]再次检查：一直到最深处，持续的给cmd_done和read_data赋值会不会有问题
         .read_data(sdram_read_data),
-        .cmd_done(cmd_done)
+        .cmd_done(cmd_done),
+        // 与SRAM交互的信号
+        .sram_io_req(render_sram_io_req),
+        .times(render_sram_times),
+        .wr(render_sram_wr),
+        .addr(render_sram_addr),
+        .din(render_sram_din),
+        .dout(render_sram_dout)
     );
 
+    /*****************  SRAM信号仲裁  *****************/
+    assign sram_io_req= (manager_stat == SWITCH) ? switch_sram_io_req:
+                        (manager_stat == RENDER) ? render_sram_io_req:
+                        'bz;
+    assign times =  (manager_stat == SWITCH) ? switch_sram_times:
+                    (manager_stat == RENDER) ? render_sram_times:
+                    'bz;
+    assign addr =   (manager_stat == SWITCH) ? switch_sram_addr:
+                    (manager_stat == RENDER) ? render_sram_addr:
+                    'bz;
+    assign wr = (manager_stat == SWITCH) ? switch_sram_wr:
+                (manager_stat == RENDER) ? render_sram_wr:
+                'bz;
+    assign din = (manager_stat == RENDER) ? render_sram_din : 'bz;
+    assign dout =   (manager_stat == SWITCH) ? switch_sram_dout:
+                    (manager_stat == RENDER) ? render_sram_dout:
+                    'bz;
+    
     // 进行batch信号的同步
-    reg batch_free1, batch_free2;
+    reg batch_free1, batch_free2;       // 来自 hdmi_clk
     always @(posedge ui_clk)begin
         batch_free1 <= batch_free;
         batch_free2 <= batch_free1;
@@ -378,8 +449,6 @@ module vm_manager
                 end
                 SWITCH:begin
                     switch_begin <= 1'b1;
-                    sdram_cmd <= switch_sdram_cmd;
-                    sdram_addr <= switch_operate_addr;
                     
                     if(~last_switch_end & switch_end)begin
                         switch_begin <= 1'b0;

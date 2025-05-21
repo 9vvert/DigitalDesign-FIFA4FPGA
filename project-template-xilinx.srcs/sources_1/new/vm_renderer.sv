@@ -18,9 +18,17 @@ module vm_renderer
     output reg[29:0] operate_addr,      //地址
     output reg[63:0] write_data,
     input [63:0] read_data,
-    input cmd_done
+    input cmd_done,
+    //与SRAM的接口
+    output reg sram_io_req,        //读写请求
+    output reg [19:0] times,       //读写次数
+    output reg wr,                 //是否选择“写”
+    output reg [19:0] addr,
+    output reg [31:0] din,          // 渲染信息
+    input wire [31:0] dout
 );
     reg [3:0] render_stat;  //渲染器状态
+    localparam [3:0] IDLE=0, READ1=1, READ2=2, WRITE1=3, WRITE2=4, WRITE3=5, PRE_READ=6, PRE_WRITE=7,DONE=8;
     localparam [3:0] IDLE=0, RENDER=1, DONE=2;
     reg [1:0] done_delay_counter;
     /***********  渲染引擎   ***********/
@@ -88,7 +96,14 @@ module vm_renderer
         .operate_addr(operate_addr),      //地址
         .write_data(write_data),
         .read_data(read_data),
-        .cmd_done(cmd_done)
+        .cmd_done(cmd_done),
+        //控制SRAM
+        .sram_io_req(sram_io_req),
+        .wr(wr),
+        .times(times),
+        .addr(addr),
+        .din(din),
+        .dout(dout)
     );
 
     /***********  渲染状态机  ***********/

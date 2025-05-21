@@ -5,11 +5,10 @@
 
 
 module vm_switch
-// 这里的BATCHSIZE表示：每次交换8字节，需要5120轮，也就是8*5120B = 40KB
-#(parameter SWAP_TIME = TEST_DEBUG ? 1024 : 5120, BATCHSIZE = TEST_DEBUG ? (8*KB): (40*KB) )
+// SRAM每次可以读取4字节，因此发送40KB的数据需要10240轮
+#(parameter SWAP_TIME = TEST_DEBUG ? 2048 : 10240, BATCH_SKIP = TEST_DEBUG ? 2048: 10240 )
 (
     output reg[31:0] debug_number,
-    input [3:0] btn_push,
     input vm_switch_ui_clk,
     input ui_rst,
     //和上层的接口
@@ -17,100 +16,80 @@ module vm_switch
     input vm_flag,           //负责交换分区; 0代表用BUF2，1代表用BUF1
     input switch_begin,             // 开始新一轮的交换（上层的vm_manager.sv需要严格控制交换次数）
     output reg switch_end,         //本轮的batch交换完成
-    //与SDRAM的接口
-    output reg [1:0] sdram_cmd,          //命令，  0无效，1读取，2写入
-    output reg [29:0] operate_addr,      //地址
-    input reg [63:l0] read_data,
-    input reg cmd_done,             //这一轮命令结束
+    //与SRAM的接口
+    output reg sram_io_req,        //读写请求
+    output reg [19:0] times,       //读写次数
+    output reg wr,                 //是否选择“写”
+    output reg [19:0] addr,        
+    input wire [31:0] dout,     //[TODO] SRAM有无字节大小端的问题？
     //与video的接口
-    output reg [63:0] write_data,   //[TODO]研究SRAM的字节序，注意进行顺序变换
-    output reg [13:0] write_addr,   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
+    output reg [31:0] write_data,   //[TODO]研究SRAM的字节序，注意进行顺序变换
+    output reg [14:0] write_addr,   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
     output reg write_enable
 );
-    reg [31:0]debug_counter;
-    reg last_cmd_done;      //捕捉上升沿
-    reg [13:0] switch_counter;      //负责BATCHSIZE的计数
-    reg [2:0] switch_stat;
+    reg [19:0] switch_counter;      //负责BATCHSIZE的计数
+    reg [3:0] switch_stat;
     reg switch_end_delay_counter;
-    reg [13:0] tmp_swap_size;
-    localparam [2:0] IDLE=0,REQ=1 ,SWAP=2, DONE=3;
 
-    reg btn11, btn12, btn21, btn22;
-    reg last_btn12, last_btn22;
-    always@(posedge vm_switch_ui_clk)begin
-        btn11 <= btn_push[0];
-        btn21 <= btn_push[1];
-        btn12 <= btn11;
-        btn22 <= btn21;
-    end
+    localparam [3:0] IDLE=0, READ1=1, READ2=2, WRITE1=3, WRITE2=4, WRITE3=5, PRE_READ=6, PRE_WRITE=7,DONE=8;
     always@(posedge vm_switch_ui_clk)begin
         if(ui_rst)begin
             switch_stat <= IDLE;
-            switch_counter <= 14'd0;
+            switch_counter <= 20'd0;
             switch_end_delay_counter <= 1'b0;
             //输出到video的信号初始化
-            write_data <= 64'd0;
+            write_data <= 32'd0;
             write_addr <= 14'd0;
             write_enable <= 1'b0;
-            tmp_swap_size <= 14'd1000;
-            debug_number <= 0;
-            debug_counter <= 0;
         end else begin
-            if(~last_btn12 && btn12)begin
-                tmp_swap_size <= tmp_swap_size + 14'd100;    
-            end else if(~last_btn22 && btn22)begin
-                if(tmp_swap_size > 100)begin
-                    tmp_swap_size <= tmp_swap_size - 14'd100; 
-                end
-            end
             if(switch_stat == IDLE)begin
                 write_enable <= 1'b0;
-                if(switch_begin)begin
-                    //计算地址变化
-                    switch_stat <= REQ;
-                    debug_counter <= 0;
-                    debug_number <= 0;
+                if(switch_begin)begin               //相当于 test_sram中的IDLE
+                    sram_io_req <= 1'b1;        //拉高请求
+                    times <= SWAP_TIME;
+                    wr <= 1'b0;                 //读数据
+                    switch_stat <= PRE_READ;        //必须保证和sram_IO内部同步
                 end
-            end else if(switch_stat == REQ)begin    //请求数据
-                debug_counter <= debug_counter + 1;
-                write_enable <= 1'b0;       //加上这一行，防止误写入
-                sdram_cmd <= 2'd1;
-                operate_addr <= (vm_flag ? BUF1_START : BUF2_START) + frame_counter * BATCHSIZE + switch_counter * 8;    //每次读取8个字节，在switch_counter增加的过程中，会自动进行地址偏移
-                if(~last_cmd_done & cmd_done)begin
-                    sdram_cmd <= 2'd0;
-                    //将设置write_addr和write_data提前，保证稳定
-                    write_addr <= switch_counter;
-                    //这里进行字节顺序的变换，使得RAM中读取到的像素数据顺序正确
-                    write_data <= {read_data[15:0], read_data[31:16], read_data[47:32], read_data[63:48]};
-                    switch_stat <= SWAP;
+            end else if(switch_stat == PRE_READ)begin
+                addr <= (vm_flag ? BUF1_START : BUF2_START) + frame_counter*BATCH_SKIP + switch_counter;
+                switch_stat <= READ1;
+            end else if(switch_stat == READ1)begin
+                // 负责原来的SWAP部分，这会将上一轮的READ2中设置的write_data写入
+                if(switch_counter > 0)begin
+                    write_enable <= 1;           //第一个周期不需要发
                 end
-            end else if(switch_stat == SWAP)begin   //交换
-                debug_counter <= debug_counter + 1;
-                write_enable <= 1'b1;
-                if(switch_counter == tmp_swap_size - 1)begin
+                //
+                switch_stat <= READ2;
+            end else if(switch_stat == READ2)begin
+                sram_io_req <= 0;       // 这个时候拉低req是绝对安全的
+                // 在READ2周期内，dout可以读取
+                write_enable <= 0;      //[TODO]这样是否可行？
+                write_addr <= switch_counter;
+                write_data <= {dout[15:0], dout[31:16]};        //[TODO]验证字节序
+                if(switch_counter == SWAP_TIME - 1)begin
+                    //已经完成，退出
                     switch_counter <= 0;
-                    switch_end <= 1'b1;     //拉高交换完成的信号
+                    switch_end <= 1;        // 这里不要忘记拉高end信号
                     switch_stat <= DONE;
                 end else begin
-                    debug_counter <= 0;
-                    debug_number <= debug_counter;
+                    //控制
+                    wr <= 0;
+                    addr <= addr + 1;   
                     switch_counter <= switch_counter + 1;
-                    switch_stat <= REQ;       // 下一个请求
+                    switch_stat <= READ1;       //新的一轮
+                    
                 end
             end else begin                          //DONE
-                
-                write_enable <= 1'b0; 
                 if(switch_end_delay_counter == 1'b0)begin
+                    write_enable <= 1'b1;           // 充当READ1的作用，这里发送的是最后一轮的数据
                     switch_end_delay_counter <= 1'b1;
                 end else begin
+                    write_enable <= 1'b0; 
                     switch_end_delay_counter <= 1'b0;
                     switch_end <= 1'b0;     // 恢复信号
                     switch_stat <= IDLE;    // 等待下一次batch fill的请求
                 end
             end
-            last_btn12 <= btn12;
-            last_btn22 <= btn22;
-            last_cmd_done <= cmd_done;
         end
     end
 endmodule

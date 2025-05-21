@@ -8,7 +8,7 @@ package type_declare;
         logic [11:0] width;      //对应图片的宽度
         logic [11:0] height;     //对应图片的高度
     } Render_Param_t;        
-    parameter TEST_DEBUG = 0;
+    parameter TEST_DEBUG = 1;
     parameter TEST_WIDTH = 12;
     parameter TEST_HSIZE = 256;    // 有效显示宽度
     parameter TEST_HFP   = 272;    // 前肩: HSIZE + 16
