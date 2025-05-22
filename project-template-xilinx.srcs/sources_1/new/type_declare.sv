@@ -1,14 +1,14 @@
 package type_declare;
     typedef struct packed {
         logic [2:0] render_type;       //要渲染的对象类型（填补背景：0 | A方人物：1 | B方人物：2 | 足球：3 | 辅助块：4）
-        logic [11:0] h_pos;
-        logic [11:0] v_pos;     
+        logic [11:0] hpos;
+        logic [11:0] vpos;     
         logic [7:0] angle;      //朝向的目标，对于人物和辅助块都有用
         logic [3:0] stat;       //物体的状态，对于人来说是action，对于足球来说是在几个图层之间进行切换
         logic [11:0] width;      //对应图片的宽度
         logic [11:0] height;     //对应图片的高度
     } Render_Param_t;        
-    parameter TEST_DEBUG = 1;
+    parameter TEST_DEBUG = 0;
     parameter TEST_WIDTH = 12;
     parameter TEST_HSIZE = 256;    // 有效显示宽度
     parameter TEST_HFP   = 272;    // 前肩: HSIZE + 16

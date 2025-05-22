@@ -10,8 +10,8 @@ module video
     input wire ui_clk,
     //[TODO]对fill_batch进行一层同步
     output reg fill_batch,  //拉高这个信号表示需要填充40KB的缓存数据
-    input [63:0] write_data,    //显存通过这三个信号来写入数据
-    input [13:0] write_addr,
+    input [31:0] write_data,    //显存通过这三个信号来写入数据
+    input [14:0] write_addr,
     input write_enable,
     
     //和HDMI的交互
@@ -30,9 +30,9 @@ module video
     logic [WIDTH - 1:0] next_vdata;
 
     localparam READ_SKIP = 20480;           // 和RAM容量有关，不需要随着显示屏的大小改变
-    localparam WRITE_SKIP = 5120;
+    localparam WRITE_SKIP = 10240;
     wire [15:0] read_ram_addr;
-    wire [13:0] write_ram_addr;
+    wire [14:0] write_ram_addr;
 
     wire [15:0] pixel_data;     // 实时连接RAM的输出端口
     reg ram_flag;       // 如果为0，则读取0-40KB，写到40-80K ; 如果为1则交换

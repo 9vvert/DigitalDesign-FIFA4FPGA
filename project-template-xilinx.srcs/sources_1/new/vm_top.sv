@@ -46,12 +46,12 @@ module vm_top(
     // output wire [3: 0] rgmii_tx_data,
 
     // 4MB SRAM 内存
-    // inout  wire [31:0] base_ram_data,   // SRAM 数据
-    // output wire [19:0] base_ram_addr,   // SRAM 地址
-    // output wire [3: 0] base_ram_be_n,   // SRAM 字节使能，低有效。如果不使用字节使能，请保持为0
-    // output wire        base_ram_ce_n,   // SRAM 片选，低有效
-    // output wire        base_ram_oe_n,   // SRAM 读使能，低有效
-    // output wire        base_ram_we_n,   // SRAM 写使能，低有效
+    inout  wire [31:0] base_ram_data,   // SRAM 数据
+    output wire [19:0] base_ram_addr,   // SRAM 地址
+    output wire [3: 0] base_ram_be_n,   // SRAM 字节使能，低有效。如果不使用字节使能，请保持为0
+    output wire        base_ram_ce_n,   // SRAM 片选，低有效
+    output wire        base_ram_oe_n,   // SRAM 读使能，低有效
+    output wire        base_ram_we_n,   // SRAM 写使能，低有效
 
     // 512MB DDR3 SDRAM 内存
     inout  wire [7 :0] ddr3_dq,
@@ -160,16 +160,15 @@ module vm_top(
     always @(posedge clk_100m) begin
         if(rst)begin
             y_pos[0] = 20;
-            in_render_param[0] = '{render_type:1, h_pos: 64, v_pos:128, angle: 9, stat: 1, width: 32, height:32};
+            in_render_param[0] = '{render_type:1, hpos: 64, vpos:128, angle: 0, stat: 1, width: 32, height:32};
             y_pos[1] = 10;
-            in_render_param[1] = '{render_type:2, h_pos: 128, v_pos:64, angle: 18, stat: 2, width: 32, height:32};
+            in_render_param[1] = '{render_type:2, hpos: 128, vpos:64, angle: 0, stat: 2, width: 32, height:32};
         end
     end
 
     vm_manager u_vm_manager
     (
         .debug_number(number),
-        .btn_push(btn_push),
         .clk_100m(clk_100m),       // 100MHz
         .rst(rst),
         .clk_locked(clk_locked),     // 复位信号
@@ -198,6 +197,13 @@ module vm_top(
         .ddr3_cs_n(ddr3_cs_n),
         .ddr3_dm(ddr3_dm),
         .ddr3_odt(ddr3_odt),
+        //SRAM接口
+        .base_ram_data(base_ram_data),
+        .base_ram_addr(base_ram_addr),
+        .base_ram_be_n(base_ram_be_n),
+        .base_ram_ce_n(base_ram_ce_n),
+        .base_ram_oe_n(base_ram_oe_n),
+        .base_ram_we_n(base_ram_we_n),
         //数据，和game.sv对接 [TODO]
         .y_pos(y_pos),           //用y值来判断渲染顺序
         .in_render_param(in_render_param),          //具体参数，用来表示渲染的位置，以及采用什么图片素材

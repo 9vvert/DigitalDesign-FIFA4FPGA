@@ -2,8 +2,6 @@
 // 负责向video RAM发送batch;
 // 每处理完一次发送，向外界发送一个信号，将控制权转交给render
 // 累计一定次数后会耗尽，然后上层的vm_manager会交换这两块显存
-
-
 module vm_switch
 // SRAM每次可以读取4字节，因此发送40KB的数据需要10240轮
 #(parameter SWAP_TIME = TEST_DEBUG ? 2048 : 10240, BATCH_SKIP = TEST_DEBUG ? 2048: 10240 )

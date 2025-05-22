@@ -67,9 +67,9 @@ module vm_manager_tb;
         $dumpvars(0, vm_manager_tb);
         #5
         y_pos[0] = 20;
-        in_render_param[0] = '{render_type:1, h_pos: 64, v_pos:128, angle: 9, stat: 0, width: 32, height:32};
+        in_render_param[0] = '{render_type:1, hpos: 64, vpos:128, angle: 9, stat: 0, width: 32, height:32};
         y_pos[1] = 10;
-        in_render_param[1] = '{render_type:2, h_pos: 128, v_pos:64, angle: 18, stat: 2, width: 32, height:32};
+        in_render_param[1] = '{render_type:2, hpos: 128, vpos:64, angle: 18, stat: 2, width: 32, height:32};
         #10000;
     end
 

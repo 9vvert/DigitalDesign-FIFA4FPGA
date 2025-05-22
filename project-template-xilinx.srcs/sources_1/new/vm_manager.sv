@@ -9,7 +9,6 @@ parameter KB = 1024;
 parameter MB = 1024*KB;
 // 这些BUF的开始位置不需要随着分辨率改变
 // parameter BUF1_START = 16*MB, BUF2_START = 18*MB, BG_FRAME_START = 20*MB;
-parameter BUF1_START = 0, BUF2_START = 524288;      // SRAM的地址偏移
 parameter BG_FRAME_START = 20*MB;
 parameter OBJ_NUM = 2;
 import type_declare::*;
@@ -17,7 +16,6 @@ module vm_manager
 // 测试阶段，只绘制2个物体 
 (
     output reg [31:0]debug_number,
-    input [3:0] btn_push,
     input clk_100m,       // 100MHz
     input rst,
     input clk_locked,     // 复位信号
@@ -71,87 +69,30 @@ module vm_manager
 );
 
 
-    // /*************   SD卡    *************/
-    // reg sd_read_start;
-    // reg sd_read_end;
-    // reg [31:0] sd_addr;
-    // reg [7:0] sd_buffer[511:0];
-    // sd_IO u_sd_IO(
-    //     .clk_100m(clk_100m),
-    //     .rst(~clk_locked),
-    //     // SD 卡（SPI 模式）
-    //     .sd_sclk(sd_sclk),     // SPI 时钟
-    //     .sd_mosi(sd_mosi),     // 数据输出
-    //     .sd_miso(sd_miso),     // 数据输入
-    //     .sd_cs(sd_cs),       // SPI 片选，低有效
-    //     .sd_cd(sd_cd),       // 卡插入检测，0 表示有卡插入
-    //     .sd_wp(sd_wp),       // 写保护检测，0 表示写保护状态
-    //     //对外接口
-    //     .read_start(sd_read_start),               // 因为SD卡频率较慢，外界必须等待一段时间才能将raed_start降低
-    //     .read_end(sd_read_end),                // 加载完成
-    //     .sd_src_addr(sd_addr),       // SD卡
-    //     .mem(sd_buffer)
-    // );
-
-    // // /***********  SDRAM  ************/
-    // reg [2:0] sdram_controller_stat;    //
-    // wire ui_clk;                 // 由SDRAM输出
-    // wire ui_rst;
-    // reg [1:0]sdram_cmd;
-    // reg [29:0]sdram_addr;
-    // reg [63:0]sdram_write_data;
-    // reg [63:0]sdram_read_data;
-    // reg cmd_done;
-    // wire sdram_init_calib_complete; //检测到为高的时候，SDRAM正式进入可用状态
-    // sdram_IO u_sdram_IO(
-    //     .ui_clk(ui_clk),
-    //     .ui_clk_sync_rst(ui_rst),
-    //     .init_calib_complete(sdram_init_calib_complete),
-    //     .ddr3_dq(ddr3_dq),
-    //     .ddr3_dqs_n(ddr3_dqs_n),
-    //     .ddr3_dqs_p(ddr3_dqs_p),
-    //     .ddr3_addr(ddr3_addr),
-    //     .ddr3_ba(ddr3_ba),
-    //     .ddr3_ras_n(ddr3_ras_n),
-    //     .ddr3_cas_n(ddr3_cas_n),
-    //     .ddr3_we_n(ddr3_we_n),
-    //     .ddr3_reset_n(ddr3_reset_n),
-    //     .ddr3_ck_p(ddr3_ck_p),
-    //     .ddr3_ck_n(ddr3_ck_n),
-    //     .ddr3_cke(ddr3_cke),
-    //     .ddr3_cs_n(ddr3_cs_n),
-    //     .ddr3_dm(ddr3_dm),
-    //     .ddr3_odt(ddr3_odt),
-
-    //     .sys_clk_i(clk_ddr),  // 400MHz
-    //     .clk_ref_i(clk_ref),  // 200MHz
-    //     .sys_rst(!clk_locked),
-
-    //     // .sdram_info(number[7:0]),
-    //     //对外接口
-    //     .sdram_cmd(sdram_cmd),          //命令，  0无效，1读取，2写入
-    //     .operate_addr(sdram_addr),      //地址
-    //     .write_data(sdram_write_data),
-    //     .read_data(sdram_read_data),
-    //     .cmd_done(cmd_done)             //这一轮命令结束
-    // );
-
-    /*****************  模拟SD卡和SDRAM   *****************/
-    /**************  模拟SD卡 **************/
+    /*************   SD卡    *************/
     reg sd_read_start;
     reg sd_read_end;
     reg [31:0] sd_addr;
     reg [7:0] sd_buffer[511:0];
-    // Fake SD card model
-    fake_sd u_fake_sd (
-        .clk_100m (clk_100m),
-        .rst (rst),
-        .read_start (sd_read_start),
-        .read_end (sd_read_end),
-        .sd_src_addr (sd_addr),
-        .mem (sd_buffer)
+    sd_IO u_sd_IO(
+        .clk_100m(clk_100m),
+        .rst(~clk_locked),
+        // SD 卡（SPI 模式）
+        .sd_sclk(sd_sclk),     // SPI 时钟
+        .sd_mosi(sd_mosi),     // 数据输出
+        .sd_miso(sd_miso),     // 数据输入
+        .sd_cs(sd_cs),       // SPI 片选，低有效
+        .sd_cd(sd_cd),       // 卡插入检测，0 表示有卡插入
+        .sd_wp(sd_wp),       // 写保护检测，0 表示写保护状态
+        //对外接口
+        .read_start(sd_read_start),               // 因为SD卡频率较慢，外界必须等待一段时间才能将raed_start降低
+        .read_end(sd_read_end),                // 加载完成
+        .sd_src_addr(sd_addr),       // SD卡
+        .mem(sd_buffer)
     );
-    // /**************  模拟SDRAM **************/
+
+    // /***********  SDRAM  ************/
+    reg [2:0] sdram_controller_stat;    //
     wire ui_clk;                 // 由SDRAM输出
     wire ui_rst;
     reg [1:0]sdram_cmd;
@@ -160,18 +101,75 @@ module vm_manager
     reg [63:0]sdram_read_data;
     reg cmd_done;
     wire sdram_init_calib_complete; //检测到为高的时候，SDRAM正式进入可用状态
-    // Fake SDRAM model
-    fake_sdram u_fake_sdram (
-        .clk_100m(clk_100m),
+    sdram_IO u_sdram_IO(
         .ui_clk(ui_clk),
         .ui_clk_sync_rst(ui_rst),
         .init_calib_complete(sdram_init_calib_complete),
-        .sdram_cmd(sdram_cmd),
-        .operate_addr(sdram_addr),
+        .ddr3_dq(ddr3_dq),
+        .ddr3_dqs_n(ddr3_dqs_n),
+        .ddr3_dqs_p(ddr3_dqs_p),
+        .ddr3_addr(ddr3_addr),
+        .ddr3_ba(ddr3_ba),
+        .ddr3_ras_n(ddr3_ras_n),
+        .ddr3_cas_n(ddr3_cas_n),
+        .ddr3_we_n(ddr3_we_n),
+        .ddr3_reset_n(ddr3_reset_n),
+        .ddr3_ck_p(ddr3_ck_p),
+        .ddr3_ck_n(ddr3_ck_n),
+        .ddr3_cke(ddr3_cke),
+        .ddr3_cs_n(ddr3_cs_n),
+        .ddr3_dm(ddr3_dm),
+        .ddr3_odt(ddr3_odt),
+
+        .sys_clk_i(clk_ddr),  // 400MHz
+        .clk_ref_i(clk_ref),  // 200MHz
+        .sys_rst(!clk_locked),
+
+        // .sdram_info(number[7:0]),
+        //对外接口
+        .sdram_cmd(sdram_cmd),          //命令，  0无效，1读取，2写入
+        .operate_addr(sdram_addr),      //地址
         .write_data(sdram_write_data),
         .read_data(sdram_read_data),
-        .cmd_done(cmd_done)
+        .cmd_done(cmd_done)             //这一轮命令结束
     );
+
+    // /*****************  模拟SD卡和SDRAM   *****************/
+    // /**************  模拟SD卡 **************/
+    // reg sd_read_start;
+    // reg sd_read_end;
+    // reg [31:0] sd_addr;
+    // reg [7:0] sd_buffer[511:0];
+    // // Fake SD card model
+    // fake_sd u_fake_sd (
+    //     .clk_100m (clk_100m),
+    //     .rst (rst),
+    //     .read_start (sd_read_start),
+    //     .read_end (sd_read_end),
+    //     .sd_src_addr (sd_addr),
+    //     .mem (sd_buffer)
+    // );
+    // // /**************  模拟SDRAM **************/
+    // wire ui_clk;                 // 由SDRAM输出
+    // wire ui_rst;
+    // reg [1:0]sdram_cmd;
+    // reg [29:0]sdram_addr;
+    // reg [63:0]sdram_write_data;
+    // reg [63:0]sdram_read_data;
+    // reg cmd_done;
+    // wire sdram_init_calib_complete; //检测到为高的时候，SDRAM正式进入可用状态
+    // // Fake SDRAM model
+    // fake_sdram u_fake_sdram (
+    //     .clk_100m(clk_100m),
+    //     .ui_clk(ui_clk),
+    //     .ui_clk_sync_rst(ui_rst),
+    //     .init_calib_complete(sdram_init_calib_complete),
+    //     .sdram_cmd(sdram_cmd),
+    //     .operate_addr(sdram_addr),
+    //     .write_data(sdram_write_data),
+    //     .read_data(sdram_read_data),
+    //     .cmd_done(cmd_done)
+    // );
 
     /****************   SRAM   *****************/
 
@@ -203,7 +201,7 @@ module vm_manager
     // [change]
     localparam TURN = TEST_DEBUG ? 9 : 45;   //每一帧进行45次交换
     reg [5:0] frame_counter; //和TURN一起使用
-    localparam [3:0] START = 0, INIT = 1, RENDER = 3, SWITCH = 4, IDLE = 5, SORT=6, DONE=7, FINISH=8;
+    localparam [3:0] START = 0, INIT = 1, RENDER = 3, SWITCH = 4, IDLE = 5, SORT=6, DONE=7, FINISH=8, TEST_SHOW=9;
     reg [3:0] manager_stat;  
     reg vm_flag;           //用于表示分区状态
     reg [1:0] sort_counter;      // 排序计数器，在第一个周期赋值
@@ -249,9 +247,7 @@ module vm_manager
     wire [19:0] switch_sram_times;
     wire switch_sram_wr;
     wire [19:0] switch_sram_addr;
-    wire [31:0] switch_sram_dout;
     vm_switch u_vm_switch(
-        .debug_number(debug_number),
         .vm_switch_ui_clk(ui_clk),
         .ui_rst(ui_rst),
         //和上层的接口
@@ -264,7 +260,7 @@ module vm_manager
         .times(switch_sram_times),     // 连续执行多少次操作
         .wr(switch_sram_wr),             // 1:写, 0:读
         .addr(switch_sram_addr),           // 20位地址        //需要及时更新
-        .dout(switch_sram_dout),           // 读出数据
+        .dout(dout),           // 读出数据
         //与video的接口
         .write_data(write_data),   //[TODO]研究SRAM的字节序，注意进行顺序变换
         .write_addr(write_addr),   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
@@ -300,7 +296,6 @@ module vm_manager
     wire [19:0] render_sram_times;
     wire render_sram_wr;
     wire [19:0] render_sram_addr;
-    wire [31:0] render_sram_dout;
     wire [31:0] render_sram_din;
     vm_renderer u_vm_renderer(
         .vm_renderer_ui_clk(ui_clk),
@@ -323,7 +318,24 @@ module vm_manager
         .wr(render_sram_wr),
         .addr(render_sram_addr),
         .din(render_sram_din),
-        .dout(render_sram_dout)
+        .dout(dout)
+    );
+
+    /***************测试 ******************/
+    reg[1:0] test_cmd;
+    reg[29:0] test_addr;
+    reg show_begin;
+    test_load u_test_load(
+        .ui_clk(ui_clk),
+        .ui_rst(ui_rst),
+        // 与SDRAM交互的信号
+        .sdram_cmd(test_cmd),          //命令，  0无效，1读取，2写入
+        .operate_addr(test_addr),      //地址
+        .read_data(sdram_read_data),
+        .cmd_done(cmd_done),
+        //对外接口
+        .show_begin(show_begin),
+        .debug_number(debug_number)
     );
 
     /*****************  SRAM信号仲裁  *****************/
@@ -340,9 +352,6 @@ module vm_manager
                 (manager_stat == RENDER) ? render_sram_wr:
                 'bz;
     assign din = (manager_stat == RENDER) ? render_sram_din : 'bz;
-    assign dout =   (manager_stat == SWITCH) ? switch_sram_dout:
-                    (manager_stat == RENDER) ? render_sram_dout:
-                    'bz;
     
     // 进行batch信号的同步
     reg batch_free1, batch_free2;       // 来自 hdmi_clk
@@ -351,9 +360,15 @@ module vm_manager
         batch_free2 <= batch_free1;
     end
 
-    
+    reg [7:0] f_counter;        // 帧计数器
+    reg test_flag;
     always@(posedge ui_clk)begin
         if(ui_rst)begin
+            //
+            f_counter <= 0; //测试用
+            test_flag <= 0;
+            show_begin <= 0;
+            //
             manager_stat <= IDLE;
             sort_counter <= 2'd0;
             have_sorted <= 1'b0;
@@ -392,7 +407,9 @@ module vm_manager
                 IDLE:begin
                     // 这里时刻监听，当接收到video.sv发送的batch_free信号时，进行交换
                     // [TODO]后续进行检查，看这里应该捕捉上升沿还是持续检测
-                    if(batch_free2)begin
+                    if(test_flag)begin
+                        manager_stat <= TEST_SHOW;
+                    end else if(batch_free2)begin
                         manager_stat <= SWITCH;
                     end
                 end
@@ -424,28 +441,26 @@ module vm_manager
                 end
                 RENDER:begin
                     // 绘制一个图形
-                    // if(render_counter < OBJ_NUM)begin
+                    // [TODO]修改参数
+                    if(render_counter < 2)begin
 
-                    //     draw_begin <= 1'b1;
+                        draw_begin <= 1'b1;
                         
-                    //     sdram_cmd <= render_sdram_cmd;
-                    //     sdram_addr <= render_operate_addr;
-                    //     sdram_write_data <= render_write_data;
-                    //     // [TODO]这里进行数据的初步处理，并给render_param赋值
-                    //     // 31是vpos最大的一个，这里应该从vpos小的图形开始渲染
-                    //     render_param <= in_render_param[ index[32 - OBJ_NUM + render_counter] ];
-                    //     if(~last_draw_end & draw_end)begin
-                    //         render_counter <= render_counter + 1;
-                    //         draw_begin <= 1'b0;
-                    //         manager_stat <= DONE;
-                    //     end
-                    // end else begin
-                    //     manager_stat <= DONE;       //已经绘制完毕，直接进入IDLE状态
-                    // end
-
-
+                        sdram_cmd <= render_sdram_cmd;
+                        sdram_addr <= render_operate_addr;
+                        sdram_write_data <= render_write_data;
+                        // [TODO]这里进行数据的初步处理，并给render_param赋值
+                        // 31是vpos最大的一个，这里应该从vpos小的图形开始渲染
+                        render_param <= in_render_param[ index[32 - OBJ_NUM + render_counter] ];
+                        if(~last_draw_end & draw_end)begin
+                            render_counter <= render_counter + 1;
+                            draw_begin <= 1'b0;
+                            manager_stat <= DONE;
+                        end
+                    end else begin
+                        manager_stat <= DONE;       //已经绘制完毕，直接进入IDLE状态
+                    end
                     // DEBUG : 跳过RENDER，看是否还会花屏。如果是，那么很可能是交换的问题
-                    manager_stat <= DONE;
                 end
                 SWITCH:begin
                     switch_begin <= 1'b1;
@@ -468,11 +483,24 @@ module vm_manager
                         have_sorted <= 0;           //[TODO]检查有没有其它需要清零的变量
                         sort_counter <= 0;
                         render_counter <= 0;
+
+                        ////////////////
+                        if(f_counter == 250)begin
+                            test_flag <= 1;
+                        end else begin
+                            f_counter <= f_counter + 1;
+                        end
+                        
                         vm_flag <= ~vm_flag;      //交换分区
                     end else begin
                         frame_counter <= frame_counter + 1;
                     end
                     manager_stat <= IDLE;
+                end
+                TEST_SHOW : begin
+                    sdram_cmd <= test_cmd;
+                    sdram_addr <= test_addr;
+                    show_begin <= 1;
                 end
             endcase
         end

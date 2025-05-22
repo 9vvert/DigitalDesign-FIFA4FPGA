@@ -228,14 +228,14 @@ set_property -dict {PACKAGE_PIN U18 IOSTANDARD LVCMOS33} [get_ports base_ram_we_
 # set_property -dict {PACKAGE_PIN W11 IOSTANDARD LVCMOS33} [get_ports pmod5_io[7]]
 
 # HDMI TMDS
-# set_property -dict {PACKAGE_PIN C15 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_n[0]}]
-# set_property -dict {PACKAGE_PIN C14 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_p[0]}]
-# set_property -dict {PACKAGE_PIN A14 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_n[1]}]
-# set_property -dict {PACKAGE_PIN A13 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_p[1]}]
-# set_property -dict {PACKAGE_PIN B13 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_n[2]}]
-# set_property -dict {PACKAGE_PIN C13 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_p[2]}]
-# set_property -dict {PACKAGE_PIN A16 IOSTANDARD TMDS_33} [get_ports hdmi_tmds_c_n]
-# set_property -dict {PACKAGE_PIN A15 IOSTANDARD TMDS_33} [get_ports hdmi_tmds_c_p]
+set_property -dict {PACKAGE_PIN C15 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_n[0]}]
+set_property -dict {PACKAGE_PIN C14 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_p[0]}]
+set_property -dict {PACKAGE_PIN A14 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_n[1]}]
+set_property -dict {PACKAGE_PIN A13 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_p[1]}]
+set_property -dict {PACKAGE_PIN B13 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_n[2]}]
+set_property -dict {PACKAGE_PIN C13 IOSTANDARD TMDS_33} [get_ports {hdmi_tmds_p[2]}]
+set_property -dict {PACKAGE_PIN A16 IOSTANDARD TMDS_33} [get_ports hdmi_tmds_c_n]
+set_property -dict {PACKAGE_PIN A15 IOSTANDARD TMDS_33} [get_ports hdmi_tmds_c_p]
 
 # RGMII PHY
 # set_property -dict {PACKAGE_PIN H3 IOSTANDARD LVCMOS33} [get_ports rgmii_rx_clk]

@@ -13,15 +13,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="187896000fs"></ZoomStartTime>
-      <ZoomEndTime time="188146801fs"></ZoomEndTime>
-      <Cursor1Time time="188055000fs"></Cursor1Time>
+      <ZoomStartTime time="2279314333fs"></ZoomStartTime>
+      <ZoomEndTime time="2279567134fs"></ZoomEndTime>
+      <Cursor1Time time="2279525000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="183"></NameColumnWidth>
-      <ValueColumnWidth column_width="91"></ValueColumnWidth>
+      <ValueColumnWidth column_width="81"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="198" />
+   <WVObjectSize size="269" />
    <wave_markers>
       <marker time="7199975000" label="" />
    </wave_markers>
@@ -34,12 +34,12 @@
       <obj_property name="ObjectShortName">fill_batch</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_video/write_data" type="array">
-      <obj_property name="ElementShortName">write_data[63:0]</obj_property>
-      <obj_property name="ObjectShortName">write_data[63:0]</obj_property>
+      <obj_property name="ElementShortName">write_data[31:0]</obj_property>
+      <obj_property name="ObjectShortName">write_data[31:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_video/write_addr" type="array">
-      <obj_property name="ElementShortName">write_addr[13:0]</obj_property>
-      <obj_property name="ObjectShortName">write_addr[13:0]</obj_property>
+      <obj_property name="ElementShortName">write_addr[14:0]</obj_property>
+      <obj_property name="ObjectShortName">write_addr[14:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_video/write_enable" type="logic">
       <obj_property name="ElementShortName">write_enable</obj_property>
@@ -94,8 +94,8 @@
       <obj_property name="ObjectShortName">read_ram_addr[15:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_video/write_ram_addr" type="array">
-      <obj_property name="ElementShortName">write_ram_addr[13:0]</obj_property>
-      <obj_property name="ObjectShortName">write_ram_addr[13:0]</obj_property>
+      <obj_property name="ElementShortName">write_ram_addr[14:0]</obj_property>
+      <obj_property name="ObjectShortName">write_ram_addr[14:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_video/pixel_data" type="array">
       <obj_property name="ElementShortName">pixel_data[15:0]</obj_property>
@@ -412,14 +412,20 @@
    <wvobject fp_name="/vm_manager_tb/u_vm_manager/frame_counter" type="array">
       <obj_property name="ElementShortName">frame_counter[5:0]</obj_property>
       <obj_property name="ObjectShortName">frame_counter[5:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_vm_manager/manager_stat" type="array">
       <obj_property name="ElementShortName">manager_stat[3:0]</obj_property>
       <obj_property name="ObjectShortName">manager_stat[3:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_vm_manager/vm_flag" type="logic">
       <obj_property name="ElementShortName">vm_flag</obj_property>
       <obj_property name="ObjectShortName">vm_flag</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_vm_manager/sort_counter" type="array">
       <obj_property name="ElementShortName">sort_counter[1:0]</obj_property>
@@ -674,8 +680,8 @@
       <obj_property name="ObjectShortName">switch_counter[19:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_switch/switch_stat" type="array">
-      <obj_property name="ElementShortName">switch_stat[2:0]</obj_property>
-      <obj_property name="ObjectShortName">switch_stat[2:0]</obj_property>
+      <obj_property name="ElementShortName">switch_stat[3:0]</obj_property>
+      <obj_property name="ObjectShortName">switch_stat[3:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_switch/switch_end_delay_counter" type="logic">
       <obj_property name="ElementShortName">switch_end_delay_counter</obj_property>
@@ -722,6 +728,306 @@
       <obj_property name="ObjectShortName">PRE_WRITE[3:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_switch/DONE" type="array">
+      <obj_property name="ElementShortName">DONE[3:0]</obj_property>
+      <obj_property name="ObjectShortName">DONE[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/vm_renderer_ui_clk" type="logic">
+      <obj_property name="ElementShortName">vm_renderer_ui_clk</obj_property>
+      <obj_property name="ObjectShortName">vm_renderer_ui_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/ui_rst" type="logic">
+      <obj_property name="ElementShortName">ui_rst</obj_property>
+      <obj_property name="ObjectShortName">ui_rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/vm_flag" type="logic">
+      <obj_property name="ElementShortName">vm_flag</obj_property>
+      <obj_property name="ObjectShortName">vm_flag</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/draw_begin" type="logic">
+      <obj_property name="ElementShortName">draw_begin</obj_property>
+      <obj_property name="ObjectShortName">draw_begin</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/draw_end" type="logic">
+      <obj_property name="ElementShortName">draw_end</obj_property>
+      <obj_property name="ObjectShortName">draw_end</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/render_param" type="array">
+      <obj_property name="ElementShortName">render_param</obj_property>
+      <obj_property name="ObjectShortName">render_param</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/sdram_cmd" type="array">
+      <obj_property name="ElementShortName">sdram_cmd[1:0]</obj_property>
+      <obj_property name="ObjectShortName">sdram_cmd[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/operate_addr" type="array">
+      <obj_property name="ElementShortName">operate_addr[29:0]</obj_property>
+      <obj_property name="ObjectShortName">operate_addr[29:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/write_data" type="array">
+      <obj_property name="ElementShortName">write_data[63:0]</obj_property>
+      <obj_property name="ObjectShortName">write_data[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/read_data" type="array">
+      <obj_property name="ElementShortName">read_data[63:0]</obj_property>
+      <obj_property name="ObjectShortName">read_data[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/cmd_done" type="logic">
+      <obj_property name="ElementShortName">cmd_done</obj_property>
+      <obj_property name="ObjectShortName">cmd_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/sram_io_req" type="logic">
+      <obj_property name="ElementShortName">sram_io_req</obj_property>
+      <obj_property name="ObjectShortName">sram_io_req</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/times" type="array">
+      <obj_property name="ElementShortName">times[19:0]</obj_property>
+      <obj_property name="ObjectShortName">times[19:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/wr" type="logic">
+      <obj_property name="ElementShortName">wr</obj_property>
+      <obj_property name="ObjectShortName">wr</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/addr" type="array">
+      <obj_property name="ElementShortName">addr[19:0]</obj_property>
+      <obj_property name="ObjectShortName">addr[19:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/din" type="array">
+      <obj_property name="ElementShortName">din[31:0]</obj_property>
+      <obj_property name="ObjectShortName">din[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/dout" type="array">
+      <obj_property name="ElementShortName">dout[31:0]</obj_property>
+      <obj_property name="ObjectShortName">dout[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/last_cmd_done" type="logic">
+      <obj_property name="ElementShortName">last_cmd_done</obj_property>
+      <obj_property name="ObjectShortName">last_cmd_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/render_stat" type="array">
+      <obj_property name="ElementShortName">render_stat[3:0]</obj_property>
+      <obj_property name="ObjectShortName">render_stat[3:0]</obj_property>
+      <obj_property name="CustomSignalColor">#F0E68C</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/line_counter" type="array">
+      <obj_property name="ElementShortName">line_counter[5:0]</obj_property>
+      <obj_property name="ObjectShortName">line_counter[5:0]</obj_property>
+      <obj_property name="CustomSignalColor">#F0E68C</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/read_sdram_counter" type="array">
+      <obj_property name="ElementShortName">read_sdram_counter[3:0]</obj_property>
+      <obj_property name="ObjectShortName">read_sdram_counter[3:0]</obj_property>
+      <obj_property name="CustomSignalColor">#F0E68C</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/done_delay_counter" type="array">
+      <obj_property name="ElementShortName">done_delay_counter[1:0]</obj_property>
+      <obj_property name="ObjectShortName">done_delay_counter[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/img_part_addr" type="array">
+      <obj_property name="ElementShortName">img_part_addr[29:0]</obj_property>
+      <obj_property name="ObjectShortName">img_part_addr[29:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/line_buffer" type="array">
+      <obj_property name="ElementShortName">line_buffer[31:0][15:0]</obj_property>
+      <obj_property name="ObjectShortName">line_buffer[31:0][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/hpos" type="array">
+      <obj_property name="ElementShortName">hpos[11:0]</obj_property>
+      <obj_property name="ObjectShortName">hpos[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/vpos" type="array">
+      <obj_property name="ElementShortName">vpos[11:0]</obj_property>
+      <obj_property name="ObjectShortName">vpos[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/direction" type="array">
+      <obj_property name="ElementShortName">direction[2:0]</obj_property>
+      <obj_property name="ObjectShortName">direction[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/angle" type="array">
+      <obj_property name="ElementShortName">angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/render_type" type="array">
+      <obj_property name="ElementShortName">render_type[2:0]</obj_property>
+      <obj_property name="ObjectShortName">render_type[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/stat" type="array">
+      <obj_property name="ElementShortName">stat[3:0]</obj_property>
+      <obj_property name="ObjectShortName">stat[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/result_addr" type="array">
+      <obj_property name="ElementShortName">result_addr[29:0]</obj_property>
+      <obj_property name="ObjectShortName">result_addr[29:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/start_hpos" type="array">
+      <obj_property name="ElementShortName">start_hpos[11:0]</obj_property>
+      <obj_property name="ObjectShortName">start_hpos[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/start_vpos" type="array">
+      <obj_property name="ElementShortName">start_vpos[11:0]</obj_property>
+      <obj_property name="ObjectShortName">start_vpos[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/render_begin" type="logic">
+      <obj_property name="ElementShortName">render_begin</obj_property>
+      <obj_property name="ObjectShortName">render_begin</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/render_end" type="logic">
+      <obj_property name="ElementShortName">render_end</obj_property>
+      <obj_property name="ObjectShortName">render_end</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/last_render_end" type="logic">
+      <obj_property name="ElementShortName">last_render_end</obj_property>
+      <obj_property name="ObjectShortName">last_render_end</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/VM_WIDTH" type="array">
+      <obj_property name="ElementShortName">VM_WIDTH[31:0]</obj_property>
+      <obj_property name="ObjectShortName">VM_WIDTH[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/VM_HEIGHT" type="array">
+      <obj_property name="ElementShortName">VM_HEIGHT[31:0]</obj_property>
+      <obj_property name="ObjectShortName">VM_HEIGHT[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/IDLE" type="array">
+      <obj_property name="ElementShortName">IDLE[3:0]</obj_property>
+      <obj_property name="ObjectShortName">IDLE[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/LOAD_LINE" type="array">
+      <obj_property name="ElementShortName">LOAD_LINE[3:0]</obj_property>
+      <obj_property name="ObjectShortName">LOAD_LINE[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/RENDER_LINE" type="array">
+      <obj_property name="ElementShortName">RENDER_LINE[3:0]</obj_property>
+      <obj_property name="ObjectShortName">RENDER_LINE[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/DONE" type="array">
+      <obj_property name="ElementShortName">DONE[3:0]</obj_property>
+      <obj_property name="ObjectShortName">DONE[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/line_render_ui_clk" type="logic">
+      <obj_property name="ElementShortName">line_render_ui_clk</obj_property>
+      <obj_property name="ObjectShortName">line_render_ui_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/ui_rst" type="logic">
+      <obj_property name="ElementShortName">ui_rst</obj_property>
+      <obj_property name="ObjectShortName">ui_rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/vm_flag" type="logic">
+      <obj_property name="ElementShortName">vm_flag</obj_property>
+      <obj_property name="ObjectShortName">vm_flag</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/render_begin" type="logic">
+      <obj_property name="ElementShortName">render_begin</obj_property>
+      <obj_property name="ObjectShortName">render_begin</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/render_end" type="logic">
+      <obj_property name="ElementShortName">render_end</obj_property>
+      <obj_property name="ObjectShortName">render_end</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/hpos" type="array">
+      <obj_property name="ElementShortName">hpos[11:0]</obj_property>
+      <obj_property name="ObjectShortName">hpos[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/vpos" type="array">
+      <obj_property name="ElementShortName">vpos[11:0]</obj_property>
+      <obj_property name="ObjectShortName">vpos[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/line_buffer" type="array">
+      <obj_property name="ElementShortName">line_buffer[31:0][15:0]</obj_property>
+      <obj_property name="ObjectShortName">line_buffer[31:0][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/sram_io_req" type="logic">
+      <obj_property name="ElementShortName">sram_io_req</obj_property>
+      <obj_property name="ObjectShortName">sram_io_req</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/times" type="array">
+      <obj_property name="ElementShortName">times[19:0]</obj_property>
+      <obj_property name="ObjectShortName">times[19:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/wr" type="logic">
+      <obj_property name="ElementShortName">wr</obj_property>
+      <obj_property name="ObjectShortName">wr</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/addr" type="array">
+      <obj_property name="ElementShortName">addr[19:0]</obj_property>
+      <obj_property name="ObjectShortName">addr[19:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/din" type="array">
+      <obj_property name="ElementShortName">din[31:0]</obj_property>
+      <obj_property name="ObjectShortName">din[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/dout" type="array">
+      <obj_property name="ElementShortName">dout[31:0]</obj_property>
+      <obj_property name="ObjectShortName">dout[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/render_stat" type="array">
+      <obj_property name="ElementShortName">render_stat[3:0]</obj_property>
+      <obj_property name="ObjectShortName">render_stat[3:0]</obj_property>
+      <obj_property name="CustomSignalColor">#008080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/delay_counter" type="logic">
+      <obj_property name="ElementShortName">delay_counter</obj_property>
+      <obj_property name="ObjectShortName">delay_counter</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/tmp_line_buffer" type="array">
+      <obj_property name="ElementShortName">tmp_line_buffer[16:0][31:0]</obj_property>
+      <obj_property name="ObjectShortName">tmp_line_buffer[16:0][31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/special_flag" type="logic">
+      <obj_property name="ElementShortName">special_flag</obj_property>
+      <obj_property name="ObjectShortName">special_flag</obj_property>
+      <obj_property name="CustomSignalColor">#008080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/h_counter" type="array">
+      <obj_property name="ElementShortName">h_counter[4:0]</obj_property>
+      <obj_property name="ObjectShortName">h_counter[4:0]</obj_property>
+      <obj_property name="CustomSignalColor">#008080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/VM_WIDTH" type="array">
+      <obj_property name="ElementShortName">VM_WIDTH[31:0]</obj_property>
+      <obj_property name="ObjectShortName">VM_WIDTH[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/VM_HEIGHT" type="array">
+      <obj_property name="ElementShortName">VM_HEIGHT[31:0]</obj_property>
+      <obj_property name="ObjectShortName">VM_HEIGHT[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/IDLE" type="array">
+      <obj_property name="ElementShortName">IDLE[3:0]</obj_property>
+      <obj_property name="ObjectShortName">IDLE[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/READ1" type="array">
+      <obj_property name="ElementShortName">READ1[3:0]</obj_property>
+      <obj_property name="ObjectShortName">READ1[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/READ2" type="array">
+      <obj_property name="ElementShortName">READ2[3:0]</obj_property>
+      <obj_property name="ObjectShortName">READ2[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/WRITE1" type="array">
+      <obj_property name="ElementShortName">WRITE1[3:0]</obj_property>
+      <obj_property name="ObjectShortName">WRITE1[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/WRITE2" type="array">
+      <obj_property name="ElementShortName">WRITE2[3:0]</obj_property>
+      <obj_property name="ObjectShortName">WRITE2[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/WRITE3" type="array">
+      <obj_property name="ElementShortName">WRITE3[3:0]</obj_property>
+      <obj_property name="ObjectShortName">WRITE3[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/PRE_READ" type="array">
+      <obj_property name="ElementShortName">PRE_READ[3:0]</obj_property>
+      <obj_property name="ObjectShortName">PRE_READ[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/PRE_WRITE" type="array">
+      <obj_property name="ElementShortName">PRE_WRITE[3:0]</obj_property>
+      <obj_property name="ObjectShortName">PRE_WRITE[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_vm_renderer/u_line_render/DONE" type="array">
       <obj_property name="ElementShortName">DONE[3:0]</obj_property>
       <obj_property name="ObjectShortName">DONE[3:0]</obj_property>
    </wvobject>
@@ -780,10 +1086,6 @@
    <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_sram_IO/base_ram_we_n" type="logic">
       <obj_property name="ElementShortName">base_ram_we_n</obj_property>
       <obj_property name="ObjectShortName">base_ram_we_n</obj_property>
-   </wvobject>
-   <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_sram_IO/din_reg" type="array">
-      <obj_property name="ElementShortName">din_reg[31:0]</obj_property>
-      <obj_property name="ObjectShortName">din_reg[31:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/vm_manager_tb/u_vm_manager/u_sram_IO/sram_stat" type="array">
       <obj_property name="ElementShortName">sram_stat[2:0]</obj_property>

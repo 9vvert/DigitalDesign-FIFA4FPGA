@@ -20,41 +20,48 @@ module vm_renderer
     input [63:0] read_data,
     input cmd_done,
     //与SRAM的接口
-    output reg sram_io_req,        //读写请求
-    output reg [19:0] times,       //读写次数
-    output reg wr,                 //是否选择“写”
-    output reg [19:0] addr,
-    output reg [31:0] din,          // 渲染信息
-    input wire [31:0] dout
+    output sram_io_req,        //读写请求
+    output [19:0] times,       //读写次数
+    output wr,                 //是否选择“写”
+    output [19:0] addr,
+    output [31:0] din,          // 渲染信息
+    input [31:0] dout
 );
+    // 总控制
+    reg last_cmd_done;
     reg [3:0] render_stat;  //渲染器状态
-    localparam [3:0] IDLE=0, READ1=1, READ2=2, WRITE1=3, WRITE2=4, WRITE3=5, PRE_READ=6, PRE_WRITE=7,DONE=8;
-    localparam [3:0] IDLE=0, RENDER=1, DONE=2;
+    localparam [3:0] IDLE=0, LOAD_LINE=1, RENDER_LINE=2, DONE=3;
+    reg [5:0] line_counter;         //按照行来渲染
+    reg [3:0] read_sdram_counter;   //每一行64字节需要8次读取
     reg [1:0] done_delay_counter;
-    /***********  渲染引擎   ***********/
-    reg mode;
-    reg render_begin;
-    wire render_end;
-    reg [29:0] vm_start;      // 该显存开始的地址
-    reg [11:0] half_img_width;    //[TODO]一定要注意：这里用半宽
-    reg [11:0] half_img_height;
-    reg [11:0] h_pos;          // 物体在显存中渲染的坐标
-    reg [11:0] v_pos;
-    // mode = 0 时， sprite_addr有效
-    reg [29:0] sprite_addr;    // 图片数据存放的地址（线性存储）
-    // mode = 1 时， 下列有效
-    reg [29:0] vm_background_start;   //背景在显存中另外开辟一个区域，和显存等大
-    reg [11:0] bg_hpos;
-    reg [11:0] bg_vpos;
+    reg [15:0] line_buffer [31:0];   //一整行的像素数据
+    reg [11:0] hpos;
+    reg [11:0] vpos;            // 注意：和start_hpos, start_vpos不同， hpos和vpos是每一行第一个像素的起始地址
 
-    // 辅助：将stat, angle等映射到具体的地址
+    /*************  资源映射器  ***************/
+    //根据render_param，找到在SDRAM中的地址，并且根据类型计算出渲染的起始h_pos和v_pos
+    //[TODO]后续
     logic [2:0] direction;  // 计算出的方向值
     logic [7:0] angle;
+    logic [2:0] render_type;
     logic [3:0] stat;
     logic [29:0] result_addr;
+    logic [11:0] start_hpos;          // 渲染目标左上角的坐标
+    logic [11:0] start_vpos;
+    
     assign angle = render_param.angle;
     assign stat = render_param.stat;
+    assign render_type = render_param.render_type;
     always_comb begin
+        // 根据type，计算出h_pos和y_pos
+        // [TODO]后续需要修改这里的逻辑
+        if(render_type <= 2)begin
+            start_hpos = render_param.hpos-16;
+            start_vpos = render_param.vpos-32;
+        end else begin
+            start_hpos = render_param.hpos;
+            start_vpos = render_param.vpos;
+        end
         // 计算方向值
         if (angle >= 68 || angle <= 4)
             direction = 3'd0;
@@ -76,27 +83,21 @@ module vm_renderer
             direction = 3'd0; // 默认值
         result_addr = ((direction * 100) + (stat * 10)) * 512;
     end
-    sprite_render u_sprite_render(
-        .sprite_render_ui_clk(vm_renderer_ui_clk),
+
+    /***********  渲染引擎   ***********/
+    reg render_begin;
+    wire render_end;
+    reg last_render_end;      //捕捉上升沿
+    // 行渲染器
+    line_render u_line_render(
+        .line_render_ui_clk(vm_renderer_ui_clk),
         .ui_rst(ui_rst),
-        .mode(mode),         // 0:将线性存储的数据渲染到显存的指定坐标；  1：将背景的某一块补全
+        .vm_flag(vm_flag),
         .render_begin(render_begin),
         .render_end(render_end),
-        .vm_start(vm_start),       // 该显存开始的地址
-        .half_img_width(half_img_width),    //[TODO]一定要注意：这里用半宽
-        .half_img_height(half_img_height),
-        .hpos(h_pos),          // 物体在显存中渲染的坐标
-        .vpos(v_pos),
-        .sprite_addr(sprite_addr),    // 图片数据存放的地址（线性存储）
-        .vm_background_start(vm_background_start),   //背景在显存中另外开辟一个区域，和显存等大
-        .bg_hpos(bg_hpos),
-        .bg_vpos(bg_vpos),
-        //控制SDRAM
-        .sdram_cmd(sdram_cmd),          //命令，  0无效，1读取，2写入
-        .operate_addr(operate_addr),      //地址
-        .write_data(write_data),
-        .read_data(read_data),
-        .cmd_done(cmd_done),
+        .hpos(hpos),          // 这一行第一个像素的坐标
+        .vpos(vpos),
+        .line_buffer(line_buffer),
         //控制SRAM
         .sram_io_req(sram_io_req),
         .wr(wr),
@@ -107,59 +108,64 @@ module vm_renderer
     );
 
     /***********  渲染状态机  ***********/
-    reg last_render_end;      //捕捉上升沿
     always @(posedge vm_renderer_ui_clk)begin
         if(ui_rst)begin
             done_delay_counter <= 1'b0;
             render_stat <= IDLE;
             last_render_end <= 1'b0;
+            last_cmd_done <= 0;
         end else begin
             if(render_stat == IDLE)begin
                 if(draw_begin)begin
-                    render_stat <= RENDER;
+                    render_stat <= LOAD_LINE;   // 先读取一行的数据
+                    //[TODO]后续要加上背景取样的逻辑，那么这里的img_part_addr需要进行判断、分类计数
+
+                    // LOAD参数初始化
+                    operate_addr <= result_addr;   // 初始：赋值为图片资源开始的地方
+                    line_counter <= 0;
+                    read_sdram_counter <= 0;
+                    // RENDER参数初始化
+                    hpos <= start_hpos;
+                    vpos <= start_vpos;
                 end
-            end else if(render_stat == RENDER)begin
-                // dst 渲染目标帧的起始位置、渲染坐标、图片大小
-                vm_start <= (vm_flag ? BUF2_START : BUF1_START);
-                half_img_height <= (render_param.height >> 1);
-                half_img_width <= (render_param.width >> 1);
-                h_pos <= render_param.h_pos;
-                v_pos <= render_param.v_pos;
-                //type中，除了填补背景会直接改变sprite_render的mode外，其余的type只是为了公式化寻找目标
-                if(render_param.render_type == 0)begin
-                    mode <= 1'b1;
-                    render_begin <= 1'b1;
-                    // src
-                    vm_background_start <= BG_FRAME_START;
-                    bg_hpos <= render_param.h_pos;
-                    bg_vpos <= render_param.v_pos;
-                    if(~last_render_end & render_end)begin
-                        render_begin <= 1'b0;
-                        draw_end <= 1'b1;
+            end else if(render_stat == LOAD_LINE)begin
+                sdram_cmd <= 1;     // 读取
+                if(~last_cmd_done & cmd_done)begin
+                    //[TODO]这里的顺序是否正确？
+                    line_buffer[4*read_sdram_counter] <= read_data[63:48];
+                    line_buffer[4*read_sdram_counter+1] <= read_data[47:32];
+                    line_buffer[4*read_sdram_counter+2] <= read_data[31:16];
+                    line_buffer[4*read_sdram_counter+3] <= read_data[15:0];
+                    if(read_sdram_counter == 7)begin
+                        //行数据读取完毕
+                        sdram_cmd <= 0;              // 结束数据读取
+                        read_sdram_counter <= 0;
+                        render_stat <= RENDER_LINE;
+                    end else begin
+                        //保持sdram_cmd
+                        operate_addr <=operate_addr + 8;        //不要忘记增加地址，每次8字节
+                        read_sdram_counter <= read_sdram_counter + 1;
+                        //[TODO]这种情况只是用于默认大小图片素材，后续需要添加新的逻辑
+                        render_stat <= LOAD_LINE;
+                    end 
+                end
+            end else if(render_stat == RENDER_LINE)begin
+                render_begin <= 1;
+                if( ~last_render_end & render_end)begin
+                    render_begin <= 0;
+                    if(line_counter == 31)begin
+                        line_counter <= 0;
+                        read_sdram_counter <= 0;
+                        //完成了最后一轮渲染，彻底结束
+                        draw_end <= 1;
                         render_stat <= DONE;
-                    end
-                end else if(render_param.render_type == 1)begin
-                    mode <= 1'b0;
-                    render_begin <= 1'b1;
-                    // src
-                    sprite_addr <= result_addr; // 在always_comb中计算
-
-                    if(~last_render_end & render_end)begin
-                        render_begin <= 1'b0;
-                        draw_end <= 1'b1;
-                        render_stat <= DONE;
-                    end
-                end else if(render_param.render_type == 2)begin
-                    mode <= 1'b0;
-                    render_begin <= 1'b1;
-                    // src
-                    //[TODO]检查这里新增的base_addr是否正确
-                    sprite_addr <= result_addr + 1000*512; // 在always_comb中计算
-
-                    if(~last_render_end & render_end)begin
-                        render_begin <= 1'b0;
-                        draw_end <= 1'b1;
-                        render_stat <= DONE;
+                    end else begin
+                        line_counter <= line_counter + 1;
+                        //开始下一行
+                        operate_addr <= operate_addr + 8;  
+                        read_sdram_counter <= 0;
+                        render_stat <= LOAD_LINE;
+                        vpos <= vpos + 1;   // 行起始地址：不变
                     end
                 end
             end else begin
@@ -173,5 +179,6 @@ module vm_renderer
             end
         end
         last_render_end <= render_end;
+        last_cmd_done <= cmd_done;
     end 
 endmodule
