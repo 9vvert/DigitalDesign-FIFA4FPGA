@@ -8,12 +8,18 @@ module video
 (
     //和显存的交互
     input wire ui_clk,
+    input wire ui_rst,
     //[TODO]对fill_batch进行一层同步
     output reg fill_batch,  //拉高这个信号表示需要填充40KB的缓存数据
+    output reg zero_batch,  //拉高这个信号表示下一个需要填充的数据是“0号batch”
     input [31:0] write_data,    //显存通过这三个信号来写入数据
     input [14:0] write_addr,
     input write_enable,
-    
+    //
+    input dark_begin,
+    input light_begin,
+    output reg dark_end,
+    output reg light_end,
     //和HDMI的交互
     input wire clk,
     output wire hsync,
@@ -62,17 +68,26 @@ module video
     // [TODO]以后测试的时候，如果修改的分辨率，一定要保持单次读取batch是16行或者其倍数
     reg [WIDTH - 1:0] last_hdata; 
     reg [1:0] fill_batch_cnt;
+    reg [1:0] zero_batch_cnt;
     always @(posedge clk) begin
         if ((vdata[3:0]==15) && (vdata < VSIZE) && (last_hdata < HSIZE) && (hdata >= HSIZE)) begin
             ram_flag <= ~ram_flag;      //交换batch
-            fill_batch_cnt <= 2'b10;
+            // 这里的31是乱设的，只是为了测试zero_batch信号触发是否正常
+            if(vdata == (TEST_DEBUG ? 31 : 719))begin
+                zero_batch_cnt <= 2'b10;    //目前是一帧的最后一个batch，
+            end else begin
+                fill_batch_cnt <= 2'b10;
+            end
         end else if (fill_batch_cnt != 0) begin
             fill_batch_cnt <= fill_batch_cnt - 1; 
+        end else if (zero_batch_cnt != 0) begin
+            zero_batch_cnt <= zero_batch_cnt - 1;
         end
         last_hdata <= hdata;
     end
     always @(posedge clk) begin
         fill_batch <= (fill_batch_cnt != 0);    // fill_batch信号会保持多个hdmi_clk周期
+        zero_batch <= (zero_batch_cnt != 0);
     end
 
     // 将clk时钟域下的ram_flag同步到ui_clk下
@@ -81,6 +96,53 @@ module video
         ram_flag_clk1 <= ram_flag;
         ram_flag_clk2 <= ram_flag_clk1;
     end
+
+
+    // 信号同步
+    reg dark1,dark2,light1,light2;
+    always@(posedge clk)begin
+        light1 <= light_begin;
+        light2 <= light1;
+        dark1 <= dark_begin;
+        dark2 <= dark1;
+    end
+
+    reg [3:0] dark_rate;
+    reg [31:0] change_counter;  //渐变计数器
+    // 只要dark_begin信号在，会一直减少亮度；如果dark_begin为低，但是light_begin为1，会逐渐增加亮度；
+    always@(posedge clk)begin
+        if(dark2)begin
+            if(change_counter == (TEST_DEBUG ? 10 : 4000000))begin
+                change_counter <= 0;
+                if(dark_rate < 8)begin
+                    dark_rate <= dark_rate + 1;
+                end else begin
+                    // dark_rate已经足够
+                    dark_end <= 1;
+                end
+            end else begin
+                change_counter <= change_counter + 1;
+            end
+        end else if(light2)begin
+            if(change_counter == (TEST_DEBUG ? 10 : 4000000))begin
+                change_counter <= 0;
+                if(dark_rate > 0)begin
+                    dark_rate <= dark_rate - 1;
+                end else begin
+                    // dark_rate已经足够
+                    light_end <= 1;
+                end
+            end else begin
+                change_counter <= change_counter + 1;
+            end
+        end else begin
+            dark_rate <= 0;
+            change_counter <= 0;
+            dark_end <= 0;          // 能够进入这个阶段，说明外界已经接收到了end信号，并拉低了begin
+            light_end <= 0;
+        end
+    end
+
 
     // 可能是这里导致了时序问题？ 
     assign read_ram_addr = (ram_flag ? READ_SKIP : 0) + HSIZE * next_vdata[3:0] + next_hdata;
@@ -160,9 +222,9 @@ module video
     assign hsync = ((hdata >= HFP) && (hdata < HSP)) ? HSPP : !HSPP;
     assign vsync = ((vdata >= VFP) && (vdata < VSP)) ? VSPP : !VSPP;
     assign data_enable = ((hdata < HSIZE) && (vdata < VSIZE));
-    assign red = data_enable ? ({pixel_data[15:11], pixel_data[15:13]}) : 0;
-    assign green = data_enable ? ({pixel_data[10:5], pixel_data[10:9]}) : 0;
-    assign blue = data_enable ? ({pixel_data[4:0], pixel_data[4:2]}) : 0;
+    assign red = data_enable ? ({pixel_data[15:11], pixel_data[15:13]})>>dark_rate : 0;
+    assign green = data_enable ? ({pixel_data[10:5], pixel_data[10:9]})>>dark_rate : 0;
+    assign blue = data_enable ? ({pixel_data[4:0], pixel_data[4:2]})>>dark_rate : 0;
     // always @(posedge clk)begin
     //     // 只需要根据当前的hdata和vdata，计算出“下一个要获得的像素地址”即可
     //     // 每个ram batch能够提供16行的缓存

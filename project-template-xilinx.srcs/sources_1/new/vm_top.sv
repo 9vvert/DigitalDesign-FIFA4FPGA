@@ -154,6 +154,11 @@ module vm_top(
     wire [14:0] write_addr;
     wire write_enable;
     wire batch_free;                // 请求batch 的信号
+    wire batch_zero;
+    wire dark_begin;
+    wire dark_end;
+    wire light_begin;
+    wire light_end;
     reg [11:0] y_pos[1:0];
     Render_Param_t in_render_param[1:0]; 
 
@@ -210,6 +215,11 @@ module vm_top(
         //和video.sv对接的信号
         .batch_free(batch_free),       // 当RAM进行一轮交换后，会发送这个信号，并持续相当长一段周期，保证能够接受到
                                 // 这个信号仅仅是用来切换到switcher
+        .batch_zero(batch_zero),
+        .light_begin(light_begin),
+        .light_end(light_end),
+        .dark_begin(dark_begin),
+        .dark_end(dark_end),
         //[TODO]检查和switch中的宽度是否一致，以及在空闲时候，switch输出的值是否会干扰正常逻辑
         .write_data(write_data),   //[TODO]研究SRAM的字节序，注意进行顺序变换
         .write_addr(write_addr),   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
@@ -241,6 +251,11 @@ module vm_top(
     (
         .ui_clk(ui_clk),
         .fill_batch(batch_free),
+        .zero_batch(batch_zero),
+        .dark_end(dark_end),
+        .light_end(light_end),
+        .dark_begin(dark_begin),
+        .light_begin(light_begin),
         .write_data(write_data),
         .write_addr(write_addr),
         .write_enable(write_enable),

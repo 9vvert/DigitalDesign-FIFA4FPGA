@@ -33,6 +33,11 @@ module vm_manager_tb;
     end
     wire ui_clk;
     wire batch_free;
+    wire batch_zero;
+    wire dark_begin;
+    wire dark_end;
+    wire light_begin;
+    wire light_end;
     reg [11:0] y_pos[OBJ_NUM-1:0];
     Render_Param_t in_render_param[OBJ_NUM-1:0]; 
     wire [31:0] write_data;
@@ -44,9 +49,14 @@ module vm_manager_tb;
     (
         .ui_clk(ui_clk),
         .fill_batch(batch_free),
+        .zero_batch(batch_zero),
         .write_data(write_data),            // 接受RAM控制信息
         .write_addr(write_addr),
         .write_enable(write_enable),
+        .dark_begin(dark_begin),
+        .dark_end(dark_end),
+        .light_begin(light_begin),
+        .light_end(light_end),
         .clk(hdmi_clk)
     );
     vm_manager u_vm_manager(
@@ -56,8 +66,13 @@ module vm_manager_tb;
         .write_data(write_data),            // 输出RAM控制信息
         .write_addr(write_addr),
         .write_enable(write_enable),
+        .dark_begin(dark_begin),
+        .dark_end(dark_end),
+        .light_begin(light_begin),
+        .light_end(light_end),
         .y_pos(y_pos),
         .batch_free(batch_free),
+        .batch_zero(batch_zero),
         .in_render_param(in_render_param)
     );
     

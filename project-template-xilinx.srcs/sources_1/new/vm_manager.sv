@@ -61,6 +61,11 @@ module vm_manager
     //和video.sv对接的信号
     input batch_free,       // 当RAM进行一轮交换后，会发送这个信号，并持续相当长一段周期，保证能够接受到
                             // 这个信号仅仅是用来切换到switcher
+    input batch_zero,       // 特殊标志，外部保证batch_zero和batch_free不会同时出现
+    output reg dark_begin,
+    output reg light_begin,
+    input light_end,
+    input dark_end,
     //[TODO]检查和switch中的宽度是否一致，以及在空闲时候，switch输出的值是否会干扰正常逻辑
     output [31:0] write_data,   //[TODO]研究SRAM的字节序，注意进行顺序变换
     output [14:0] write_addr,   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
@@ -201,12 +206,15 @@ module vm_manager
     // [change]
     localparam TURN = TEST_DEBUG ? 9 : 45;   //每一帧进行45次交换
     reg [5:0] frame_counter; //和TURN一起使用
-    localparam [3:0] START = 0, INIT = 1, RENDER = 3, SWITCH = 4, IDLE = 5, SORT=6, DONE=7, FINISH=8, TEST_SHOW=9;
+    localparam [3:0] START = 0, INIT = 1, RENDER = 3, SWITCH = 4, IDLE = 5, SORT=6, DONE=7, FINISH=8,
+        TEST_SHOW=9, SWITCH_BG=10, SWITCH_BG_DELAY=11;
     reg [3:0] manager_stat;  
     reg vm_flag;           //用于表示分区状态
     reg [1:0] sort_counter;      // 排序计数器，在第一个周期赋值
     reg have_sorted;      // 是否已经完成排序; 每次交换显存后，开始新的一帧，就需要进行重置
     reg [4:0] render_counter;     // 当前渲染了几个图形
+    reg switch_bg_flag;
+    reg new_frame;          // 用于batch同步。当该信号为高的时候，下一次下一次必须接受
 
     assign out_ui_clk = ui_clk;
 
@@ -321,55 +329,102 @@ module vm_manager
         .dout(dout)
     );
 
-    /***************测试 ******************/
-    reg[1:0] test_cmd;
-    reg[29:0] test_addr;
-    reg show_begin;
-    test_load u_test_load(
-        .ui_clk(ui_clk),
+
+    /*************  背景切换器  **************/
+    reg switch_bg_begin;
+    reg [5:0] switch_bg_index;
+    wire switch_bg_end;
+    reg last_switch_bg_end;
+    reg copy_done;          // 这个信号由亮度由亮度控制器监测，当为1的时候，开始进入LIGHT模式
+    reg [1:0] bg_delay_counter;     // 延时释放copy_done，否则过快进入IDLE会导致进入新一次COPY
+    //sdram
+    wire [1:0] bg_sdram_cmd;
+    wire [29:0] bg_sdram_addr;
+    //sram
+    wire bg_sram_io_req;
+    wire [19:0] bg_sram_times;
+    wire bg_sram_wr;
+    wire [19:0] bg_sram_addr;
+    wire [31:0] bg_sram_din;
+    switch_bg u_switch_bg(
+        .switch_bg_ui_clk(ui_clk),
         .ui_rst(ui_rst),
+        // 和game controller交互
+        .switch_begin(switch_bg_begin),
+        .bg_index(switch_bg_index),       // 使用的场景编号，应该也有一个映射
+        .switch_end(switch_bg_end),
         // 与SDRAM交互的信号
-        .sdram_cmd(test_cmd),          //命令，  0无效，1读取，2写入
-        .operate_addr(test_addr),      //地址
+        .sdram_cmd(bg_sdram_cmd),          //命令，  0无效，1读取，2写入
+        .operate_addr(bg_sdram_addr),      //地址
         .read_data(sdram_read_data),
         .cmd_done(cmd_done),
-        //对外接口
-        .show_begin(show_begin),
-        .debug_number(debug_number)
+        //与SRAM的接口
+        .sram_io_req(bg_sram_io_req),
+        .times(bg_sram_times),
+        .wr(bg_sram_wr),
+        .addr(bg_sram_addr),
+        .din(bg_sram_din)
     );
+
+    // /***************测试 ******************/
+    // reg[1:0] test_cmd;
+    // reg[29:0] test_addr;
+    // reg show_begin;
+    // test_load u_test_load(
+    //     .ui_clk(ui_clk),
+    //     .ui_rst(ui_rst),
+    //     // 与SDRAM交互的信号
+    //     .sdram_cmd(test_cmd),          //命令，  0无效，1读取，2写入
+    //     .operate_addr(test_addr),      //地址
+    //     .read_data(sdram_read_data),
+    //     .cmd_done(cmd_done),
+    //     //对外接口
+    //     .show_begin(show_begin),
+    //     .debug_number(debug_number)
+    // );
 
     /*****************  SRAM信号仲裁  *****************/
     assign sram_io_req= (manager_stat == SWITCH) ? switch_sram_io_req:
                         (manager_stat == RENDER) ? render_sram_io_req:
+                        (manager_stat == SWITCH_BG) ? bg_sram_io_req:
                         'bz;
     assign times =  (manager_stat == SWITCH) ? switch_sram_times:
                     (manager_stat == RENDER) ? render_sram_times:
+                    (manager_stat == SWITCH_BG) ? bg_sram_times:
                     'bz;
     assign addr =   (manager_stat == SWITCH) ? switch_sram_addr:
                     (manager_stat == RENDER) ? render_sram_addr:
+                    (manager_stat == SWITCH_BG) ? bg_sram_addr:
                     'bz;
     assign wr = (manager_stat == SWITCH) ? switch_sram_wr:
                 (manager_stat == RENDER) ? render_sram_wr:
+                (manager_stat == SWITCH_BG) ? bg_sram_wr:
                 'bz;
-    assign din = (manager_stat == RENDER) ? render_sram_din : 'bz;
+    assign din = (manager_stat == RENDER) ? render_sram_din : 
+                (manager_stat == SWITCH_BG) ? bg_sram_din :
+                'bz;
     
     // 进行batch信号的同步
     reg batch_free1, batch_free2;       // 来自 hdmi_clk
+    reg batch_zero1, batch_zero2;
     always @(posedge ui_clk)begin
         batch_free1 <= batch_free;
         batch_free2 <= batch_free1;
+        batch_zero1 <= batch_zero;
+        batch_zero2 <= batch_zero1;
     end
 
-    reg [7:0] f_counter;        // 帧计数器
-    reg test_flag;
+    // reg [7:0] f_counter;        // 帧计数器
+    // reg test_flag;
     always@(posedge ui_clk)begin
         if(ui_rst)begin
             //
-            f_counter <= 0; //测试用
-            test_flag <= 0;
-            show_begin <= 0;
+            // f_counter <= 0; //测试用
+            // test_flag <= 0;
+            // show_begin <= 0;
             //
-            manager_stat <= IDLE;
+            new_frame <= 1;             // 每次重新启动的时候，都需要设置new_fram = 1来实现同步
+            manager_stat <= START;
             sort_counter <= 2'd0;
             have_sorted <= 1'b0;
             frame_counter <= 6'd0;
@@ -381,6 +436,9 @@ module vm_manager
             index[30] <= 5'd1;
             //
             switch_begin <= 1'b0;
+            // bg
+            copy_done <= 0;
+            bg_delay_counter <= 0;
 
         end else begin
             case(manager_stat)
@@ -390,6 +448,7 @@ module vm_manager
                     end
                 end
                 INIT:begin
+                    init_start <= 1;
                     sd_read_start <= init_sd_read_start;
                     sd_addr <= init_curr_sd_addr;
                     sdram_cmd <= init_sdram_cmd;
@@ -407,10 +466,27 @@ module vm_manager
                 IDLE:begin
                     // 这里时刻监听，当接收到video.sv发送的batch_free信号时，进行交换
                     // [TODO]后续进行检查，看这里应该捕捉上升沿还是持续检测
-                    if(test_flag)begin
-                        manager_stat <= TEST_SHOW;
-                    end else if(batch_free2)begin
-                        manager_stat <= SWITCH;
+                    if(switch_bg_flag)begin
+                        //当switch_bg_flag为1的时候，IDLE状态不再开启新的帧，而是进入复制状态
+                        manager_stat <= SWITCH_BG;
+                        new_frame <= 1;     // 下次对接的时候，需要重新同步
+                    end else begin
+                        if(new_frame)begin                  // 重新连接，因此需要一次同步，仅仅接受batch_zero信号
+                            if(batch_zero2)begin
+                                new_frame <= 0;         // 关闭new_fram信号
+                                //[TODO]重置一些变量
+                                have_sorted <= 0;
+                                sort_counter <= 0;
+                                frame_counter <= 0;
+                                vm_flag <= 0;
+                                render_counter <= 0;
+                                manager_stat <= SWITCH;
+                            end
+                        end else begin
+                            if(batch_free2 | batch_zero2)begin  // 接受两者中的任意一个信号
+                                manager_stat <= SWITCH;
+                            end
+                        end
                     end
                 end
                 SORT:begin
@@ -484,12 +560,12 @@ module vm_manager
                         sort_counter <= 0;
                         render_counter <= 0;
 
-                        ////////////////
-                        if(f_counter == 250)begin
-                            test_flag <= 1;
-                        end else begin
-                            f_counter <= f_counter + 1;
-                        end
+                        // ////////////////
+                        // if(f_counter == 250)begin
+                        //     test_flag <= 1;
+                        // end else begin
+                        //     f_counter <= f_counter + 1;
+                        // end
                         
                         vm_flag <= ~vm_flag;      //交换分区
                     end else begin
@@ -497,15 +573,80 @@ module vm_manager
                     end
                     manager_stat <= IDLE;
                 end
-                TEST_SHOW : begin
-                    sdram_cmd <= test_cmd;
-                    sdram_addr <= test_addr;
-                    show_begin <= 1;
+                SWITCH_BG: begin
+                    sdram_cmd <= bg_sdram_cmd;
+                    sdram_addr <= bg_sdram_addr;
+                    switch_bg_index <= 0;   //[TODO]后续这里对接具体的数据
+                    switch_bg_begin <= 1;
+                    if(~last_switch_bg_end & switch_bg_end)begin
+                        copy_done <= 1;
+                        switch_bg_begin <= 0;
+                        manager_stat <= SWITCH_BG_DELAY;
+                    end
+                end
+                SWITCH_BG_DELAY:begin
+                    if(bg_delay_counter <= 2)begin
+                        bg_delay_counter <= bg_delay_counter + 1;
+                    end else begin
+                        bg_delay_counter <= 0;
+                        copy_done <= 0;
+                        manager_stat <= IDLE;
+                    end
                 end
             endcase
         end
         last_sort_done <= sort_done;
         last_draw_end <= draw_end;
         last_switch_end <= switch_end;
+        last_switch_bg_end <= switch_bg_end;
+    end
+
+    
+    /********  场景亮度控制器  *********/
+    localparam [2:0] LIGHT_WAIT=0, LIGHT=1, DARK=2, DARK_WAIT=3;
+    reg [2:0] lc_stat;
+    reg game_bg_change;        // 当为高电平的时候，切换背景
+    reg dark_end1,dark_end2,light_end1,light_end2;
+    always@(posedge ui_clk)begin
+        //信号同步
+        dark_end1 <= dark_end;
+        dark_end2 <= dark_end1;
+        light_end1 <= light_end;
+        light_end2 <= light_end1;
+        //[TODO]后续这里应该同步game_clk的信号
+        if(ui_rst)begin
+            lc_stat <= LIGHT_WAIT;
+            game_bg_change <= 1;
+            switch_bg_flag <= 0;
+        end else begin
+            if(lc_stat == LIGHT_WAIT)begin
+                //[TODO]后续需要将这个信号进行同步
+                if(game_bg_change)begin
+                    game_bg_change <= 0;        // 刚开始的时候切换背景
+                    lc_stat <= DARK;
+                end
+            end else if(lc_stat == LIGHT)begin
+                light_begin <= 1;
+                if(light_end2)begin
+                    //亮度已经恢复正常
+                    light_begin <= 0;
+                    lc_stat <= LIGHT_WAIT;
+                end
+            end else if(lc_stat == DARK)begin  // DARK
+                dark_begin <= 1;
+                if(dark_end2)begin
+                    //等屏幕完全变暗后
+                    switch_bg_flag <= 1;
+                    lc_stat <= DARK_WAIT;
+                end
+            end else begin
+                if(copy_done)begin
+                    game_bg_change <= 0;
+                    switch_bg_flag <= 0;    // 在下一次IDLE到来之前，及时将switch_bg_flag置为0，让其恢复正常
+                    dark_begin <= 0;        // 必须及时将dark_begin拉低，否则会一直覆盖light_begin信号
+                    lc_stat <= LIGHT;
+                end
+            end
+        end
     end
 endmodule

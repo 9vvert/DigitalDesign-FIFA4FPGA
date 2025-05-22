@@ -49,7 +49,6 @@ module fake_sd (
         else
             read_start_d <= read_start;
     end
-    wire read_start_posedge = read_start & ~read_start_d;
 
     // 状态机转换
     always @(posedge clk_sd or posedge rst) begin
@@ -58,11 +57,11 @@ module fake_sd (
         else
             state <= next_state;
     end
-
+    
     always @(*) begin
         next_state = state;
         case (state)
-            S_IDLE:   if (read_start_posedge) next_state = S_WAIT;
+            S_IDLE:   if (read_start) next_state = S_WAIT;
             S_WAIT:   if (wait_cnt == 4'd9)   next_state = S_WRITE;
             S_WRITE:                         next_state = S_DONE;
             S_DONE:                          next_state = S_IDLE;

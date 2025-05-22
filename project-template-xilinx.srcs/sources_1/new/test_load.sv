@@ -29,7 +29,7 @@ module test_load(
             debug_number[23:16] <= file_offset[7:0];
             if(show_stat == 0)begin
                 sdram_cmd <= 2'd1;
-                operate_addr <= 30'd(file*5120 + file_offset);
+                operate_addr <= file*5120 + file_offset;
                 if( ~last_cmd_done & cmd_done)begin
                     sdram_cmd <= 2'd0;
                     show_data <= read_data;
