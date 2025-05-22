@@ -69,6 +69,7 @@ module switch_bg
                 //初步估计拷贝时间：60ms
             end else if(bg_stat == REQ)begin
                 //向SDRAM请求数据，每次8字节，一共32次
+                sdram_cmd <= 2'd1;
                 
             end else if(bg_stat == COPY)begin
                 //
