@@ -20,5 +20,29 @@ package type_declare;
     parameter TEST_VMAX  = 154;    // 总场高: VSP + 4
     parameter TEST_HSPP  = 1;
     parameter TEST_VSPP  = 1;
+
+
+    //球员信息
+    typedef struct packed {
+        logic [15:0] master_x;
+        logic [15:0] master_y;
+        logic [15:0] master_height;
+        logic [7:0] master_angle;
+        logic [15:0] master_radius;
+    } ConstrainedInit;
+
+    typedef struct packed {
+        logic [7:0] init_speed;
+        logic [7:0] init_angle;
+        logic [7:0] init_vertical_speed;
+        logic init_vertical_signal;
+    } FreeInit;
+    
+    typedef struct packed {
+        logic [15:0] sx;
+        logic [15:0] sy;
+        logic [7:0] angle;  
+        logic [7:0] speed;
+    } PlayerInfo;
 endpackage
 

@@ -3,14 +3,14 @@
 // 每处理完一次发送，向外界发送一个信号，将控制权转交给render
 // 累计一定次数后会耗尽，然后上层的vm_manager会交换这两块显存
 module vm_switch
-// SRAM每次可以读取4字节，因此发送40KB的数据需要10240轮
-#(parameter SWAP_TIME = TEST_DEBUG ? 2048 : 10240, BATCH_SKIP = TEST_DEBUG ? 2048: 10240 )
+// SRAM每次可以读取4字节，因此发送20KB的数据需要5120轮
+#(parameter SWAP_TIME = TEST_DEBUG ? 2048 : 7680, BATCH_SKIP = TEST_DEBUG ? 2048: 7680 )
 (
     output reg[31:0] debug_number,
     input vm_switch_ui_clk,
     input ui_rst,
     //和上层的接口
-    input [5:0] frame_counter,  
+    input [6:0] frame_counter,  
     input vm_flag,           //负责交换分区; 0代表用BUF2，1代表用BUF1
     input switch_begin,             // 开始新一轮的交换（上层的vm_manager.sv需要严格控制交换次数）
     output reg switch_end,         //本轮的batch交换完成

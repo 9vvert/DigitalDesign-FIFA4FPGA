@@ -203,8 +203,8 @@ module vm_manager
 
     /*************   manager FSM  **************/
     // [change]
-    localparam TURN = TEST_DEBUG ? 9 : 45;   //每一帧进行45次交换
-    reg [5:0] frame_counter; //和TURN一起使用
+    localparam TURN = TEST_DEBUG ? 9 : 60;   //每一帧进行90次交换，这样能够绘画的图形会翻倍
+    reg [6:0] frame_counter; //和TURN一起使用
     localparam [3:0] START = 0, INIT = 1, RENDER = 3, SWITCH = 4, IDLE = 5, SORT=6, DONE=7, FINISH=8,
         TEST_SHOW=9, SWITCH_BG=10, SWITCH_BG_DELAY=11;
     reg [3:0] manager_stat;  
@@ -426,7 +426,7 @@ module vm_manager
             manager_stat <= START;
             sort_counter <= 2'd0;
             have_sorted <= 1'b0;
-            frame_counter <= 6'd0;
+            frame_counter <= 7'd0;
             vm_flag <= 1'b0;
             render_counter <= 0;
             //vm_init
@@ -444,6 +444,7 @@ module vm_manager
                 START:begin
                     if(sdram_init_calib_complete)begin
                         manager_stat <= INIT;
+                        // manager_stat <= IDLE;
                     end
                 end
                 INIT:begin
@@ -554,7 +555,7 @@ module vm_manager
                 DONE:begin
                     // DONE代表一个周期
                     if(frame_counter == TURN - 1)begin
-                        frame_counter <= 6'd0;      // 这会影响vm_switch中的地址计算 [TODO]检查
+                        frame_counter <= 7'd0;      // 这会影响vm_switch中的地址计算 [TODO]检查
                         have_sorted <= 0;           //[TODO]检查有没有其它需要清零的变量
                         sort_counter <= 0;
                         render_counter <= 0;

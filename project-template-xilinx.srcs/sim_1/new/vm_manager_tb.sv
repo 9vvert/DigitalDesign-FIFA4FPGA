@@ -44,8 +44,7 @@ module vm_manager_tb;
     wire [14:0] write_addr;
     wire write_enable;
 
-    video #(TEST_WIDTH, TEST_HSIZE, TEST_HFP, TEST_HSP, TEST_HMAX, TEST_VSIZE, TEST_VFP, TEST_VFP, TEST_VMAX, TEST_HSPP, TEST_VSPP)
-    u_video
+    video u_video
     (
         .ui_clk(ui_clk),
         .fill_batch(batch_free),

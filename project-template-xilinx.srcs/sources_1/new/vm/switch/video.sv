@@ -62,18 +62,41 @@ module video
         vdata = 'b0;
     end
 
-
-    // 交换batch，使用显存时钟的逻辑
-    // 每16行进行一次交换
-    // [TODO]以后测试的时候，如果修改的分辨率，一定要保持单次读取batch是16行或者其倍数
-    reg [WIDTH - 1:0] last_hdata; 
+    //能否被12整除
+    logic next_flag;            // next_data是否被12整除
+    logic [2:0] odd_counter;
+    logic [2:0] even_counter;   
+    always_comb begin
+        odd_counter = next_vdata[1] + next_vdata[3] + next_vdata[5] + next_vdata[7] + next_vdata[9] + next_vdata[11];
+        even_counter = next_vdata[0] + next_vdata[2] + next_vdata[4] + next_vdata[6] + next_vdata[8] + next_vdata[10];
+        if(next_vdata[1:0] == 0)begin       // 首先必须能被4整除
+            // 奇数和偶数位上的1个数之差必须是3的倍数，那么只剩下x-x, 3-0, 0-3的情况
+            if( (odd_counter==even_counter) || (odd_counter+3==even_counter) || (odd_counter==even_counter+3))begin
+                next_flag = 1;
+            end else begin
+                next_flag = 0;
+            end
+        end else begin
+            next_flag = 0;
+        end
+    end
+    reg [3:0] next_vdata_mod_12;     // 同时计算出行数mod12
+    reg [3:0] last_next_vdata_mod12;
+    reg [11:0]last_next_vdata;    // 预测vdata的旧值
     reg [1:0] fill_batch_cnt;
     reg [1:0] zero_batch_cnt;
-    always @(posedge clk) begin
-        if ((vdata[3:0]==15) && (vdata < VSIZE) && (last_hdata < HSIZE) && (hdata >= HSIZE)) begin
-            ram_flag <= ~ram_flag;      //交换batch
-            // 这里的31是乱设的，只是为了测试zero_batch信号触发是否正常
-            if(vdata == (TEST_DEBUG ? 31 : 719))begin
+    always@(posedge clk)begin
+        if(next_flag)begin
+            next_vdata_mod_12 <= 0;      // next_vdata被12整除，那么将余数记为0
+        end else begin
+            if(next_vdata != last_next_vdata)begin
+                next_vdata_mod_12 <= next_vdata_mod_12 + 1;
+            end
+        end
+        // 管理 ram_flag
+        if(last_next_vdata_mod12 == 11 && next_vdata_mod_12 == 0)begin
+            ram_flag <= ~ram_flag;
+            if(vdata == (TEST_DEBUG ? 31 : 707))begin
                 zero_batch_cnt <= 2'b10;    //目前是一帧的最后一个batch，
             end else begin
                 fill_batch_cnt <= 2'b10;
@@ -83,8 +106,10 @@ module video
         end else if (zero_batch_cnt != 0) begin
             zero_batch_cnt <= zero_batch_cnt - 1;
         end
-        last_hdata <= hdata;
+        last_next_vdata <= next_vdata;
+        last_next_vdata_mod12 <= next_vdata_mod_12;
     end
+
     always @(posedge clk) begin
         fill_batch <= (fill_batch_cnt != 0);    // fill_batch信号会保持多个hdmi_clk周期
         zero_batch <= (zero_batch_cnt != 0);
@@ -145,7 +170,7 @@ module video
 
 
     // 可能是这里导致了时序问题？ 
-    assign read_ram_addr = (ram_flag ? READ_SKIP : 0) + HSIZE * next_vdata[3:0] + next_hdata;
+    assign read_ram_addr = (ram_flag ? READ_SKIP : 0) + HSIZE * next_vdata_mod_12 + next_hdata;
     assign write_ram_addr = (ram_flag_clk2 ? 0 : WRITE_SKIP) + write_addr;       // 在输入的基础上增加一层基地址变换
     //[TODO]这里的大小端还需要后续测试
     // 初始的水平、竖直计数器
@@ -189,9 +214,10 @@ module video
     //     end
     // end
 
-
+    
+    // 考虑到时间差，使用next_vdata代替v_data作为计算，这样每一行获得的vdata_mod_12都是正确的
     always_comb begin
-        // --- 1. 计算下一个像素坐标 ---
+        // --- 1. 计算下下一个像素坐标 ---
         if (hdata < HSIZE - 2) begin
             next_hdata = hdata + 2;
             if(vdata < VSIZE)begin
