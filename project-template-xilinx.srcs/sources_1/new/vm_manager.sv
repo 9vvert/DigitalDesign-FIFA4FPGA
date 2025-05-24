@@ -73,29 +73,6 @@ module vm_manager
     output out_ui_clk
 );
 
-
-    /*************   SD卡    *************/
-    reg sd_read_start;
-    reg sd_read_end;
-    reg [31:0] sd_addr;
-    reg [7:0] sd_buffer[511:0];
-    sd_IO u_sd_IO(
-        .clk_100m(clk_100m),
-        .rst(~clk_locked),
-        // SD 卡（SPI 模式）
-        .sd_sclk(sd_sclk),     // SPI 时钟
-        .sd_mosi(sd_mosi),     // 数据输出
-        .sd_miso(sd_miso),     // 数据输入
-        .sd_cs(sd_cs),       // SPI 片选，低有效
-        .sd_cd(sd_cd),       // 卡插入检测，0 表示有卡插入
-        .sd_wp(sd_wp),       // 写保护检测，0 表示写保护状态
-        //对外接口
-        .read_start(sd_read_start),               // 因为SD卡频率较慢，外界必须等待一段时间才能将raed_start降低
-        .read_end(sd_read_end),                // 加载完成
-        .sd_src_addr(sd_addr),       // SD卡
-        .mem(sd_buffer)
-    );
-
     // /***********  SDRAM  ************/
     reg [2:0] sdram_controller_stat;    //
     wire ui_clk;                 // 由SDRAM输出
@@ -137,6 +114,28 @@ module vm_manager
         .write_data(sdram_write_data),
         .read_data(sdram_read_data),
         .cmd_done(cmd_done)             //这一轮命令结束
+    );
+
+     /*************   SD卡    *************/
+    reg sd_read_start;
+    reg sd_read_end;
+    reg [31:0] sd_addr;
+    reg [7:0] sd_buffer[511:0];
+    sd_IO u_sd_IO(
+        .ui_clk(ui_clk),
+        .rst(~clk_locked),
+        // SD 卡（SPI 模式）
+        .sd_sclk(sd_sclk),     // SPI 时钟
+        .sd_mosi(sd_mosi),     // 数据输出
+        .sd_miso(sd_miso),     // 数据输入
+        .sd_cs(sd_cs),       // SPI 片选，低有效
+        .sd_cd(sd_cd),       // 卡插入检测，0 表示有卡插入
+        .sd_wp(sd_wp),       // 写保护检测，0 表示写保护状态
+        //对外接口
+        .read_start(sd_read_start),               // 因为SD卡频率较慢，外界必须等待一段时间才能将raed_start降低
+        .read_end(sd_read_end),                // 加载完成
+        .sd_src_addr(sd_addr),       // SD卡
+        .mem(sd_buffer)
     );
 
     // /*****************  模拟SD卡和SDRAM   *****************/

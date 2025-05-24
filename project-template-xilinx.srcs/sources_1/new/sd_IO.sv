@@ -3,7 +3,7 @@
 // 该时钟为5MHz，较慢，外部可以使用高频时钟，捕捉其上升沿
 // 和SDRAM不同，SD卡不需要外界等待初始化
 module sd_IO(
-    input clk_100m,
+    input ui_clk,
     input rst,
     // SD 卡（SPI 模式）
     output wire        sd_sclk,     // SPI 时钟
@@ -21,7 +21,7 @@ module sd_IO(
     //产生 SD卡 5MHz时钟
     reg clk_sd_spi;
     reg [3:0] sd_spi_clk_counter;
-    always@(posedge clk_100m)begin
+    always@(posedge ui_clk)begin
         if(rst)begin
             sd_spi_clk_counter <= 4'd0;
             clk_sd_spi <= 1'b0;
