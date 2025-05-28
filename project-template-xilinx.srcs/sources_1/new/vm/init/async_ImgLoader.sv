@@ -107,12 +107,12 @@ module async_ImgLoader(
                     loader_sdram_cmd <= 0;      // 及时撤销命令 
                     delay_show_counter <= 64'd0;
                     loader_curr_sdram_addr <= loader_curr_sdram_addr + 8;
+                    sector_counter <= sector_counter + 1;
                     // 2025/5/15发现的第三个错误，这里不应该用512！是64，否则会死循环
                     if(sector_counter == 63)begin
                         sector_counter <= 0;
                         loader_stat <= JUDGE;   //开启下一个扇区
                     end else begin
-                        sector_counter <= sector_counter + 1;
                         loader_stat <= WAIT;    //在开启下一轮写之前，可能需要延时
                                                     //更新：似乎不需要延时，因为上面检测的是上升沿，而不是单纯的电平高低
                     end
