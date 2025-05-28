@@ -1,3 +1,4 @@
+// 只有持球人才能进行
 module GroundShoot_FSM
 #(parameter SPEED_MAX = 8, CHARG_T = 100)   //实际倍率 * 3
 (
@@ -11,9 +12,9 @@ module GroundShoot_FSM
     output reg [1:0] GroundShoot_FSM_message        //1成功，2失败
 );
 
-`include "angle.sv"
-`include "trangleval.sv"
-`include "line.sv"
+import AngleLib::*;
+import TrianglevalLib::*;
+import LineLib::*;
     /**************************************/
     //DIS_JUDGE: 距离判定。不论何时，一旦距离超过，就会导致状态机结束，返回失败
     //ANG_JUDGE: 角度判定，重点是“人和球连线的角度”和

@@ -28,8 +28,8 @@ module cmd_decoder
     output reg [7:0] action_cmd2
     //[TODO]这里删去了一些等待的逻辑，是否可能导致时序问题？
 );
-    `include "trangleval.sv"
-    `include "line.sv" 
+import TrianglevalLib::*;
+import LineLib::*;
     reg [7:0] ps2_mode;
     reg [7:0] btn_grp1;
     reg [7:0] btn_grp2;
@@ -71,13 +71,11 @@ module cmd_decoder
         .pmod_io4(pmod_io4)  // CS
     );
     // 这里选择和下层的ps2使用同一个时钟，而不是使用更慢的game_clk
-    reg cmd_done_delay;     // 当一轮信号处理完成后，进行1ms的延时，确保其稳定
     always @(posedge ps2_clk) begin
         if(rst) begin
             left_angle <= 8'hFF;
             right_angle <= 8'hFF;
-            action_command <= 8'd0; //IDLE
-            cmd_done_delay <= 8'hFF;
+            action_cmd <= 8'd0; //IDLE
             last_btn_grp2 <= 8'hFF;
             //因为ready是在内部输出的，所以这里不应该再进行初始化
             //清空计数器
@@ -92,78 +90,82 @@ module cmd_decoder
         end else if(ready)begin
             //计数器在电位变化的时候归零
             if(btn_grp2[0] != last_btn_grp2[0])begin
-                L2_counter = 4'd0;
-            end
+                L2_counter <= 4'd0;
+            end else begin
+                if(L2_counter == BUTTON_DELAY)begin
+                    action_cmd[1] <= ~btn_grp2[0];   // L2
+                end else begin
+                    L2_counter <= L2_counter + 1;
+                end
+            end 
             if(btn_grp2[1] != last_btn_grp2[1])begin
-                R2_counter = 4'd0;
-            end
+                R2_counter <= 4'd0;
+            end else begin
+                if(R2_counter == BUTTON_DELAY)begin
+                    action_cmd[3] <= ~btn_grp2[1];   // R2
+                end else begin
+                    R2_counter <= R2_counter + 1;
+                end
+            end 
             if(btn_grp2[2] != last_btn_grp2[2])begin
-                L1_counter = 4'd0;
-            end
+                L1_counter <= 4'd0;
+            end else begin
+                if(L1_counter == BUTTON_DELAY)begin
+                    action_cmd[0] <= ~btn_grp2[2];   // L1
+                end else begin
+                    L1_counter <= L1_counter + 1;
+                end
+            end 
             if(btn_grp2[3] != last_btn_grp2[3])begin
-                R1_counter = 4'd0;
-            end
+                R1_counter <= 4'd0;
+            end else begin
+                if(R1_counter == BUTTON_DELAY)begin
+                    action_cmd[2] <= ~btn_grp2[3];   // R1
+                end else begin
+                    R1_counter <= R1_counter + 1;
+                end
+            end 
             if(btn_grp2[4] != last_btn_grp2[4])begin
-                Y_counter = 4'd0;
-            end
+                Y_counter <= 4'd0;
+            end else begin
+                if(Y_counter == BUTTON_DELAY)begin
+                    action_cmd[7] <= ~btn_grp2[4];   // R2
+                end else begin
+                    Y_counter <= Y_counter + 1;
+                end
+            end 
             if(btn_grp2[5] != last_btn_grp2[5])begin
-                B_counter = 4'd0;
-            end
+                B_counter <= 4'd0;
+            end else begin
+                if(B_counter == BUTTON_DELAY)begin
+                    action_cmd[5] <= ~btn_grp2[5];   // R2
+                end else begin
+                    B_counter <= B_counter + 1;
+                end
+            end 
             if(btn_grp2[6] != last_btn_grp2[6])begin
-                A_counter = 4'd0;
-            end
+                A_counter <= 4'd0;
+            end else begin
+                if(A_counter == BUTTON_DELAY)begin
+                    action_cmd[4] <= ~btn_grp2[6];   // R2
+                end else begin
+                    A_counter <= A_counter + 1;
+                end
+            end 
             if(btn_grp2[7] != last_btn_grp2[7])begin
-                X_counter = 4'd0;
-            end
-            // 当计数器达到阈值后不再计数，得益于阻塞赋值，如果电位发生变化，计数器会先清零再执行下面的过程
-            if(L1_counter == BUTTON_DELAY)begin
-                action_cmd[0] <= btn_grp2[2];   // L1
-            end begin
-                L1_counter = L1_counter + 4'd1;
-            end
-            if(L2_counter == BUTTON_DELAY)begin
-                action_cmd[1] <= btn_grp2[0];   // L2
-            end begin
-                L2_counter = L2_counter + 4'd1;
-            end
-            if(L2_counter == BUTTON_DELAY)begin
-                action_cmd[2] <= btn_grp2[3];   // R1
-            end begin
-                R1_counter = R1_counter + 4'd1;
-            end
-            if(L2_counter == BUTTON_DELAY)begin
-                action_cmd[3] <= btn_grp2[1];   // R2
-            end begin
-                R2_counter = R2_counter + 4'd1;
-            end
-            if(L2_counter == BUTTON_DELAY)begin
-                action_cmd[4] <= btn_grp2[6];   // A
-            end begin
-                A_counter = A_counter + 4'd1;
-            end
-            if(L2_counter == BUTTON_DELAY)begin
-                action_cmd[5] <= btn_grp2[5];   // B
-            end begin
-                B_counter = B_counter + 4'd1;
-            end
-            if(L2_counter == BUTTON_DELAY)begin
-                action_cmd[6] <= btn_grp2[7];   // X
-            end begin
-                X_counter = X_counter + 4'd1;
-            end
-            if(L2_counter == BUTTON_DELAY)begin
-                action_cmd[7] <= btn_grp2[4];   // Y
-            end begin
-                Y_counter = Y_counter + 4'd1;
-            end
-
-            last_btn_grp2 = btn_grp2;
+                X_counter <= 4'd0;
+            end else begin
+                if(X_counter == BUTTON_DELAY)begin
+                    action_cmd[6] <= ~btn_grp2[7];   // R2
+                end else begin
+                    X_counter <= X_counter + 1;
+                end
+            end 
+            last_btn_grp2 <= btn_grp2;
             
 
             // ready的时候能够保证btn_grp等信号稳定,这是通过ready协议方法+ps2完成后主动延时的方法实现的
             //测试：ready=1代表这一个周期的手柄信号可以读取，
-            left_X <= lhandle_X;
-            left_Y <= lhandle_Y;
 
             //radius超过40才认为有效（事实上，如果radius过小，计算出角度的浮动可能也较大）
             if(distance(8'h80, 8'h80, lhandle_X, lhandle_Y) >= 32'd2500)begin

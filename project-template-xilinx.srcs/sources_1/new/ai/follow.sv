@@ -18,9 +18,9 @@ module follow
     output reg W_enable,
     output reg W_signal
 );
-`include "angle.sv"
-`include "trangleval.sv"
-`include "line.sv"
+import AngleLib::*;
+import TrianglevalLib::*;
+import LineLib::*;
     reg [7:0] mid_angle;        //连线的角
     reg [7:0] current_speed_max;
     reg [1:0] rel_pos;

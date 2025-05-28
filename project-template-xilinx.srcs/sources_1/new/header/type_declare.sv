@@ -1,13 +1,12 @@
 package type_declare;
     typedef struct packed {
-        logic [2:0] render_type;       //要渲染的对象类型（填补背景：0 | A方人物：1 | B方人物：2 | 足球：3 | 辅助块：4）
+        logic enable;           //渲染使能
         logic [11:0] hpos;
-        logic [11:0] vpos;     
-        logic [7:0] angle;      //朝向的目标，对于人物和辅助块都有用
-        logic [3:0] stat;       //物体的状态，对于人来说是action，对于足球来说是在几个图层之间进行切换
-        logic [11:0] width;      //对应图片的宽度
-        logic [11:0] height;     //对应图片的高度
-    } Render_Param_t;        
+        logic [11:0] vpos;  
+        logic [15:0] start_sector;  //资源所在的起始扇区(对于背景类型无效)   
+        logic [11:0] render_priority;       //渲染优先级
+        // 大小固定为32*32，不用再增加参数
+    } Render_Param_t;
     parameter TEST_DEBUG = 0;
     parameter TEST_WIDTH = 12;
     parameter TEST_HSIZE = 256;    // 有效显示宽度
@@ -24,11 +23,11 @@ package type_declare;
 
     //球员信息
     typedef struct packed {
-        logic [15:0] master_x;
-        logic [15:0] master_y;
-        logic [15:0] master_height;
+        logic [11:0] master_x;
+        logic [11:0] master_y;
+        logic [11:0] master_height;
         logic [7:0] master_angle;
-        logic [15:0] master_radius;
+        logic [11:0] master_radius;
     } ConstrainedInit;
 
     typedef struct packed {
@@ -39,10 +38,29 @@ package type_declare;
     } FreeInit;
     
     typedef struct packed {
-        logic [15:0] sx;
-        logic [15:0] sy;
+        logic [2:0] index;      //球员编号
+        logic [11:0] x;
+        logic [11:0] y;
+        //[TODO] 暂时不给人物增加跳跃功能
         logic [7:0] angle;  
         logic [7:0] speed;
+        logic [3:0] anim_stat;      // 同一个方向上有5个stat； [TODO]后续渲染的时候要注意对接
     } PlayerInfo;
+    typedef struct packed {
+        logic [11:0] x;
+        logic [11:0] y;
+        logic [11:0] z;
+        logic [7:0] angle;
+        logic [7:0] speed;
+        logic vertical_signal;
+        logic [7:0] vertical_speed;
+        logic [3:0] anim_stat;
+    } BallInfo;
+    typedef struct packed {     //控制加速度和角速度，足以改变人物的运动
+        logic A_enable;
+        logic A_signal;
+        logic W_enable;
+        logic W_signal;
+    } MoveControl;
 endpackage
 

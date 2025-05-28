@@ -70,7 +70,8 @@ module ps2(
         end else if(interval_counter == 32'd0) begin
             interval_counter <= interval_counter + 32'd1;   //缓冲，保持ready的高电平
             //[TODO]这里将延时时间缩小了10倍，如果后续出现不稳定的现象，就再该回去
-        end else if(interval_counter < 32'd100) begin
+            //[TODO]2025.5.27实验：信号变得非常不稳定，于是又改回了1000，立竿见影
+        end else if(interval_counter < 32'd1000) begin
             ready <= 1'b0;      
             interval_counter <= interval_counter + 32'd1;
         end else begin

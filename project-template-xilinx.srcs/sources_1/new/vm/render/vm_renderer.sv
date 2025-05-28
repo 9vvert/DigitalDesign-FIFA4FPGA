@@ -1,6 +1,9 @@
 /***********  vm_renderer  ***********/
 // 根据三元组<上一时刻的位置， 这一时刻的位置， 素材编号>，建立一个渲染任务序列
 // 渲染优先级：所有背景剪切优先级都最高，然后是辅助层（顺序无所谓），最后是按照y值进行排序的物体(外界将x,y,z进行变换，这里仅仅输入渲染的位置)
+
+//[TODO]更新：如果SDRAM的地址没有8字节对齐，访问的数据将会异常！
+//利用一个
 import type_declare::*;   
 
 module vm_renderer
@@ -9,6 +12,8 @@ module vm_renderer
     input vm_renderer_ui_clk,
     input ui_rst,
     //和上层的接口
+    input [5:0] bg_index,   // 背景编号，用于填补背景
+    input render_type,      // 如果为1，是背景填补
     input vm_flag,         //负责交换分区; 0代表用BUF2，1代表用BUF1
     input draw_begin,         
     output reg draw_end,
@@ -30,7 +35,7 @@ module vm_renderer
     // 总控制
     reg last_cmd_done;
     reg [3:0] render_stat;  //渲染器状态
-    localparam [3:0] IDLE=0, LOAD_LINE=1, RENDER_LINE=2, DONE=3;
+    localparam [3:0] IDLE=0, LOAD_LINE=1, RENDER_LINE=2, DONE=3, WAIT=4;
     reg [5:0] line_counter;         //按照行来渲染
     reg [3:0] read_sdram_counter;   //每一行64字节需要8次读取
     reg [1:0] done_delay_counter;
@@ -38,52 +43,7 @@ module vm_renderer
     reg [11:0] hpos;
     reg [11:0] vpos;            // 注意：和start_hpos, start_vpos不同， hpos和vpos是每一行第一个像素的起始地址
 
-    /*************  资源映射器  ***************/
-    //根据render_param，找到在SDRAM中的地址，并且根据类型计算出渲染的起始h_pos和v_pos
-    //[TODO]后续
-    logic [2:0] direction;  // 计算出的方向值
-    logic [7:0] angle;
-    logic [2:0] render_type;
-    logic [3:0] stat;
-    logic [29:0] result_addr;
-    logic [11:0] start_hpos;          // 渲染目标左上角的坐标
-    logic [11:0] start_vpos;
     
-    assign angle = render_param.angle;
-    assign stat = render_param.stat;
-    assign render_type = render_param.render_type;
-    always_comb begin
-        // 根据type，计算出h_pos和y_pos
-        // [TODO]后续需要修改这里的逻辑
-        if(render_type <= 2)begin
-            start_hpos = render_param.hpos-16;
-            start_vpos = render_param.vpos-32;
-        end else begin
-            start_hpos = render_param.hpos;
-            start_vpos = render_param.vpos;
-        end
-        // 计算方向值
-        if (angle >= 68 || angle <= 4)
-            direction = 3'd0;
-        else if (angle >= 5 && angle <= 13)
-            direction = 3'd1;
-        else if (angle >= 14 && angle <= 22)
-            direction = 3'd2;
-        else if (angle >= 23 && angle <= 31)
-            direction = 3'd3;
-        else if (angle >= 32 && angle <= 40)
-            direction = 3'd4;
-        else if (angle >= 41 && angle <= 49)
-            direction = 3'd5;
-        else if (angle >= 50 && angle <= 58)
-            direction = 3'd6;
-        else if (angle >= 59 && angle <= 67)
-            direction = 3'd7;
-        else
-            direction = 3'd0; // 默认值
-        result_addr = ((direction * 100) + (stat * 10)) * 512;
-    end
-
     /***********  渲染引擎   ***********/
     reg render_begin;
     wire render_end;
@@ -114,28 +74,44 @@ module vm_renderer
             render_stat <= IDLE;
             last_render_end <= 1'b0;
             last_cmd_done <= 0;
+            hpos <= 0;
+            vpos <= 0;
         end else begin
             if(render_stat == IDLE)begin
                 if(draw_begin)begin
-                    render_stat <= LOAD_LINE;   // 先读取一行的数据
-                    //[TODO]后续要加上背景取样的逻辑，那么这里的img_part_addr需要进行判断、分类计数
-
-                    // LOAD参数初始化
-                    operate_addr <= result_addr;   // 初始：赋值为图片资源开始的地方
-                    line_counter <= 0;
-                    read_sdram_counter <= 0;
-                    // RENDER参数初始化
-                    hpos <= start_hpos;
-                    vpos <= start_vpos;
+                    // render_type == 1的时候忽略使能，必定渲染
+                    render_stat <= WAIT;        //等待一周期，让render_param稳定
                 end
+            end else if(render_stat == WAIT)begin
+                if(render_param.enable)begin
+                        render_stat <= LOAD_LINE;   // 先读取一行的数据
+                        //[TODO]后续要加上背景取样的逻辑，那么这里的img_part_addr需要进行判断、分类计数
+
+                        // LOAD参数初始化
+                        if(render_type == 0)begin
+                            operate_addr <= render_param.start_sector*512;   // 初始：赋值为图片资源开始的地方
+                        end else begin
+                            //[TODO]这里需要检查
+                            operate_addr <= (10000+5000*bg_index)*512 + 2*(1280*(render_param.vpos-32) + (render_param.hpos-16));
+                        end
+                        line_counter <= 0;
+                        read_sdram_counter <= 0;
+                        // RENDER参数初始化
+                        hpos <= render_param.hpos -16;
+                        vpos <= render_param.vpos -32;
+                    end else begin
+                        // render_enable = 0时，不绘制该图形
+                        render_stat <= DONE;
+                        draw_end <= 1;
+                    end
             end else if(render_stat == LOAD_LINE)begin
                 sdram_cmd <= 1;     // 读取
                 if(~last_cmd_done & cmd_done)begin
                     //[TODO]这里的顺序是否正确？
-                    line_buffer[4*read_sdram_counter] <= read_data[63:48];
-                    line_buffer[4*read_sdram_counter+1] <= read_data[47:32];
-                    line_buffer[4*read_sdram_counter+2] <= read_data[31:16];
-                    line_buffer[4*read_sdram_counter+3] <= read_data[15:0];
+                    line_buffer[4*read_sdram_counter] <= read_data[15:0];
+                    line_buffer[4*read_sdram_counter+1] <= read_data[31:16];
+                    line_buffer[4*read_sdram_counter+2] <= read_data[47:32];
+                    line_buffer[4*read_sdram_counter+3] <= read_data[63:48];
                     if(read_sdram_counter == 7)begin
                         //行数据读取完毕
                         sdram_cmd <= 0;              // 结束数据读取
@@ -162,7 +138,11 @@ module vm_renderer
                     end else begin
                         line_counter <= line_counter + 1;
                         //开始下一行
-                        operate_addr <= operate_addr + 8;  
+                        if(render_type == 0)begin
+                            operate_addr <=operate_addr + 8;        //不要忘记增加地址，每次8字节
+                        end else begin
+                            operate_addr <= operate_addr + 2504;    //[TODO]检查是否正确
+                        end
                         read_sdram_counter <= 0;
                         render_stat <= LOAD_LINE;
                         vpos <= vpos + 1;   // 行起始地址：不变

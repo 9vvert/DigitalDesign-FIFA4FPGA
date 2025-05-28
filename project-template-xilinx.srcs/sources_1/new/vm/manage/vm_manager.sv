@@ -10,12 +10,12 @@ parameter MB = 1024*KB;
 // 这些BUF的开始位置不需要随着分辨率改变
 // parameter BUF1_START = 16*MB, BUF2_START = 18*MB, BG_FRAME_START = 20*MB;
 parameter BG_FRAME_START = 20*MB;
-parameter OBJ_NUM = 2;
+parameter OBJ_NUM = 1;
 import type_declare::*;
 module vm_manager
 // 测试阶段，只绘制2个物体 
 (
-    output reg [31:0]debug_number,
+    output reg [15:0]debug_number,
     input clk_100m,       // 100MHz
     input rst,
     input clk_locked,     // 复位信号
@@ -51,16 +51,13 @@ module vm_manager
     output wire        base_ram_ce_n,   // SRAM 片选，低有效
     output wire        base_ram_oe_n,   // SRAM 读使能，低有效
     output wire        base_ram_we_n,   // SRAM 写使能，低有效
-    //数据，和game.sv对接 [TODO]
-    input [11:0] y_pos[OBJ_NUM-1:0],           //用y值来判断渲染顺序
-    input Render_Param_t in_render_param[OBJ_NUM-1:0],          //具体参数，用来表示渲染的位置，以及采用什么图片素材
-
-
-
-
+    //和中间层sprite_generator对接
+    input Render_Param_t in_render_param[31:0],    // 实际上的OBJ_NUM < 32
+    input [5:0] input_bg_index,
+    input game_bg_change,
+    output reg bg_change_done,
     //和video.sv对接的信号
     input batch_free,       // 当RAM进行一轮交换后，会发送这个信号，并持续相当长一段周期，保证能够接受到
-                            // 这个信号仅仅是用来切换到switcher
     input batch_zero,       // 特殊标志，外部保证batch_zero和batch_free不会同时出现
     output reg dark_begin,
     output reg light_begin,
@@ -70,9 +67,9 @@ module vm_manager
     output [31:0] write_data,   //[TODO]研究SRAM的字节序，注意进行顺序变换
     output [14:0] write_addr,   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
     output write_enable,        //写入显存的使能信号
-    output out_ui_clk
+    output out_ui_clk,
+    output out_ui_rst
 );
-
     // /***********  SDRAM  ************/
     reg [2:0] sdram_controller_stat;    //
     wire ui_clk;                 // 由SDRAM输出
@@ -116,7 +113,7 @@ module vm_manager
         .cmd_done(cmd_done)             //这一轮命令结束
     );
 
-     /*************   SD卡    *************/
+    /*************   SD卡    *************/
     reg sd_read_start;
     reg sd_read_end;
     reg [31:0] sd_addr;
@@ -161,8 +158,6 @@ module vm_manager
     // reg [63:0]sdram_write_data;
     // reg [63:0]sdram_read_data;
     // reg cmd_done;
-    // wire sdram_init_calib_complete; //检测到为高的时候，SDRAM正式进入可用状态
-    // // Fake SDRAM model
     // fake_sdram u_fake_sdram (
     //     .clk_100m(clk_100m),
     //     .ui_clk(ui_clk),
@@ -203,20 +198,22 @@ module vm_manager
 
     /*************   manager FSM  **************/
     // [change]
-    localparam TURN = TEST_DEBUG ? 9 : 60;   //每一帧进行90次交换，这样能够绘画的图形会翻倍
+    localparam TURN = 60;   //每一帧进行90次交换，这样能够绘画的图形会翻倍
     reg [6:0] frame_counter; //和TURN一起使用
-    localparam [3:0] START = 0, INIT = 1, RENDER = 3, SWITCH = 4, IDLE = 5, SORT=6, DONE=7, FINISH=8,
-        TEST_SHOW=9, SWITCH_BG=10, SWITCH_BG_DELAY=11;
+    localparam [3:0] START = 0, INIT = 1, RENDER = 3 ,SWITCH = 4, IDLE = 5, SORT=6, DONE=7, FINISH=8,
+        TEST_SHOW=9, SWITCH_BG=10, SWITCH_BG_DELAY=11, FILL = 12, PRE_SORT=13, PRE_RENDER=14;       
     reg [3:0] manager_stat;  
     reg vm_flag;           //用于表示分区状态
     reg [1:0] sort_counter;      // 排序计数器，在第一个周期赋值
     reg have_sorted;      // 是否已经完成排序; 每次交换显存后，开始新的一帧，就需要进行重置
-    reg [4:0] render_counter;     // 当前渲染了几个图形
+    reg [5:0] render_counter;     // 当前渲染了几个图形
+    reg [5:0] fill_counter;         // 当前填补了几块背景
     reg switch_bg_flag;
     reg new_frame;          // 用于batch同步。当该信号为高的时候，下一次下一次必须接受
+    Render_Param_t render_param_buffer[31:0];           // 保证同一个周期中使用的是一个
 
     assign out_ui_clk = ui_clk;
-
+    assign out_ui_rst = ui_rst;
     /****************  vm_init  ****************/
     reg init_start;
     wire init_end;
@@ -276,23 +273,26 @@ module vm_manager
     /***************   sort ************************/
     reg sort_start;
     reg [11:0] data_in [0:31]; // 输入数据
-    reg [4:0] index [0:31];   // 输出排序后的序号
+    wire [4:0] index [0:31];   // 输出排序后的序号
     wire sort_done;                 // 排序完成信号
     reg last_sort_done;             // 捕捉上升沿
-    // sort u_sort (
-    //     // 大约需要4us完成排序，绰绰有余
-    //     .clk(ui_clk),
-    //     .rst(ui_rst),
-    //     .start(sort_start),
-    //     .data_in(data_in),
-    //     .index(index),
-    //     .done(sort_done)
-    // );
+    sort u_sort (
+        .clk(ui_clk),
+        .rst(ui_rst),
+        .start(sort_start),
+        .data_in(data_in),
+        .index(index),
+        .done(sort_done)
+    );
 
     /****************  vm_renderer  ****************/
     reg draw_begin;
     wire draw_end;
     reg last_draw_end;
+    reg [5:0] tmp_bg;
+    reg render_type;
+    Render_Param_t bg_square [31:0];     //用于存放下一帧需要覆盖的背景
+    Render_Param_t bg_square1 [31:0];
     // sdram， 素材
     wire [1:0] render_sdram_cmd;
     wire [29:0] render_operate_addr;
@@ -305,9 +305,12 @@ module vm_manager
     wire [19:0] render_sram_addr;
     wire [31:0] render_sram_din;
     vm_renderer u_vm_renderer(
+        // .debug_number(debug_number),
         .vm_renderer_ui_clk(ui_clk),
         .ui_rst(ui_rst),
         //和上层的接口
+        .bg_index(tmp_bg),
+        .render_type(render_type),
         .vm_flag(vm_flag),         //负责交换分区; 0代表用BUF2，1代表用BUF1
         .draw_begin(draw_begin),         
         .draw_end(draw_end),
@@ -331,7 +334,7 @@ module vm_manager
 
     /*************  背景切换器  **************/
     reg switch_bg_begin;
-    reg [5:0] switch_bg_index;
+    reg [5:0] switch_bg_index;      //背景切换器使用的内容
     wire switch_bg_end;
     reg last_switch_bg_end;
     reg copy_done;          // 这个信号由亮度由亮度控制器监测，当为1的时候，开始进入LIGHT模式
@@ -385,21 +388,26 @@ module vm_manager
     /*****************  SRAM信号仲裁  *****************/
     assign sram_io_req= (manager_stat == SWITCH) ? switch_sram_io_req:
                         (manager_stat == RENDER) ? render_sram_io_req:
+                        (manager_stat == FILL) ? render_sram_io_req:
                         (manager_stat == SWITCH_BG) ? bg_sram_io_req:
                         'bz;
     assign times =  (manager_stat == SWITCH) ? switch_sram_times:
                     (manager_stat == RENDER) ? render_sram_times:
+                    (manager_stat == FILL) ? render_sram_times:
                     (manager_stat == SWITCH_BG) ? bg_sram_times:
                     'bz;
     assign addr =   (manager_stat == SWITCH) ? switch_sram_addr:
                     (manager_stat == RENDER) ? render_sram_addr:
+                    (manager_stat == FILL) ? render_sram_addr:
                     (manager_stat == SWITCH_BG) ? bg_sram_addr:
                     'bz;
     assign wr = (manager_stat == SWITCH) ? switch_sram_wr:
                 (manager_stat == RENDER) ? render_sram_wr:
+                (manager_stat == FILL) ? render_sram_wr:
                 (manager_stat == SWITCH_BG) ? bg_sram_wr:
                 'bz;
     assign din = (manager_stat == RENDER) ? render_sram_din : 
+                (manager_stat == FILL) ? render_sram_din : 
                 (manager_stat == SWITCH_BG) ? bg_sram_din :
                 'bz;
     
@@ -415,6 +423,7 @@ module vm_manager
 
     // reg [7:0] f_counter;        // 帧计数器
     // reg test_flag;
+
     always@(posedge ui_clk)begin
         if(ui_rst)begin
             //
@@ -429,22 +438,29 @@ module vm_manager
             frame_counter <= 7'd0;
             vm_flag <= 1'b0;
             render_counter <= 0;
+            fill_counter <= 0;
             //vm_init
             init_start <= 1'b0;
-            index[31] <= 5'd0;
-            index[30] <= 5'd1;
             //
             switch_begin <= 1'b0;
             // bg
             copy_done <= 0;
             bg_delay_counter <= 0;
 
+            debug_number <= 0;
+            // bg_square
+            for(integer k=0; k<32; k=k+1)begin
+                bg_square[k].enable <= 0;
+                bg_square[k].hpos <= 128;
+                bg_square[k].vpos <= 128;
+            end
+
         end else begin
             case(manager_stat)
                 START:begin
                     if(sdram_init_calib_complete)begin
-                        manager_stat <= INIT;
                         // manager_stat <= IDLE;
+                        manager_stat <= TEST_DEBUG ? IDLE : INIT;
                     end
                 end
                 INIT:begin
@@ -472,7 +488,8 @@ module vm_manager
                         new_frame <= 1;     // 下次对接的时候，需要重新同步
                     end else begin
                         if(new_frame)begin                  // 重新连接，因此需要一次同步，仅仅接受batch_zero信号
-                            if(batch_zero2)begin
+                            // [TODO]为了方便测试，这里宽松一些
+                            if(batch_zero2 || (TEST_DEBUG&batch_free2))begin
                                 new_frame <= 0;         // 关闭new_fram信号
                                 //[TODO]重置一些变量
                                 have_sorted <= 0;
@@ -489,46 +506,64 @@ module vm_manager
                         end
                     end
                 end
+                PRE_SORT:begin
+                    for(integer k=0; k<32; k=k+1)begin
+                        render_param_buffer[k] <= in_render_param[k];
+                    end
+                    manager_stat <= SORT;
+                end
                 SORT:begin
-                    // if(sort_counter == 2'd0)begin
-                    //     for(int i=0; i<32; i=i+1)begin
-                    //         if(i < OBJ_NUM)begin
-                    //             data_in[i] <= y_pos[i];   // 这里需要进行数据的传递
-                    //         end else begin
-                    //             data_in[i] <= 12'd0;   // 这里需要进行数据的传递
-                    //         end
-                    //     end
-                    //     sort_counter <= sort_counter + 2'd1;
-                    // end else begin
-                    //     sort_start <= 1'b1;
-                    //     //[TODO]这里进行数据的初步处理
-                    //     if(~last_sort_done & sort_done)begin
-                    //         manager_stat <= DONE;
-                    //         have_sorted <= 1'b1;    // 这一帧已经完成排序
-                    //         sort_start <= 1'b0;
-                    //     end
-                    // end
-
-                    //[TODO]测试阶段，暂时不加排序
-                    index[31] <= 5'd0;
-                    index[30] <= 5'd1;
-                    have_sorted <= 1'b1;
-                    manager_stat <= DONE;
+                    if(sort_counter == 2'd0)begin
+                        for(int i=0; i<32; i=i+1)begin
+                            data_in[i] <= render_param_buffer[i].render_priority;
+                        end
+                        sort_counter <= sort_counter + 2'd1;
+                    end else begin
+                        sort_start <= 1'b1;
+                        //[TODO]这里进行数据的初步处理
+                        if(~last_sort_done & sort_done)begin
+                            manager_stat <= DONE;
+                            have_sorted <= 1'b1;    // 这一帧已经完成排序
+                            sort_start <= 1'b0;
+                        end
+                    end
+                end
+                FILL:begin
+                    //[TODO] 重要：外部需要确保enable=0的优先级为0，排在最后面
+                    draw_begin <= 1'b1;
+                    render_type <= 1;   //背景填补
+                    sdram_cmd <= render_sdram_cmd;
+                    sdram_addr <= render_operate_addr;
+                    sdram_write_data <= render_write_data;
+                    //  index[0]的优先级最高
+                    render_param <= bg_square1[ fill_counter ];
+                    
+                    if(~last_draw_end & draw_end)begin
+                        fill_counter <= fill_counter + 1;
+                        draw_begin <= 1'b0;
+                        manager_stat <= DONE;
+                    end
                 end
                 RENDER:begin
                     // 绘制一个图形
                     // [TODO]修改参数
-                    if(render_counter < 2)begin
-
+                    if(render_counter < OBJ_NUM)begin
                         draw_begin <= 1'b1;
-                        
+                        render_type <= 0;   //图形绘制
                         sdram_cmd <= render_sdram_cmd;
                         sdram_addr <= render_operate_addr;
                         sdram_write_data <= render_write_data;
                         // [TODO]这里进行数据的初步处理，并给render_param赋值
                         // 31是vpos最大的一个，这里应该从vpos小的图形开始渲染
-                        render_param <= in_render_param[ index[32 - OBJ_NUM + render_counter] ];
+                        //[TODO] 这里会不会因为继承enable属性导致渲染错误？
+                        render_param <= render_param_buffer[ index[render_counter] ];
+                        debug_number[15:8] <= render_param_buffer[ index[render_counter] ].hpos[7:0];
+                        debug_number[7:0] <= render_param_buffer[ index[render_counter] ].vpos[7:0];
+                        // [TODO]在这里，将当前的渲染参数（只用坐标）赋给bg_square,供下一帧使用
                         if(~last_draw_end & draw_end)begin
+                            //[TODO]不能写在外面，否则会执行多次
+                            bg_square[ render_counter ] <= render_param_buffer[ index[render_counter] ];
+                            bg_square1[ render_counter ] <= bg_square[ render_counter ];
                             render_counter <= render_counter + 1;
                             draw_begin <= 1'b0;
                             manager_stat <= DONE;
@@ -543,10 +578,13 @@ module vm_manager
                     
                     if(~last_switch_end & switch_end)begin
                         switch_begin <= 1'b0;
-                        if(have_sorted)begin        //这一帧排完序了就
-                            manager_stat <= RENDER;
+                        //[TODO]更新：因为要填补的顺序是按照上一帧的index决定的，所以必须先进行fill再sort
+                        if(fill_counter < OBJ_NUM)begin
+                            manager_stat <= FILL;
+                        end else if(!have_sorted)begin
+                            manager_stat <= PRE_SORT;
                         end else begin
-                            manager_stat <= SORT;
+                            manager_stat <= RENDER;
                         end
                     end
 
@@ -559,14 +597,7 @@ module vm_manager
                         have_sorted <= 0;           //[TODO]检查有没有其它需要清零的变量
                         sort_counter <= 0;
                         render_counter <= 0;
-
-                        // ////////////////
-                        // if(f_counter == 250)begin
-                        //     test_flag <= 1;
-                        // end else begin
-                        //     f_counter <= f_counter + 1;
-                        // end
-                        
+                        fill_counter <= 0;
                         vm_flag <= ~vm_flag;      //交换分区
                     end else begin
                         frame_counter <= frame_counter + 1;
@@ -576,7 +607,8 @@ module vm_manager
                 SWITCH_BG: begin
                     sdram_cmd <= bg_sdram_cmd;
                     sdram_addr <= bg_sdram_addr;
-                    switch_bg_index <= 0;   //[TODO]后续这里对接具体的数据
+                    switch_bg_index <= input_bg_index;   //[TODO]后续这里对接具体的数据
+                    tmp_bg <= input_bg_index;        //供vm_renderer使用
                     switch_bg_begin <= 1;
                     if(~last_switch_bg_end & switch_bg_end)begin
                         copy_done <= 1;
@@ -605,7 +637,6 @@ module vm_manager
     /********  场景亮度控制器  *********/
     localparam [2:0] LIGHT_WAIT=0, LIGHT=1, DARK=2, DARK_WAIT=3;
     reg [2:0] lc_stat;
-    reg game_bg_change;        // 当为高电平的时候，切换背景
     reg dark_end1,dark_end2,light_end1,light_end2;
     always@(posedge ui_clk)begin
         //信号同步
@@ -616,13 +647,13 @@ module vm_manager
         //[TODO]后续这里应该同步game_clk的信号
         if(ui_rst)begin
             lc_stat <= LIGHT_WAIT;
-            game_bg_change <= 1;
             switch_bg_flag <= 0;
+            bg_change_done <= 0;        //向外部输出的信号，表示是否完成切换
         end else begin
             if(lc_stat == LIGHT_WAIT)begin
                 //[TODO]后续需要将这个信号进行同步
+                bg_change_done <= 0;    //复位
                 if(game_bg_change)begin
-                    game_bg_change <= 0;        // 刚开始的时候切换背景
                     lc_stat <= DARK;
                 end
             end else if(lc_stat == LIGHT)begin
@@ -641,7 +672,7 @@ module vm_manager
                 end
             end else begin
                 if(copy_done)begin
-                    game_bg_change <= 0;
+                    bg_change_done <= 1;
                     switch_bg_flag <= 0;    // 在下一次IDLE到来之前，及时将switch_bg_flag置为0，让其恢复正常
                     dark_begin <= 0;        // 必须及时将dark_begin拉低，否则会一直覆盖light_begin信号
                     lc_stat <= LIGHT;

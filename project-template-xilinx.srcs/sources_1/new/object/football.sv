@@ -2,6 +2,7 @@
 /*****************  使用约定  ******************/
 //外界在保持being_held为高电平的时候，必须在每回合都传入master_* 这几个参数
 //在为低电平的时候，必须提供init_* 这几个参数的初始值
+import type_declare::BallInfo, type_declare::ConstrainedInit, type_declare::FreeInit;
 module football
 #(parameter INIT_X = 100, INIT_Y = 100, INIT_Z = 0)
 (
@@ -10,40 +11,48 @@ module football
 
     input being_held,       // 是否被持球（0代表自由状态，1代表被持球）
     // 在束缚状态下，其位置仅仅由外部输入决定(输入：master的坐标，球的角度，人和球的距离，计算出球的坐标)
-    input reg [15:0] master_x,
-    input reg [15:0] master_y,
-    input reg [15:0] master_height,     //外界输入的高度，用来直接设置球的高度
-    input reg [7:0] master_angle,
-    input reg [15:0] master_radius,     // radius自带12倍率（和sin, cos中的倍率一致）
+    input ConstrainedInit const_init,
     // 在自由状态下，其运动由物理引擎驱动，但是初始可以赋予一个初速度，并自由决定方向（射门、传球过程）
-    input [7:0] init_angle,
-    input [7:0] init_speed,
-    input [7:0] init_vertical_speed,
-    input init_vertical_signal,
+    input FreeInit free_init,
     // 最终的输出
-    output reg [15:0] pos_x,
-    output reg [15:0] pos_y,
-    output reg [15:0] pos_z,
-
-    output reg [7:0] anim_stat
+    output BallInfo ball_info
+    
 );
-`include "trangleval.sv"
+    reg [11:0] pos_x;
+    reg [11:0] pos_y;
+    reg [11:0] pos_z;
+    reg [7:0] speed;
+    reg [7:0] angle;
+    reg [7:0] vertical_speed;
+    reg vertical_signal;
+
+    always_comb begin
+        ball_info.anim_stat = 1;
+        ball_info.x = pos_x;
+        ball_info.y = pos_y;
+        ball_info.z = pos_z;
+        ball_info.speed = speed;
+        ball_info.angle = 0;        // [TODO]修改多驱动问题后，football angle变成了高阻态，这里暂时用0代替
+        ball_info.vertical_speed = vertical_speed;
+        ball_info.vertical_signal = vertical_signal;
+    end
+
+
+    import TrianglevalLib::*;
+// `include "trangleval.sv"
     // "run"部分，除了会受到转弯/动作的影响，其它情况下应该是能够独立完成的
 
     reg set_enable; // 共用一个重置信号
 
     /****************   坐标计算  *******************/
-    reg [7:0] speed;
-    reg [7:0] vertical_speed;    // z方向速度
-    reg vertical_signal;         // z方向速度的方向
     // 这里对坐标加一层缓冲的目的是：可以选择性地使用position_caculator的值，在束缚状态下可以直接忽略
-    reg [15:0] free_out_x;
-    reg [15:0] free_out_y;
-    reg [15:0] free_out_z;
+    reg [11:0] free_out_x;
+    reg [11:0] free_out_y;
+    reg [11:0] free_out_z;
     position_caculator #(.INIT_X(INIT_X), .INIT_Y(INIT_Y)) u_position_caculator(
         .game_clk(football_game_clk),
         .rst(rst),
-        .in_angle(init_angle),          // angle保持不变
+        .in_angle(angle),          // angle保持不变
         .in_speed(speed),
         .out_x(free_out_x),
         .out_y(free_out_y),
@@ -65,7 +74,6 @@ module football
     reg A_enable;
     reg A_signal;
     reg VA_enable;  //垂直加速度使能
-    reg VA_signal;  //垂直加速度方向
     speed_caculator u_speed_caculator(
         .game_clk(football_game_clk),
         .rst(rst),
@@ -73,7 +81,7 @@ module football
         .signal(A_signal),
         .speed(speed),
         .set_speed_enable(set_enable),
-        .set_speed_val(init_speed)
+        .set_speed_val(free_init.init_speed)
     );
     vertical_speed_caculator u_vertical_speed_caculator(
         .game_clk(football_game_clk),
@@ -82,12 +90,12 @@ module football
         .speed_signal(vertical_signal),
         .speed(vertical_speed),
         .set_speed_enable(set_enable),
-        .set_speed_val(init_vertical_speed),
-        .set_speed_signal(init_vertical_signal)
+        .set_speed_val(free_init.init_vertical_speed),
+        .set_speed_signal(free_init.init_vertical_signal)
     );
 
     /**************  简化模型，不会进行角度计算 ***************/
-    // 仅仅通过INIT_angle来设置即可
+    // 仅仅通过free_init.init_angle来设置即可
 
 
     // 进入约束态/进入自由态/物理引擎模拟
@@ -110,24 +118,25 @@ module football
             case(football_stat) 
                 ENTER_CONST:
                 //[TODO]这里没有进行坐标的约束计算
+                // const状态下，ball_info的x, y, z有效，但是speed, angle等无效
                     if(being_held == 1'b1) begin
                         football_stat <= ENTER_CONST;   // 保持约束态
-                        pos_z <= master_height;
-                        if(master_angle < 8'd18) begin
-                            pos_x <= master_x + master_radius * sin(master_angle);
-                            pos_y <= master_y + master_radius * cos(master_angle);
-                        end else if(master_angle < 8'd36) begin
-                            pos_x <= master_x + master_radius * cos(master_angle - 8'd18);
-                            pos_y <= master_y - master_radius * sin(master_angle - 8'd18);
-                        end else if(master_angle < 8'd54) begin
-                            pos_x <= master_x - master_radius * sin(master_angle - 8'd36);
-                            pos_y <= master_y - master_radius * cos(master_angle - 8'd36);
-                        end else if(master_angle < 8'd72) begin
-                            pos_x <= master_x - master_radius * cos(master_angle - 8'd54);
-                            pos_y <= master_y + master_radius * sin(master_angle - 8'd54);
+                        pos_z <= const_init.master_height;
+                        if(const_init.master_angle < 8'd18) begin
+                            pos_x <= const_init.master_x + const_init.master_radius * sin(const_init.master_angle);
+                            pos_y <= const_init.master_y + const_init.master_radius * cos(const_init.master_angle);
+                        end else if(const_init.master_angle < 8'd36) begin
+                            pos_x <= const_init.master_x + const_init.master_radius * cos(const_init.master_angle - 8'd18);
+                            pos_y <= const_init.master_y - const_init.master_radius * sin(const_init.master_angle - 8'd18);
+                        end else if(const_init.master_angle < 8'd54) begin
+                            pos_x <= const_init.master_x - const_init.master_radius * sin(const_init.master_angle - 8'd36);
+                            pos_y <= const_init.master_y - const_init.master_radius * cos(const_init.master_angle - 8'd36);
+                        end else if(const_init.master_angle < 8'd72) begin
+                            pos_x <= const_init.master_x - const_init.master_radius * cos(const_init.master_angle - 8'd54);
+                            pos_y <= const_init.master_y + const_init.master_radius * sin(const_init.master_angle - 8'd54);
                         end else begin  // 0xFF没有方向 (不应出现，尽管摇杆可能有0xFF，但是人应该时刻都有一个0-71的角度)
                             pos_x <= pos_x;
-                            pos_y <= pos_y;
+                            pos_x <= pos_y;
                         end
                     end else begin
                         football_stat <= ENTER_FREE;
@@ -137,10 +146,10 @@ module football
                         football_stat <= ENTER_CONST;
                     end else begin
                         simu_stat <= 6'd0;  //初始化simulation状态
-                        // angle <= init_angle;
-                        speed <= init_speed;
-                        vertical_speed <= init_vertical_speed;
-                        vertical_signal <= init_vertical_signal;
+                        // speed <= free_init.init_speed;
+                        // angle <= free_init.init_angle;
+                        // vertical_speed <= free_init.init_vertical_speed;
+                        // vertical_signal <= free_init.init_vertical_signal;
                         football_stat <= SIMU_FREE;
                     end
                 SIMU_FREE:
@@ -158,16 +167,17 @@ module football
                             
                             //触地
                             if(pos_z == 0 && vertical_signal == 1'b1) begin    // 触底：垂直速度记为0，同时禁用垂直加速度
-                                vertical_speed <= 8'd0;
+                                //[TODO]为了防止多驱动问题，暂时将这里删除。但是后续需要考虑！
+                                // vertical_speed <= 8'd0;
                                 VA_enable <= 1'b0;
                             end else begin
                                 VA_enable <= 1'b1;      // 只要在半空中，就启用重力加速度
                             end
                             //速度减为0
-                            if(speed == 8'd0) begin
+                            if(speed == 0 || pos_z > 0) begin
                                 A_enable <= 1'b0;   
                             end else begin
-                                A_enable <= 1'b1;       //速度非0，启用摩擦力
+                                A_enable <= 1'b1;       //速度非0而且在地面上，启用摩擦力
                             end
                             // 如果后续需要加速边界反弹的逻辑，也可以在这里加入
                         end

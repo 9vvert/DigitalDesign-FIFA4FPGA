@@ -90,8 +90,8 @@ module line_render
                             din[31:16] <= (line_buffer[31] == 'h0) ? tmp_line_buffer[16][31:16] : line_buffer[31];
                             din[15:0] <= tmp_line_buffer[16][15:0];
                         end else begin          //中间，组合
-                            din[31:16] <= (line_buffer[2*h_counter+1] == 'h0) ? tmp_line_buffer[h_counter+1][31:16] : line_buffer[2*h_counter-1];
-                            din[15:0] <= (line_buffer[2*h_counter+2] == 'h0) ? tmp_line_buffer[h_counter+1][15:0] : line_buffer[2*h_counter];
+                            din[31:16] <= (line_buffer[2*h_counter+1] == 'h0) ? tmp_line_buffer[h_counter+1][31:16] : line_buffer[2*h_counter+1];
+                            din[15:0] <= (line_buffer[2*h_counter+2] == 'h0) ? tmp_line_buffer[h_counter+1][15:0] : line_buffer[2*h_counter+2];
                         end
                     end else begin                  //一般情况，如果渲染图形该点像素不是0x00,就覆盖
                         din[31:16] <= (line_buffer[2*h_counter+2] == 'h0) ? tmp_line_buffer[h_counter+1][31:16] : line_buffer[2*h_counter+2];

@@ -11,25 +11,17 @@ module Tackle_FSM
     //用于打断动作
     input cancel,
 
-    input [15:0] player_x,
-    input [15:0] player_y,
-    input [7:0] player_angle,
-    input [7:0] player_speed,
-    input [15:0] football_x,
-    input [15:0] football_y,
-    input [15:0] football_z,
-    //控制
-    output reg A_enable,
-    output reg A_signal,
-    output reg W_enable,
-    output reg W_signal,
+    input PlayerInfo self_info,
+    input BallInfo ball_info,
+    
+    output MoveControl tackle_ctrl,
     //向上层传递的信息，主要用于汇报动作是否成功
     output reg [1:0] message    // 1:成功， 2：失败， 0：未定义
 );
 
-`include "angle.sv"
-`include "trangleval.sv"
-`include "line.sv"
+import AngleLib::*;
+import TrianglevalLib::*;
+import LineLib::*;
     /**************************************/
     //DIS_JUDGE: 距离判定。不论何时，一旦距离超过，就会导致状态机结束，返回失败
     //ANG_JUDGE: 角度判定，重点是“人和球连线的角度”和

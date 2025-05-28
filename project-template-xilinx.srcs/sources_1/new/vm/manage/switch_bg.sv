@@ -59,8 +59,8 @@ module switch_bg
                 sdram_cmd <= 2'd1;
                 if(~last_cmd_done & cmd_done)begin
                     sdram_cmd <= 2'd0;
-                    buffer[2*req_counter] <= read_data[63:32];
-                    buffer[2*req_counter+1] <= read_data[31:0];
+                    buffer[2*req_counter] <= {read_data[15:0], read_data[31:16]};
+                    buffer[2*req_counter+1] <= {read_data[47:32], read_data[63:48]};
                     // 下一次req
                     if(req_counter == 31)begin
                         //请求完256Bytes，开始进行一轮写入

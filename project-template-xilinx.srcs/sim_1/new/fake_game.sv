@@ -1,9 +1,9 @@
 import type_declare::PlayerInfo, type_declare::BallInfo;
-module game(
+module fake_game(
     input game_clk,     // 游戏帧
     input ps2_clk,
     input rst,
-    output [15:0]debug_number,
+    output [31:0]debug_number,
     // ps2接口
     output wire pmod_io1,
     input wire pmod_io2,
@@ -41,7 +41,12 @@ module game(
 
 
     /******************  手柄控制器 1   *******************/
-    
+    reg [7:0] cmd_left_angle;
+    initial begin
+        cmd_left_angle = 9;
+        #1000000;
+        cmd_left_angle = 8'hFF;
+    end
     cmd_decoder u_cmd_decoder(
         .game_clk(game_clk),
         .ps2_clk(ps2_clk),
@@ -50,12 +55,12 @@ module game(
         .pmod_io2(pmod_io2),
         .pmod_io3(pmod_io3),
         .pmod_io4(pmod_io4),
-        .left_angle(cmd_left_angle), 
         .right_angle(cmd_right_angle),
         .action_cmd2(cmd_action_cmd)        //已经完成消抖
     );
     assign debug_number[7:0] = cmd_action_cmd;
     assign debug_number[15:8] = cmd_left_angle;
+    assign debug_number[23:16] = cmd_right_angle;
     /***************** 球员 *******************/
     
     player #(.PLAYER_INIT_X(128), .PLAYER_INIT_Y(128))
