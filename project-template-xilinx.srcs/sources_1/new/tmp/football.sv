@@ -22,21 +22,17 @@ import TrianglevalLib::*;
     wire [11:0] pos_x;
     wire [11:0] pos_y;
     wire [11:0] pos_z;
-    wire [7:0] speed;
-    wire [7:0] angle;
-    wire [7:0] vertical_speed;
+    reg [7:0] speed;
+    reg [7:0] angle;
+    reg [7:0] vertical_speed;
     reg vertical_signal;
-
     reg [11:0] free_x;
     reg [11:0] free_y;
     reg [11:0] free_z;
     assign pos_x = being_held ? const_init.master_x : free_x;
     assign pos_y = being_held ? const_init.master_y : free_y;
     assign pos_z = being_held ? const_init.master_height : free_z;
-    assign speed = being_held ? 0 : free_init.init_speed;
-    assign angle = being_held ? const_init.master_angle : free_init.init_angle;
-    assign vertical_speed = being_held ? 0 : free_init.init_vertical_speed;
-    assign vertical_signal = being_held ? 0 : free_init.init_vertical_signal;
+
     always_comb begin
         ball_info.anim_stat = 1;
         ball_info.x = pos_x;
@@ -71,14 +67,15 @@ import TrianglevalLib::*;
     );
 
     /***************** 速度计算****************/
-    reg A_enable;
-    reg A_signal;
-    reg VA_enable;  //垂直加速度使能
+    wire A_enable;
+    wire VA_enable;  //垂直加速度使能
+    assign A_enable = (pos_z == 0) & (speed > 0);
+    assign VA_enable = (pos_z > 0) & (~being_held);     // 在空中而且处于自由态时，有加速度
     speed_caculator u_speed_caculator(
         .game_clk(football_game_clk),
         .rst(rst),
         .enable(A_enable),
-        .signal(A_signal),
+        .signal(1),         // 一直减速
         .speed(speed),
         .set_speed_enable(being_held),
         .set_speed_val(free_init.init_speed)

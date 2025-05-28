@@ -35,11 +35,12 @@ module vm_renderer
     // 总控制
     reg last_cmd_done;
     reg [3:0] render_stat;  //渲染器状态
-    localparam [3:0] IDLE=0, LOAD_LINE=1, RENDER_LINE=2, DONE=3, WAIT=4;
+    localparam [3:0] IDLE=0, LOAD_IMG_LINE=1, RENDER_LINE=2, LOAD_BG_LINE=3, DONE=5, WAIT=6, RENDER_IMG_INIT=7, RENDER_BG_INIT=8;
     reg [5:0] line_counter;         //按照行来渲染
     reg [3:0] read_sdram_counter;   //每一行64字节需要8次读取
     reg [1:0] done_delay_counter;
-    reg [15:0] line_buffer [31:0];   //一整行的像素数据
+    reg [15:0] line_buffer [35:0];   //一整行的像素数据，但是有冗余数据
+    reg [15:0] ulti_buffer [31:0];  
     reg [11:0] hpos;
     reg [11:0] vpos;            // 注意：和start_hpos, start_vpos不同， hpos和vpos是每一行第一个像素的起始地址
 
@@ -57,7 +58,7 @@ module vm_renderer
         .render_end(render_end),
         .hpos(hpos),          // 这一行第一个像素的坐标
         .vpos(vpos),
-        .line_buffer(line_buffer),
+        .line_buffer(ulti_buffer),
         //控制SRAM
         .sram_io_req(sram_io_req),
         .wr(wr),
@@ -84,27 +85,29 @@ module vm_renderer
                 end
             end else if(render_stat == WAIT)begin
                 if(render_param.enable)begin
-                        render_stat <= LOAD_LINE;   // 先读取一行的数据
-                        //[TODO]后续要加上背景取样的逻辑，那么这里的img_part_addr需要进行判断、分类计数
+                    //[TODO]后续要加上背景取样的逻辑，那么这里的img_part_addr需要进行判断、分类计数
 
-                        // LOAD参数初始化
-                        if(render_type == 0)begin
-                            operate_addr <= render_param.start_sector*512;   // 初始：赋值为图片资源开始的地方
-                        end else begin
-                            //[TODO]这里需要检查
-                            operate_addr <= (10000+5000*bg_index)*512 + 2*(1280*(render_param.vpos-32) + (render_param.hpos-16));
-                        end
-                        line_counter <= 0;
-                        read_sdram_counter <= 0;
-                        // RENDER参数初始化
-                        hpos <= render_param.hpos -16;
-                        vpos <= render_param.vpos -32;
+                    // LOAD参数初始化
+                    if(render_type == 0)begin
+                        render_stat <= LOAD_IMG_LINE;   // 先读取一行的数据
+                        operate_addr <= render_param.start_sector*512;   // 初始：赋值为图片资源开始的地方
                     end else begin
-                        // render_enable = 0时，不绘制该图形
-                        render_stat <= DONE;
-                        draw_end <= 1;
+                        //[TODO]这里需要检查
+                        render_stat <= LOAD_BG_LINE;
+                        // 这里进行8字节对齐
+                        operate_addr <= 30'h3ffffff8&(10000+5000*bg_index)*512 + 2*(1280*(render_param.vpos-32) + (render_param.hpos-16));
                     end
-            end else if(render_stat == LOAD_LINE)begin
+                    line_counter <= 0;
+                    read_sdram_counter <= 0;
+                    // RENDER参数初始化
+                    hpos <= render_param.hpos -16;
+                    vpos <= render_param.vpos -32;
+                end else begin
+                    // render_enable = 0时，不绘制该图形
+                    render_stat <= DONE;
+                    draw_end <= 1;
+                end
+            end else if(render_stat == LOAD_IMG_LINE)begin
                 sdram_cmd <= 1;     // 读取
                 if(~last_cmd_done & cmd_done)begin
                     //[TODO]这里的顺序是否正确？
@@ -112,19 +115,51 @@ module vm_renderer
                     line_buffer[4*read_sdram_counter+1] <= read_data[31:16];
                     line_buffer[4*read_sdram_counter+2] <= read_data[47:32];
                     line_buffer[4*read_sdram_counter+3] <= read_data[63:48];
-                    if(read_sdram_counter == 7)begin
+                    if(read_sdram_counter == 7)begin        // 读取8个
                         //行数据读取完毕
                         sdram_cmd <= 0;              // 结束数据读取
                         read_sdram_counter <= 0;
-                        render_stat <= RENDER_LINE;
+                        render_stat <= RENDER_IMG_INIT;
                     end else begin
                         //保持sdram_cmd
                         operate_addr <=operate_addr + 8;        //不要忘记增加地址，每次8字节
                         read_sdram_counter <= read_sdram_counter + 1;
                         //[TODO]这种情况只是用于默认大小图片素材，后续需要添加新的逻辑
-                        render_stat <= LOAD_LINE;
+                        render_stat <= LOAD_IMG_LINE;
                     end 
                 end
+            end else if(render_stat == LOAD_BG_LINE)begin
+                sdram_cmd <= 1;     // 读取
+                if(~last_cmd_done & cmd_done)begin
+                    //[TODO]这里的顺序是否正确？
+                    line_buffer[4*read_sdram_counter] <= read_data[15:0];
+                    line_buffer[4*read_sdram_counter+1] <= read_data[31:16];
+                    line_buffer[4*read_sdram_counter+2] <= read_data[47:32];
+                    line_buffer[4*read_sdram_counter+3] <= read_data[63:48];
+                    if(read_sdram_counter == 8)begin        //额外读取一次
+                        //行数据读取完毕
+                        sdram_cmd <= 0;              // 结束数据读取
+                        read_sdram_counter <= 0;
+                        render_stat <= RENDER_BG_INIT;
+                    end else begin
+                        //保持sdram_cmd
+                        operate_addr <=operate_addr + 8;        //不要忘记增加地址，每次8字节
+                        read_sdram_counter <= read_sdram_counter + 1;
+                        //[TODO]这种情况只是用于默认大小图片素材，后续需要添加新的逻辑
+                        render_stat <= LOAD_BG_LINE;
+                    end 
+                end
+            end else if(render_stat == RENDER_IMG_INIT)begin
+                for(integer i=0; i<32; i=i+1)begin
+                    ulti_buffer[i] <= line_buffer[i];
+                end
+                render_stat <= RENDER_LINE;
+            end else if(render_stat == RENDER_BG_INIT)begin
+                for(integer i=0; i<32; i=i+1)begin
+                    ulti_buffer[i] <= line_buffer[i + hpos[1:0]];
+                    // i + (hpos%4)
+                end
+                render_stat <= RENDER_LINE;
             end else if(render_stat == RENDER_LINE)begin
                 render_begin <= 1;
                 if( ~last_render_end & render_end)begin
@@ -140,11 +175,12 @@ module vm_renderer
                         //开始下一行
                         if(render_type == 0)begin
                             operate_addr <=operate_addr + 8;        //不要忘记增加地址，每次8字节
+                            render_stat <= LOAD_IMG_LINE;
                         end else begin
-                            operate_addr <= operate_addr + 2504;    //[TODO]检查是否正确
+                            operate_addr <= operate_addr + 2496;    //[TODO]检查是否正确
+                            render_stat <= LOAD_BG_LINE;
                         end
                         read_sdram_counter <= 0;
-                        render_stat <= LOAD_LINE;
                         vpos <= vpos + 1;   // 行起始地址：不变
                     end
                 end

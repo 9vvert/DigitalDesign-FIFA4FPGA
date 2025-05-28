@@ -37,7 +37,7 @@ module vertical_position_caculator
             6: begin  V_T <= 10'd11; end
             7: begin  V_T <= 10'd9; end
             8: begin  V_T <= 10'd8; end
-            default:;      //如果竖直方向速度为0，将last_speed设置为特殊值，下一轮一定会重新执行上面的逻辑
+            default:V_T <= 69;      //如果竖直方向速度为0，将last_speed设置为特殊值，下一轮一定会重新执行上面的逻辑
         endcase
     end
 
@@ -52,6 +52,7 @@ module vertical_position_caculator
             vertical_speed <= 0;
         end else if(set_pos_enable)begin
             out_z <= set_z_val;
+            pos_cal_stat <= IDLE;           //被打断，下一次进入自由状态，还是从IDLE开始
         end else begin
             //对于z方向，不用考虑角度，比较简单
             if(pos_cal_stat == IDLE)begin

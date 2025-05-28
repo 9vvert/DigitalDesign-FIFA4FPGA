@@ -47,6 +47,7 @@ module vertical_speed_caculator
                     acceler_counter <= acceler_counter + 10'd1;
                 end
             end else begin
+                speed <= speed;     // 不能设为0，否则因为z=0而永远无法有初速度
                 speed_signal <= speed_signal;
             end   
         end

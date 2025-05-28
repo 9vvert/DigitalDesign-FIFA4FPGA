@@ -105,7 +105,6 @@ module async_ImgLoader(
                 if( (~last_sdram_write_end) & loader_sdram_write_end)begin   //捕捉上升时刻
                     loader_info[23:8] <= loader_info[23:8] + 1;
                     loader_sdram_cmd <= 0;      // 及时撤销命令 
-                    sector_counter <= sector_counter + 'd1;
                     delay_show_counter <= 64'd0;
                     loader_curr_sdram_addr <= loader_curr_sdram_addr + 8;
                     // 2025/5/15发现的第三个错误，这里不应该用512！是64，否则会死循环
