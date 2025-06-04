@@ -1,12 +1,16 @@
 import type_declare::PlayerInfo, type_declare::BallInfo;
-module fake_game(
+import field_package::*;
+module fake_game2(
     input game_clk,     // 游戏帧
     input ps2_clk,
     input rst,
+   
+    //game需要向外输出的是： bg, 渲染组件
+    //不需要通讯协议，持续输出，等显存准备好了就会渲染
     output PlayerInfo player_info[9:0],
+    output BallInfo ball_info,
     output [2:0] shoot_level[9:0],
-    output [3:0] player_hold_index,
-    output BallInfo ball_info
+    output [3:0] player_hold_index
 );
     import LineLib::*;
     import AngleLib::*;
@@ -20,6 +24,7 @@ module fake_game(
     ConstrainedInit football_const_init;
     FreeInit football_free_init;
     FreeInit free_init [9:0];
+    
     //总控制器输入
     wire [9:0] tackle_signal;
     wire [9:0] shoot_signal;
@@ -31,40 +36,72 @@ module fake_game(
     logic [9:0] player_targeted;
     wire [3:0] player_selected_index1;        // 第一组选择的index
     wire [3:0] player_selected_index2;        // 第二组选择的index
-    /////////////////////  为了测试，部分player_info赋一个值
+    // ai模拟指令
+    wire [7:0] ai_left_angle[9:0];
+    wire [7:0] ai_right_angle[9:0];
+    wire [7:0] ai_action_cmd[9:0];
 
-   
+    /***************** AI 控制器  *****************/
+    ai_controller u_ai_controller(
+        .ai_game_clk(game_clk),
+        .rst(rst),
+        .hold_index(player_hold_index),
+        .selected_index1(player_selected_index1),
+        .selected_index2(player_selected_index2),
+        .player_info(player_info),
+        .ball_info(ball_info),
+        .ai_left_angle(ai_left_angle),
+        .ai_right_angle(ai_right_angle),
+        .ai_action_cmd(ai_action_cmd)
+    );
+
+
+
+
+
+
     /******************  手柄控制器 1   *******************/
     reg [7:0] cmd_left_angle1;
     reg [7:0] cmd_right_angle1;
     reg [7:0] cmd_action_cmd1;
+    cmd_decoder u_cmd_decoder1(
+        .game_clk(game_clk),
+        .ps2_clk(ps2_clk),
+        .rst(rst),
+        .left_angle(cmd_left_angle1), 
+        .right_angle(cmd_right_angle1),
+        .action_cmd2(cmd_action_cmd1)        //已经完成消抖
+    );
 
 
     /******************  手柄控制器 2   *******************/
     reg [7:0] cmd_left_angle2;
     reg [7:0] cmd_right_angle2;
     reg [7:0] cmd_action_cmd2;
- 
-    reg turn=0;
-     initial begin
-        cmd_action_cmd1 =8'b00010000;
-        #20000000;
-        cmd_action_cmd1 =8'b00000000;
-        turn = 1;
-          #20000000;
-    end
+    cmd_decoder u_cmd_decoder2(
+        .game_clk(game_clk),
+        .ps2_clk(ps2_clk),
+        .rst(rst),
+        .left_angle(cmd_left_angle2), 
+        .right_angle(cmd_right_angle2),
+        .action_cmd2(cmd_action_cmd2)        //已经完成消抖
+    );
     /***************** 球员 *******************/
     
-    player #(.PLAYER_INIT_X(128), .PLAYER_INIT_Y(128))
+    player #(.PLAYER_INIT_X(PLAYER0_X), .PLAYER_INIT_Y(PLAYER0_Y),
+    .PLAYER_INIT_ANGLE(18), .XMIN(LEFT_X), .XMAX(RIGHT_X),.YMIN(BOTTOM_Y), .YMAX(TOP_Y)
+    )
     u_player_0(
         .player_game_clk(game_clk),
         .rst(rst),
+        .ai_left_angle(ai_left_angle[0]),
+        .ai_right_angle(ai_right_angle[0]),
+        .ai_action_cmd(ai_action_cmd[0]),
         .cmd_left_angle(cmd_left_angle1),
         .cmd_right_angle(cmd_right_angle1),
         .cmd_action_cmd(cmd_action_cmd1),
         //
         .enable(1),
-        .turn(turn),
         .hold(player_hold[0]),
         .selected(player_selected[0]),
         .targeted(player_targeted[0]),
@@ -79,10 +116,15 @@ module fake_game(
         .switch_signal(switch_signal[0])
     );
 
-    player #(.PLAYER_INIT_X(128), .PLAYER_INIT_Y(140))
+    player #(.PLAYER_INIT_X(PLAYER1_X), .PLAYER_INIT_Y(PLAYER1_Y),
+    .PLAYER_INIT_ANGLE(18), .XMIN(LEFT_X), .XMAX(RIGHT_X),.YMIN(BOTTOM_Y), .YMAX(TOP_Y)
+    )
     u_player_1(
         .player_game_clk(game_clk),
         .rst(rst),
+        .ai_left_angle(ai_left_angle[1]),
+        .ai_right_angle(ai_right_angle[1]),
+        .ai_action_cmd(ai_action_cmd[1]),
         .cmd_left_angle(cmd_left_angle1),
         .cmd_right_angle(cmd_right_angle1),
         .cmd_action_cmd(cmd_action_cmd1),
@@ -102,10 +144,15 @@ module fake_game(
         .switch_signal(switch_signal[1])
     );
 
-    player #(.PLAYER_INIT_X(128), .PLAYER_INIT_Y(150))
+    player #(.PLAYER_INIT_X(PLAYER2_X), .PLAYER_INIT_Y(PLAYER2_Y),
+    .PLAYER_INIT_ANGLE(18), .XMIN(LEFT_X), .XMAX(RIGHT_X),.YMIN(BOTTOM_Y), .YMAX(TOP_Y)
+    )
     u_player_2(
         .player_game_clk(game_clk),
         .rst(rst),
+        .ai_left_angle(ai_left_angle[2]),
+        .ai_right_angle(ai_right_angle[2]),
+        .ai_action_cmd(ai_action_cmd[2]),
         .cmd_left_angle(cmd_left_angle1),
         .cmd_right_angle(cmd_right_angle1),
         .cmd_action_cmd(cmd_action_cmd1),
@@ -125,10 +172,15 @@ module fake_game(
         .switch_signal(switch_signal[2])
     );
 
-    player #(.PLAYER_INIT_X(128), .PLAYER_INIT_Y(160))
+    player #(.PLAYER_INIT_X(PLAYER3_X), .PLAYER_INIT_Y(PLAYER3_Y),
+    .PLAYER_INIT_ANGLE(18), .XMIN(LEFT_X), .XMAX(RIGHT_X),.YMIN(BOTTOM_Y), .YMAX(TOP_Y)
+    )
     u_player_3(
         .player_game_clk(game_clk),
         .rst(rst),
+        .ai_left_angle(ai_left_angle[3]),
+        .ai_right_angle(ai_right_angle[3]),
+        .ai_action_cmd(ai_action_cmd[3]),
         .cmd_left_angle(cmd_left_angle1),
         .cmd_right_angle(cmd_right_angle1),
         .cmd_action_cmd(cmd_action_cmd1),
@@ -148,10 +200,15 @@ module fake_game(
         .switch_signal(switch_signal[3])
     );
 
-    player #(.PLAYER_INIT_X(128), .PLAYER_INIT_Y(170))
+    player #(.PLAYER_INIT_X(PLAYER4_X), .PLAYER_INIT_Y(PLAYER4_Y),
+    .PLAYER_INIT_ANGLE(18), .XMIN(LEFT_KEEPER_X1), .XMAX(LEFT_KEEPER_X2),.YMIN(LEFT_KEEPER_Y1), .YMAX(LEFT_KEEPER_Y2), .KEEPER(1)
+    )
     u_player_4(
         .player_game_clk(game_clk),
         .rst(rst),
+        .ai_left_angle(ai_left_angle[4]),
+        .ai_right_angle(ai_right_angle[4]),
+        .ai_action_cmd(ai_action_cmd[4]),
         .cmd_left_angle(cmd_left_angle1),
         .cmd_right_angle(cmd_right_angle1),
         .cmd_action_cmd(cmd_action_cmd1),
@@ -171,10 +228,15 @@ module fake_game(
         .switch_signal(switch_signal[4])
     );
 
-    player #(.PLAYER_INIT_X(256), .PLAYER_INIT_Y(256))
+    player #(.PLAYER_INIT_X(PLAYER5_X), .PLAYER_INIT_Y(PLAYER5_Y),
+    .PLAYER_INIT_ANGLE(54), .XMIN(LEFT_X), .XMAX(RIGHT_X),.YMIN(BOTTOM_Y), .YMAX(TOP_Y)
+    )
     u_player_5(
         .player_game_clk(game_clk),
         .rst(rst),
+        .ai_left_angle(ai_left_angle[5]),
+        .ai_right_angle(ai_right_angle[5]),
+        .ai_action_cmd(ai_action_cmd[5]),
         .cmd_left_angle(cmd_left_angle2),
         .cmd_right_angle(cmd_right_angle2),
         .cmd_action_cmd(cmd_action_cmd2),
@@ -194,10 +256,15 @@ module fake_game(
         .switch_signal(switch_signal[5])
     );
 
-    player #(.PLAYER_INIT_X(256), .PLAYER_INIT_Y(100))
+    player #(.PLAYER_INIT_X(PLAYER6_X), .PLAYER_INIT_Y(PLAYER6_Y),
+    .PLAYER_INIT_ANGLE(54), .XMIN(LEFT_X), .XMAX(RIGHT_X),.YMIN(BOTTOM_Y), .YMAX(TOP_Y)
+    )
     u_player_6(
         .player_game_clk(game_clk),
         .rst(rst),
+        .ai_left_angle(ai_left_angle[6]),
+        .ai_right_angle(ai_right_angle[6]),
+        .ai_action_cmd(ai_action_cmd[6]),
         .cmd_left_angle(cmd_left_angle2),
         .cmd_right_angle(cmd_right_angle2),
         .cmd_action_cmd(cmd_action_cmd2),
@@ -217,10 +284,15 @@ module fake_game(
         .switch_signal(switch_signal[6])
     );
 
-    player #(.PLAYER_INIT_X(300), .PLAYER_INIT_Y(120))
+    player #(.PLAYER_INIT_X(PLAYER7_X), .PLAYER_INIT_Y(PLAYER7_Y),
+    .PLAYER_INIT_ANGLE(54), .XMIN(LEFT_X), .XMAX(RIGHT_X),.YMIN(BOTTOM_Y), .YMAX(TOP_Y)
+    )
     u_player_7(
         .player_game_clk(game_clk),
         .rst(rst),
+        .ai_left_angle(ai_left_angle[7]),
+        .ai_right_angle(ai_right_angle[7]),
+        .ai_action_cmd(ai_action_cmd[7]),
         .cmd_left_angle(cmd_left_angle2),
         .cmd_right_angle(cmd_right_angle2),
         .cmd_action_cmd(cmd_action_cmd2),
@@ -240,10 +312,15 @@ module fake_game(
         .switch_signal(switch_signal[7])
     );
 
-    player #(.PLAYER_INIT_X(256), .PLAYER_INIT_Y(512))
+    player #(.PLAYER_INIT_X(PLAYER8_X), .PLAYER_INIT_Y(PLAYER8_Y),
+    .PLAYER_INIT_ANGLE(54), .XMIN(LEFT_X), .XMAX(RIGHT_X),.YMIN(BOTTOM_Y), .YMAX(TOP_Y)
+    )
     u_player_8(
         .player_game_clk(game_clk),
         .rst(rst),
+        .ai_left_angle(ai_left_angle[8]),
+        .ai_right_angle(ai_right_angle[8]),
+        .ai_action_cmd(ai_action_cmd[8]),
         .cmd_left_angle(cmd_left_angle2),
         .cmd_right_angle(cmd_right_angle2),
         .cmd_action_cmd(cmd_action_cmd2),
@@ -263,10 +340,15 @@ module fake_game(
         .switch_signal(switch_signal[8])
     );
 
-    player #(.PLAYER_INIT_X(400), .PLAYER_INIT_Y(400))
+    player #(.PLAYER_INIT_X(PLAYER9_X), .PLAYER_INIT_Y(PLAYER9_Y),
+    .PLAYER_INIT_ANGLE(54), .XMIN(RIGHT_KEEPER_X1), .XMAX(RIGHT_KEEPER_X2),.YMIN(RIGHT_KEEPER_Y1), .YMAX(RIGHT_KEEPER_Y2), .KEEPER(1)
+    )
     u_player_9(
         .player_game_clk(game_clk),
         .rst(rst),
+        .ai_left_angle(ai_left_angle[9]),
+        .ai_right_angle(ai_right_angle[9]),
+        .ai_action_cmd(ai_action_cmd[9]),
         .cmd_left_angle(cmd_left_angle2),
         .cmd_right_angle(cmd_right_angle2),
         .cmd_action_cmd(cmd_action_cmd2),
@@ -288,8 +370,7 @@ module fake_game(
 
     /*****************  足球 *********************/
 
-    football #(.INIT_X(120), .INIT_Y(120)) u_football
-    (
+    football u_football(
         .football_game_clk(game_clk),
         .rst(rst),
         .being_held(football_being_held),
@@ -297,52 +378,59 @@ module fake_game(
         .free_init(football_free_init),
         .ball_info(ball_info)  
     );
+
+
     /*************  预切换对象管理器 *********/
     // 
-    logic [3:0] grp1_target;
+    logic [3:0] grp1_target;        //更新：target属性对于门将无效；对于非持球方，代表距离球最近的人
     logic [3:0] grp2_target;
     logic [31:0] dis[9:0];      // 人和球的距离
     logic [7:0] real_ang[9:0];          // 人和人的角度
     logic [7:0] aim_ang[9:0];        // real_ang和指示器的角度
     always_comb begin
         if(cmd_right_angle1 == 'hFF)begin   // 这种情况找距离最近的
-            for(integer k=0; k<10; k=k+1)begin
+            for(integer k=0; k<5; k=k+1)begin
                 dis[k] = player_selected[k] ? 32'hffffffff : distance(player_info[k].x, player_info[k].y, ball_info.x, ball_info.y);
             end
-            if      (dis[0] <= dis[1] && dis[0] <= dis[2] && dis[0] <= dis[3] && dis[0] <= dis[4])  grp1_target = 0;
-            else if (dis[1] <= dis[0] && dis[1] <= dis[2] && dis[1] <= dis[3] && dis[1] <= dis[4])  grp1_target = 1;
-            else if (dis[2] <= dis[0] && dis[2] <= dis[1] && dis[2] <= dis[3] && dis[2] <= dis[4])  grp1_target = 2;
-            else if (dis[3] <= dis[0] && dis[3] <= dis[1] && dis[3] <= dis[2] && dis[3] <= dis[4])  grp1_target = 3;
-            else                                                                                    grp1_target = 4;
-
-            if      (dis[5] <= dis[6] && dis[5] <= dis[7] && dis[5] <= dis[8] && dis[5] <= dis[9])  grp2_target = 5;
-            else if (dis[6] <= dis[5] && dis[6] <= dis[7] && dis[6] <= dis[8] && dis[6] <= dis[9])  grp2_target = 6;
-            else if (dis[7] <= dis[5] && dis[7] <= dis[6] && dis[7] <= dis[8] && dis[7] <= dis[9])  grp2_target = 7;
-            else if (dis[8] <= dis[5] && dis[8] <= dis[6] && dis[8] <= dis[7] && dis[8] <= dis[9])  grp2_target = 8;
-            else                                                                                    grp2_target = 9; 
-        
+            if      (dis[0] <= dis[1] && dis[0] <= dis[2] && dis[0] <= dis[3])  grp1_target = 0;
+            else if (dis[1] <= dis[0] && dis[1] <= dis[2] && dis[1] <= dis[3])  grp1_target = 1;
+            else if (dis[2] <= dis[0] && dis[2] <= dis[1] && dis[2] <= dis[3])  grp1_target = 2;
+            else  grp1_target = 3;
         end else begin                      // 这种情况下找夹角最小的
             for(integer k=0; k<5; k=k+1)begin
                 real_ang[k] = (player_selected[k]) ? 8'hFF :
                      vec2angle(player_info[player_selected_index1].x, player_info[player_selected_index1].y, player_info[k].x ,player_info[k].y);
+            end
+            for(integer k=0; k<5; k=k+1)begin
+                aim_ang[k] = player_selected[k] ? 8'hff : rel_angle_val(real_ang[k], cmd_right_angle1);
+            end
+            if(aim_ang[0] <= aim_ang[1] && aim_ang[0] <= aim_ang[2] && aim_ang[0] <= aim_ang[3] )  grp1_target = 0;
+            else if(aim_ang[1] <= aim_ang[0] && aim_ang[1] <= aim_ang[2] && aim_ang[1] <= aim_ang[3])  grp1_target = 1;
+            else if(aim_ang[2] <= aim_ang[0] && aim_ang[2] <= aim_ang[1] && aim_ang[2] <= aim_ang[3])  grp1_target = 2;
+            else   grp1_target = 3;
+        end
+
+        if(cmd_right_angle2 == 'hFF)begin
+            for(integer k=5; k<10; k=k+1)begin
+                dis[k] = player_selected[k] ? 32'hffffffff : distance(player_info[k].x, player_info[k].y, ball_info.x, ball_info.y);
+            end
+
+            if      (dis[5] <= dis[6] && dis[5] <= dis[7] && dis[5] <= dis[8])  grp2_target = 5;
+            else if (dis[6] <= dis[5] && dis[6] <= dis[7] && dis[6] <= dis[8])  grp2_target = 6;
+            else if (dis[7] <= dis[5] && dis[7] <= dis[6] && dis[7] <= dis[8])  grp2_target = 7;
+            else grp2_target = 8;
+        end else begin
+            for(integer k=0; k<5; k=k+1)begin
                 real_ang[k+5] = (player_selected[k+5]) ? 8'hFF :
                      vec2angle(player_info[player_selected_index2].x, player_info[player_selected_index2].y, player_info[k+5].x ,player_info[k+5].y);
             end
             for(integer k=0; k<5; k=k+1)begin
-                aim_ang[k] = player_selected[k] ? 8'hff : rel_angle_val(real_ang[k], cmd_right_angle1);
                 aim_ang[k+5] = player_selected[k+5] ? 8'hff : rel_angle_val(real_ang[k+5], cmd_right_angle2);
             end
-
-            if(aim_ang[0] <= aim_ang[1] && aim_ang[0] <= aim_ang[2] && aim_ang[0] <= aim_ang[3] && aim_ang[0] <= aim_ang[4])  grp1_target = 0;
-            else if(aim_ang[1] <= aim_ang[0] && aim_ang[1] <= aim_ang[2] && aim_ang[1] <= aim_ang[3] && aim_ang[1] <= aim_ang[4])  grp1_target = 1;
-            else if(aim_ang[2] <= aim_ang[0] && aim_ang[2] <= aim_ang[1] && aim_ang[2] <= aim_ang[3] && aim_ang[2] <= aim_ang[4])  grp1_target = 2;
-            else if(aim_ang[3] <= aim_ang[0] && aim_ang[3] <= aim_ang[1] && aim_ang[3] <= aim_ang[2] && aim_ang[3] <= aim_ang[4])  grp1_target = 3;
-            else                                                                                                        grp1_target = 4;
-            if(aim_ang[5] <= aim_ang[6] && aim_ang[5] <= aim_ang[7] && aim_ang[5] <= aim_ang[8] && aim_ang[5] <= aim_ang[9])  grp2_target = 5;
-            else if(aim_ang[6] <= aim_ang[5] && aim_ang[6] <= aim_ang[7] && aim_ang[6] <= aim_ang[8] && aim_ang[6] <= aim_ang[9])  grp2_target = 6;
-            else if(aim_ang[7] <= aim_ang[5] && aim_ang[7] <= aim_ang[6] && aim_ang[7] <= aim_ang[8] && aim_ang[7] <= aim_ang[9])  grp2_target = 7;
-            else if(aim_ang[8] <= aim_ang[5] && aim_ang[8] <= aim_ang[6] && aim_ang[8] <= aim_ang[7] && aim_ang[8] <= aim_ang[9])  grp2_target = 8;
-            else                                                                                                        grp2_target = 9;
+            if(aim_ang[5] <= aim_ang[6] && aim_ang[5] <= aim_ang[7] && aim_ang[5] <= aim_ang[8] )  grp2_target = 5;
+            else if(aim_ang[6] <= aim_ang[5] && aim_ang[6] <= aim_ang[7] && aim_ang[6] <= aim_ang[8] )  grp2_target = 6;
+            else if(aim_ang[7] <= aim_ang[5] && aim_ang[7] <= aim_ang[6] && aim_ang[7] <= aim_ang[8] )  grp2_target = 7;
+            else grp2_target = 8;
         end
     end
 
@@ -356,7 +444,7 @@ module fake_game(
         end else if(grp1_target==3)begin
             player_targeted[4:0] <= 5'b01000;
         end else begin
-            player_targeted[4:0] <= 5'b10000;
+            player_targeted[4:0] <= 5'b00000;
         end
         if(grp2_target==5)begin
             player_targeted[9:5] <= 5'b00001;
@@ -367,10 +455,9 @@ module fake_game(
         end else if(grp2_target==8)begin
             player_targeted[9:5] <= 5'b01000;
         end else begin
-            player_targeted[9:5] <= 5'b10000;
+            player_targeted[9:5] <= 5'b00000;
         end
     end
-
     /************* 控制器   **************/
     object_controller u_object_controller(
         .controller_game_clk(game_clk),

@@ -10,6 +10,7 @@ module vertical_speed_caculator
     output reg[7:0] speed,
     output reg speed_signal,    // 0为向上，1为向下
     //扩展
+    input [11:0] tmp_z,         // 当速度方向向下而且z=0的时候，立刻清零速度
     input set_speed_enable,
     input [7:0] set_speed_val,
     input set_speed_signal
@@ -20,7 +21,9 @@ module vertical_speed_caculator
         if(rst) begin
             //
             speed <= V_INIT;
+            speed_signal <= 0;
             acceler_counter <= 10'd0;
+            
         end else if(set_speed_enable)begin  // 重置状态，为了新一轮准备，必须将所有的东西进行重置，包括计数器
             speed <= set_speed_val;
             speed_signal <= set_speed_signal;
@@ -37,10 +40,14 @@ module vertical_speed_caculator
                             speed_signal <= 1'b1;       //速度变为向下
                         end
                     end else begin              // 当前速度向下，加速
-                        if(speed < V_MAX) begin
-                            speed <= speed + 8'd1;
+                        if(tmp_z == 0)begin
+                            speed <= 0;
                         end else begin
-                            speed <= speed; // 最多加到速度8
+                            if(speed < V_MAX) begin
+                                speed <= speed + 8'd1;
+                            end else begin
+                                speed <= speed; // 最多加到速度8
+                            end
                         end
                     end
                 end else begin

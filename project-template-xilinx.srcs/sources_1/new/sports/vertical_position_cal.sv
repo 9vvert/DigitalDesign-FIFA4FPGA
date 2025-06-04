@@ -46,7 +46,6 @@ module vertical_position_caculator
             out_z <= INIT_Z;
             // 竖直运动部分
             V_counter <= 10'd0;
-            V_T <= 10'd0;
             pos_cal_stat <= IDLE;
             vertical_signal <= 1'b0;
             vertical_speed <= 0;
@@ -63,7 +62,7 @@ module vertical_position_caculator
                     pos_cal_stat <= COUNT;
                 end
             end else if(pos_cal_stat == COUNT)begin
-                if(V_counter >= V_T) begin
+                if(V_counter >= (V_T>>1)) begin
                     V_counter <= 10'd0;
                     pos_cal_stat <= IDLE;
                     if(vertical_signal == 0) begin  //向上

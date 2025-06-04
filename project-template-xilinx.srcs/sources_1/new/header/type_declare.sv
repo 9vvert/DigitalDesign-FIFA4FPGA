@@ -26,8 +26,7 @@ package type_declare;
         logic [11:0] master_x;
         logic [11:0] master_y;
         logic [11:0] master_height;
-        logic [7:0] master_angle;
-        logic [11:0] master_radius;
+        logic [7:0] master_speed;       // 为了渲染足球动画
     } ConstrainedInit;
 
     typedef struct packed {
@@ -38,6 +37,8 @@ package type_declare;
     } FreeInit;
     
     typedef struct packed {
+        logic selected;
+        logic target;           //预切换球员
         logic [2:0] index;      //球员编号
         logic [11:0] x;
         logic [11:0] y;

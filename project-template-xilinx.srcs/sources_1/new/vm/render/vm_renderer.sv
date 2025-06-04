@@ -11,6 +11,7 @@ module vm_renderer
 (
     input vm_renderer_ui_clk,
     input ui_rst,
+    output reg [31:0]debug_number,
     //和上层的接口
     input [5:0] bg_index,   // 背景编号，用于填补背景
     input render_type,      // 如果为1，是背景填补
@@ -43,7 +44,7 @@ module vm_renderer
     reg [15:0] ulti_buffer [31:0];  
     reg [11:0] hpos;
     reg [11:0] vpos;            // 注意：和start_hpos, start_vpos不同， hpos和vpos是每一行第一个像素的起始地址
-
+    reg [7:0] init_counter;     //用于分多次搬运
     
     /***********  渲染引擎   ***********/
     reg render_begin;
@@ -77,6 +78,7 @@ module vm_renderer
             last_cmd_done <= 0;
             hpos <= 0;
             vpos <= 0;
+            init_counter <= 0;
         end else begin
             if(render_stat == IDLE)begin
                 if(draw_begin)begin
@@ -95,8 +97,10 @@ module vm_renderer
                         //[TODO]这里需要检查
                         render_stat <= LOAD_BG_LINE;
                         // 这里进行8字节对齐
-                        operate_addr <= 30'h3ffffff8&(10000+5000*bg_index)*512 + 2*(1280*(render_param.vpos-32) + (render_param.hpos-16));
+                        operate_addr <= 30'h3ffffff8& ( (10000+5000*bg_index)*512 + 2*(1280*(render_param.vpos-32) + (render_param.hpos-16)) );
                     end
+                    debug_number[31:16] <= render_param.hpos;
+                    debug_number[15:0] <=render_param.vpos;
                     line_counter <= 0;
                     read_sdram_counter <= 0;
                     // RENDER参数初始化
@@ -119,6 +123,7 @@ module vm_renderer
                         //行数据读取完毕
                         sdram_cmd <= 0;              // 结束数据读取
                         read_sdram_counter <= 0;
+                        init_counter <= 0;
                         render_stat <= RENDER_IMG_INIT;
                     end else begin
                         //保持sdram_cmd
@@ -140,24 +145,46 @@ module vm_renderer
                         //行数据读取完毕
                         sdram_cmd <= 0;              // 结束数据读取
                         read_sdram_counter <= 0;
+                        init_counter <= 0;
                         render_stat <= RENDER_BG_INIT;
                     end else begin
-                        //保持sdram_cmd
                         operate_addr <=operate_addr + 8;        //不要忘记增加地址，每次8字节
                         read_sdram_counter <= read_sdram_counter + 1;
                         //[TODO]这种情况只是用于默认大小图片素材，后续需要添加新的逻辑
                         render_stat <= LOAD_BG_LINE;
                     end 
                 end
+                //[ TODO]这里也进行优化
             end else if(render_stat == RENDER_IMG_INIT)begin
-                for(integer i=0; i<32; i=i+1)begin
+                // if(init_counter == 8)begin      // 每次加载4个数据
+                //     init_counter <= 0;
+                //     render_stat <= RENDER_LINE;
+                // end else begin
+                //     init_counter <= init_counter + 1;
+                //     ulti_buffer[(init_counter<<2)] <= line_buffer[(init_counter<<2)];
+                //     ulti_buffer[(init_counter<<2)+1] <= line_buffer[(init_counter<<2)+1];
+                //     ulti_buffer[(init_counter<<2)+2] <= line_buffer[(init_counter<<2)+2];
+                //     ulti_buffer[(init_counter<<2)+3] <= line_buffer[(init_counter<<2)+3];
+                // end
+                for(integer  i=0; i<32; i=i+1)begin
                     ulti_buffer[i] <= line_buffer[i];
                 end
                 render_stat <= RENDER_LINE;
             end else if(render_stat == RENDER_BG_INIT)begin
+                //[TODO]这里进行了修改
+                // ulti_buffer[0] <= 16'h1F00;
+                // if(init_counter == 8)begin      // 每次加载4个数据
+                //     init_counter <= 0;
+                //     render_stat <= RENDER_LINE;
+                // end else begin
+                //     init_counter <= init_counter + 1;
+                //     ulti_buffer[(init_counter<<2)] <= line_buffer[(init_counter<<2) + hpos[1:0]];
+                //     ulti_buffer[(init_counter<<2)+1] <= line_buffer[(init_counter<<2)+1 + hpos[1:0]];
+                //     ulti_buffer[(init_counter<<2)+2] <= line_buffer[(init_counter<<2)+2 + hpos[1:0]];
+                //     ulti_buffer[(init_counter<<2)+3] <= line_buffer[(init_counter<<2)+3 + hpos[1:0]];
+                // end
                 for(integer i=0; i<32; i=i+1)begin
-                    ulti_buffer[i] <= line_buffer[i + hpos[1:0]];
-                    // i + (hpos%4)
+                    ulti_buffer[i] <= line_buffer[i+hpos[1:0]];
                 end
                 render_stat <= RENDER_LINE;
             end else if(render_stat == RENDER_LINE)begin

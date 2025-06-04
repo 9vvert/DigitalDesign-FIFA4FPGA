@@ -1,7 +1,7 @@
 /***************  显存管理器   ***************/
 `timescale 1ns/1ps
 import type_declare::*;
-module game_tb;
+module game_FSM_tb;
     // Clock and reset
     reg clk;
     reg rst;
@@ -28,6 +28,8 @@ module game_tb;
     /*************  时钟生成  ****************/
     wire ui_clk;
     wire ui_rst;
+    assign ui_clk = clk_100m;
+    assign ui_rst = rst;
     reg ps2_clk;
     reg [9:0] ps2_clk_cnt;
     always @(posedge ui_clk) begin      // 使用ui_clk生成game_clk和ps2_clk，更加稳定
@@ -80,25 +82,19 @@ module game_tb;
     PlayerInfo player_info[9:0];
     BallInfo ball_info;
     wire [2:0] shoot_level[9:0];
-    wire [5:0] game_bg;
     wire [3:0] player_hold_index;
-    game u_game(
+
+    fake_game2 u_game(
         .game_clk(game_clk),
         .ps2_clk(ps2_clk),
         .rst(game_rst),
         .ball_info(ball_info),
         .player_info(player_info),
-        //
-        .game_bg(game_bg),
         .player_hold_index(player_hold_index),
         .shoot_level(shoot_level)
-
-
     );
-    
-    /***********  渲染 *************/
-    
-    wire [31:0] write_data;
+
+     wire [31:0] write_data;
     wire [14:0] write_addr;
     wire write_enable;
     wire batch_free;                // 请求batch 的信号
@@ -117,74 +113,15 @@ module game_tb;
     sprite_generator u_sprite_generator(
         .sprite_generator_ui_clk(ui_clk),
         .ui_rst(ui_rst),
-        .game_bg(game_bg),
+        .game_bg(0),
         .player_info(player_info),
         .ball_info(ball_info),
         .render_param(in_render_param),      // 输出到in_render_param中，作为vm_manager的输入
         .output_bg_index(output_bg_index),
         .game_bg_change(game_bg_change),
+        .player_hold_index(player_hold_index),
         .shoot_level(shoot_level),
         .bg_change_done(bg_change_done)     //[TODO]忘记写了
-    );
-
-    vm_manager u_vm_manager
-    (
-        .clk_100m(clk_100m),       // 100MHz
-        .rst(rst),
-        .clk_locked(clk_locked),     // 复位信号
-        //数据，和game.sv对接 [TODO]
-        .in_render_param(in_render_param),          //具体参数，用来表示渲染的位置，以及采用什么图片素材
-        .input_bg_index(output_bg_index),
-        .game_bg_change(game_bg_change),
-        .bg_change_done(bg_change_done),
-        //和video.sv对接的信号
-        .batch_free(batch_free),       // 当RAM进行一轮交换后，会发送这个信号，并持续一段周期，保证能够接受到
-        .batch_zero(batch_zero),        // 更加特殊的标记，意味着请求新一帧的第一个batch
-        .light_begin(light_begin),
-        .light_end(light_end),
-        .dark_begin(dark_begin),
-        .dark_end(dark_end),
-        //[TODO]检查和switch中的宽度是否一致，以及在空闲时候，switch输出的值是否会干扰正常逻辑
-        .write_data(write_data),   //[TODO]研究SRAM的字节序，注意进行顺序变换
-        .write_addr(write_addr),   //每一个batch，write_addr都是从0开始逐渐增减，在video.sv中会再进行一轮变换
-        .write_enable(write_enable),        //写入显存的使能信号
-        .out_ui_clk(ui_clk),
-        .out_ui_rst(ui_rst)
-    );
-
-
-    /*****************  输出显示  *********************/
-    wire [11:0] hdata;  // 当前横坐标
-    wire [11:0] vdata;  // 当前纵坐标
-    wire [7:0] video_red; // 红色分量
-    wire [7:0] video_green; // 绿色分量
-    wire [7:0] video_blue; // 蓝色分量
-    wire video_clk; // 像素时钟
-    wire video_hsync;
-    wire video_vsync;
-    wire video_de; // 数据使能信号
-    assign video_clk = clk_100m;
-    video u_video
-    (
-        .ui_clk(ui_clk),
-        .fill_batch(batch_free),
-        .zero_batch(batch_zero),
-        .dark_end(dark_end),
-        .light_end(light_end),
-        .dark_begin(dark_begin),
-        .light_begin(light_begin),
-        .write_data(write_data),
-        .write_addr(write_addr),
-        .write_enable(write_enable),
-        .clk(video_clk),
-        .hsync(video_hsync),
-        .vsync(video_vsync),
-        .hdata(hdata),
-        .vdata(vdata),
-        .red(video_red),         // output reg是时序逻辑，output wire是组合逻辑
-        .green(video_green),
-        .blue(video_blue),
-        .data_enable(video_de)
     );
 
 endmodule

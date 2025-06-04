@@ -1,7 +1,8 @@
 /********** Move_FSM  ************/
 // 最基本的移动控制模块
 module Move_FSM
-#(parameter HOLDER_MAX_V=3, FREE_MAX_V=4, CHARGE_MAX_V=6)
+// 平衡，减少对HOLDER的惩罚
+#(parameter HOLDER_MAX_V=4, FREE_MAX_V=4, CHARGE_MAX_V=6)
 (
     output reg [31:0] debug_number,
     input Move_FSM_game_clk,
@@ -35,68 +36,11 @@ module Move_FSM
             end else begin
                 //////////////////// 持球者 ////////////////////
                 if(hold)begin   // 持球者，无法冲刺，而且最大奔跑速度被限定为3
-                    //角度控制
-                    if(rel_pos == 0)begin   // 左侧
-                        basic_ctrl.W_enable <= 1;
-                        basic_ctrl.W_signal <= 1;   //逆时针
-                    end else if(rel_pos == 2)begin  //右侧
-                        basic_ctrl.W_enable <= 1;
-                        basic_ctrl.W_signal <= 0;   //顺时针
-                    end else if(rel_pos == 0)begin  //重合  // TODO这里后续是否可以换成其它？
+                    if(self_info.speed >HOLDER_MAX_V)begin
                         basic_ctrl.W_enable <= 0;
-                    end else begin  //
-                        basic_ctrl.W_enable <= 1;
-                        basic_ctrl.W_signal <= 0;   // 0/1均可
-                    end
-                    if(rel_angle < 9)begin
-                        // 这种情况角度已经比较接近，允许加速
-                        //速度控制
-                        if(self_info.speed > HOLDER_MAX_V)begin
-                            basic_ctrl.A_enable <= 1;
-                            basic_ctrl.A_signal <= 1;  // 刚冲刺完可能有这种情况，需要先减速
-                        end if(self_info.speed < HOLDER_MAX_V)begin    // 加速的情况比减速要更严格一些，为了防止出现在边缘抖动的情况
-                            if(rel_angle < 7)begin          
-                                basic_ctrl.A_enable <= 1;
-                                basic_ctrl.A_signal <= 0;
-                            end else begin
-                                basic_ctrl.A_enable <= 0;
-                            end
-                        end else begin
-                            basic_ctrl.A_enable <= 0;
-                        end 
-                    end else if(rel_angle < 18)begin
-                        if(self_info.speed > HOLDER_MAX_V-1)begin
-                            basic_ctrl.A_enable <= 1;
-                            basic_ctrl.A_signal <= 1;
-                        end else begin
-                            basic_ctrl.A_enable <= 0;
-                        end 
-                    end else if(rel_angle < 27)begin
-                        if(self_info.speed > HOLDER_MAX_V-2)begin
-                            basic_ctrl.A_enable <= 1;
-                            basic_ctrl.A_signal <= 1;
-                        end else begin
-                            basic_ctrl.A_enable <= 0;
-                        end 
+                        basic_ctrl.A_enable <= 1;
+                        basic_ctrl.A_signal <= 1;   //减速
                     end else begin
-                        if(self_info.speed > HOLDER_MAX_V-3)begin
-                            basic_ctrl.A_enable <= 1;
-                            basic_ctrl.A_signal <= 1;
-                        end else begin
-                            basic_ctrl.A_enable <= 0;
-                        end 
-                    end
-                //////////////////// 非持球者 ////////////////////
-                end else begin  
-                    if(sprint)begin //冲刺键
-                        debug_number[0]<=1;
-                        if(self_info.speed < CHARGE_MAX_V)begin
-                            basic_ctrl.A_enable <= 1;
-                            basic_ctrl.A_signal <= 0;   //加速
-                        end else begin
-                            basic_ctrl.A_enable <= 0;
-                        end
-                    end else begin      // 非冲刺状态下，可以调整angle
                         //角度控制
                         if(rel_pos == 0)begin   // 左侧
                             basic_ctrl.W_enable <= 1;
@@ -104,20 +48,20 @@ module Move_FSM
                         end else if(rel_pos == 2)begin  //右侧
                             basic_ctrl.W_enable <= 1;
                             basic_ctrl.W_signal <= 0;   //顺时针
-                        end else if(rel_pos == 0)begin  //重合
+                        end else if(rel_pos == 0)begin  //重合  // TODO这里后续是否可以换成其它？
                             basic_ctrl.W_enable <= 0;
-                        end else begin  //正对的情况，任意选择一个方向都行
+                        end else begin  //
                             basic_ctrl.W_enable <= 1;
                             basic_ctrl.W_signal <= 0;   // 0/1均可
                         end
                         if(rel_angle < 9)begin
                             // 这种情况角度已经比较接近，允许加速
                             //速度控制
-                            if(self_info.speed > FREE_MAX_V)begin
+                            if(self_info.speed > HOLDER_MAX_V)begin
                                 basic_ctrl.A_enable <= 1;
                                 basic_ctrl.A_signal <= 1;  // 刚冲刺完可能有这种情况，需要先减速
-                            end if(self_info.speed < FREE_MAX_V)begin    
-                                if(rel_angle < 7)begin              // 加速的情况比减速要更严格一些，为了防止出现在边缘抖动的情况
+                            end if(self_info.speed < HOLDER_MAX_V)begin    // 加速的情况比减速要更严格一些，为了防止出现在边缘抖动的情况
+                                if(rel_angle < 7)begin          
                                     basic_ctrl.A_enable <= 1;
                                     basic_ctrl.A_signal <= 0;
                                 end else begin
@@ -127,27 +71,95 @@ module Move_FSM
                                 basic_ctrl.A_enable <= 0;
                             end 
                         end else if(rel_angle < 18)begin
-                            if(self_info.speed > FREE_MAX_V-1)begin
+                            if(self_info.speed > HOLDER_MAX_V-1)begin
                                 basic_ctrl.A_enable <= 1;
                                 basic_ctrl.A_signal <= 1;
                             end else begin
                                 basic_ctrl.A_enable <= 0;
-                            end
+                            end 
                         end else if(rel_angle < 27)begin
-                            if(self_info.speed > FREE_MAX_V-2)begin
+                            if(self_info.speed > HOLDER_MAX_V-2)begin
                                 basic_ctrl.A_enable <= 1;
                                 basic_ctrl.A_signal <= 1;
                             end else begin
                                 basic_ctrl.A_enable <= 0;
                             end 
                         end else begin
-                            if(self_info.speed > FREE_MAX_V-3)begin
+                            if(self_info.speed > HOLDER_MAX_V-3)begin
                                 basic_ctrl.A_enable <= 1;
                                 basic_ctrl.A_signal <= 1;
                             end else begin
                                 basic_ctrl.A_enable <= 0;
                             end 
-                        
+                        end
+                    end
+                //////////////////// 非持球者 ////////////////////
+                end else begin  
+                    if(sprint)begin //冲刺键
+                        basic_ctrl.W_enable <= 0;      //停止转向
+                        if(self_info.speed < CHARGE_MAX_V)begin
+                            basic_ctrl.A_enable <= 1;
+                            basic_ctrl.A_signal <= 0;   //加速
+                        end else begin
+                            basic_ctrl.A_enable <= 0;
+                        end
+                    end else begin
+                        if(self_info.speed >FREE_MAX_V)begin
+                            basic_ctrl.W_enable <= 0;
+                            basic_ctrl.A_enable <= 1;
+                            basic_ctrl.A_signal <= 1;   //减速
+                        end else begin
+                            //角度控制
+                            if(rel_pos == 0)begin   // 左侧
+                                basic_ctrl.W_enable <= 1;
+                                basic_ctrl.W_signal <= 1;   //逆时针
+                            end else if(rel_pos == 2)begin  //右侧
+                                basic_ctrl.W_enable <= 1;
+                                basic_ctrl.W_signal <= 0;   //顺时针
+                            end else if(rel_pos == 0)begin  //重合
+                                basic_ctrl.W_enable <= 0;
+                            end else begin  //正对的情况，任意选择一个方向都行
+                                basic_ctrl.W_enable <= 1;
+                                basic_ctrl.W_signal <= 0;   // 0/1均可
+                            end
+                            if(rel_angle < 9)begin
+                                // 这种情况角度已经比较接近，允许加速
+                                //速度控制
+                                if(self_info.speed > FREE_MAX_V)begin
+                                    basic_ctrl.A_enable <= 1;
+                                    basic_ctrl.A_signal <= 1;  // 刚冲刺完可能有这种情况，需要先减速
+                                end if(self_info.speed < FREE_MAX_V)begin    
+                                    if(rel_angle < 7)begin              // 加速的情况比减速要更严格一些，为了防止出现在边缘抖动的情况
+                                        basic_ctrl.A_enable <= 1;
+                                        basic_ctrl.A_signal <= 0;
+                                    end else begin
+                                        basic_ctrl.A_enable <= 0;
+                                    end
+                                end else begin
+                                    basic_ctrl.A_enable <= 0;
+                                end 
+                            end else if(rel_angle < 18)begin
+                                if(self_info.speed > FREE_MAX_V-1)begin
+                                    basic_ctrl.A_enable <= 1;
+                                    basic_ctrl.A_signal <= 1;
+                                end else begin
+                                    basic_ctrl.A_enable <= 0;
+                                end
+                            end else if(rel_angle < 27)begin
+                                if(self_info.speed > FREE_MAX_V-2)begin
+                                    basic_ctrl.A_enable <= 1;
+                                    basic_ctrl.A_signal <= 1;
+                                end else begin
+                                    basic_ctrl.A_enable <= 0;
+                                end 
+                            end else begin
+                                if(self_info.speed > FREE_MAX_V-3)begin
+                                    basic_ctrl.A_enable <= 1;
+                                    basic_ctrl.A_signal <= 1;
+                                end else begin
+                                    basic_ctrl.A_enable <= 0;
+                                end 
+                            end
                         end
                     end
                 end

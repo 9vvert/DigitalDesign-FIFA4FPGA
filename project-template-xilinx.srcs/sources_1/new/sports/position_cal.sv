@@ -1,8 +1,12 @@
 // 运动时的坐标变换器，2025.5.8  ver 2.0
+
+// 2025.5.30更新：调整数值，将速度的周期 / 2后使用
+import field_package::*;
 module position_caculator
 // 这些参数制定了能够移动的x,y范围，以及初始的x, y值
 //[TODO] 这里和上层的player都有初始化参数的选项，后续可能要进行统一
-#(parameter X_MIN = 32, X_MAX=1248, Y_MIN = 32, Y_MAX=688, INIT_X = 128, INIT_Y = 128)
+// 如果这里设置了football标志，有额外的约束
+#(parameter X_MIN = 32, X_MAX=1248, Y_MIN = 32, Y_MAX=688, INIT_X = 635, INIT_Y = 335, FOOTBALL = 0)
 (
     input game_clk,
     input rst,
@@ -20,13 +24,25 @@ module position_caculator
 );
 import AngleLib::*;
 import TrianglevalLib::*;
+
+//////////////////////////////约束
+    wire[11:0] x_min, x_max, y_min, y_max;
+    assign x_max = (FOOTBALL==0) ? X_MAX : 
+            ((out_y < LEFT_NET_Y1)||(out_y > LEFT_NET_Y2)) ? RIGHT_X : RIGHT_NET_X2;
+    assign x_min = (FOOTBALL==0) ? X_MIN : 
+            ((out_y < LEFT_NET_Y1)||(out_y > LEFT_NET_Y2)) ? LEFT_X : LEFT_NET_X1;
+    assign y_max = (FOOTBALL==0) ? Y_MAX : 
+            ((out_x < LEFT_NET_X2)||(out_x > RIGHT_NET_X1)) ? LEFT_NET_Y2 : TOP_Y;
+    assign y_min = (FOOTBALL==0) ? Y_MIN : 
+            ((out_x < LEFT_NET_X2)||(out_x > RIGHT_NET_X1)) ? LEFT_NET_Y1 : BOTTOM_Y;
+
     reg [7:0] angle;            //代表在一个计数周期中有效的数值
     reg [7:0] speed;
     
     reg [9:0] L_counter_1;
-    reg [9:0] LT_1;
+    wire [9:0] LT_1;
     reg [9:0] L_counter_2;
-    reg [9:0] LT_2;
+    wire [9:0] LT_2;
 
 
 
@@ -53,221 +69,21 @@ import TrianglevalLib::*;
         L2_flag_1 = (sin_rate == 8'd0) ? (1'b0) : (1'b1);
         L2_flag_2 = (cos_rate == 8'd0) ? (1'b0) : (1'b1);
         // case似乎不能嵌套
-        case(speed)
-            1: begin
-                    LT_1 = (sin_rate == 1) ? 10'd839 :
-                            (sin_rate == 2) ? 10'd419 :
-                            (sin_rate == 3) ? 10'd279 :
-                            (sin_rate == 4) ? 10'd209 :
-                            (sin_rate == 5) ? 10'd167 :
-                            (sin_rate == 6) ? 10'd139 :
-                            (sin_rate == 7) ? 10'd119 :
-                            (sin_rate == 8) ? 10'd104 :
-                            (sin_rate == 9) ? 10'd93 :
-                            (sin_rate == 10) ? 10'd83 :
-                            (sin_rate == 11) ? 10'd76 :
-                            (sin_rate == 12) ? 10'd69 : 10'd999;  // 默认值
-                    LT_2 = (cos_rate == 1) ? 10'd839 :
-                            (cos_rate == 2) ? 10'd419 :
-                            (cos_rate == 3) ? 10'd279 :
-                            (cos_rate == 4) ? 10'd209 :
-                            (cos_rate == 5) ? 10'd167 :
-                            (cos_rate == 6) ? 10'd139 :
-                            (cos_rate == 7) ? 10'd119 :
-                            (cos_rate == 8) ? 10'd104 :
-                            (cos_rate == 9) ? 10'd93 :
-                            (cos_rate == 10) ? 10'd83 :
-                            (cos_rate == 11) ? 10'd76 :
-                            (cos_rate == 12) ? 10'd69 : 10'd999;
-                end
-            2: begin
-                    LT_1 = (sin_rate == 1) ? 10'd419 :
-                            (sin_rate == 2) ? 10'd209 :
-                            (sin_rate == 3) ? 10'd139 :
-                            (sin_rate == 4) ? 10'd104 :
-                            (sin_rate == 5) ? 10'd83 :
-                            (sin_rate == 6) ? 10'd69 :
-                            (sin_rate == 7) ? 10'd59 :
-                            (sin_rate == 8) ? 10'd52 :
-                            (sin_rate == 9) ? 10'd46 :
-                            (sin_rate == 10) ? 10'd41 :
-                            (sin_rate == 11) ? 10'd38 :
-                            (sin_rate == 12) ? 10'd34 : 10'd999;
-                    LT_2 = (cos_rate == 1) ? 10'd419 :
-                            (cos_rate == 2) ? 10'd209 :
-                            (cos_rate == 3) ? 10'd139 :
-                            (cos_rate == 4) ? 10'd104 :
-                            (cos_rate == 5) ? 10'd83 :
-                            (cos_rate == 6) ? 10'd69 :
-                            (cos_rate == 7) ? 10'd59 :
-                            (cos_rate == 8) ? 10'd52 :
-                            (cos_rate == 9) ? 10'd46 :
-                            (cos_rate == 10) ? 10'd41 :
-                            (cos_rate == 11) ? 10'd38 :
-                            (cos_rate == 12) ? 10'd34 : 10'd999;
-                end
-            3: begin
-                    LT_1 = (sin_rate == 1) ? 10'd279 :
-                            (sin_rate == 2) ? 10'd139 :
-                            (sin_rate == 3) ? 10'd93 :
-                            (sin_rate == 4) ? 10'd69 :
-                            (sin_rate == 5) ? 10'd55 :
-                            (sin_rate == 6) ? 10'd46 :
-                            (sin_rate == 7) ? 10'd39 :
-                            (sin_rate == 8) ? 10'd34 :
-                            (sin_rate == 9) ? 10'd31 :
-                            (sin_rate == 10) ? 10'd27 :
-                            (sin_rate == 11) ? 10'd25 :
-                            (sin_rate == 12) ? 10'd23 : 10'd999;
-                    LT_2 = (cos_rate == 1) ? 10'd279 :
-                            (cos_rate == 2) ? 10'd139 :
-                            (cos_rate == 3) ? 10'd93 :
-                            (cos_rate == 4) ? 10'd69 :
-                            (cos_rate == 5) ? 10'd55 :
-                            (cos_rate == 6) ? 10'd46 :
-                            (cos_rate == 7) ? 10'd39 :
-                            (cos_rate == 8) ? 10'd34 :
-                            (cos_rate == 9) ? 10'd31 :
-                            (cos_rate == 10) ? 10'd27 :
-                            (cos_rate == 11) ? 10'd25 :
-                            (cos_rate == 12) ? 10'd23 : 10'd999;
-                end
-            4: begin
-                    LT_1 = (sin_rate == 1) ? 10'd209 :
-                            (sin_rate == 2) ? 10'd104 :
-                            (sin_rate == 3) ? 10'd69 :
-                            (sin_rate == 4) ? 10'd52 :
-                            (sin_rate == 5) ? 10'd41 :
-                            (sin_rate == 6) ? 10'd34 :
-                            (sin_rate == 7) ? 10'd29 :
-                            (sin_rate == 8) ? 10'd26 :
-                            (sin_rate == 9) ? 10'd23 :
-                            (sin_rate == 10) ? 10'd20 :
-                            (sin_rate == 11) ? 10'd19 :
-                            (sin_rate == 12) ? 10'd17 : 10'd999;
-                    LT_2 = (cos_rate == 1) ? 10'd209 :
-                            (cos_rate == 2) ? 10'd104 :
-                            (cos_rate == 3) ? 10'd69 :
-                            (cos_rate == 4) ? 10'd52 :
-                            (cos_rate == 5) ? 10'd41 :
-                            (cos_rate == 6) ? 10'd34 :
-                            (cos_rate == 7) ? 10'd29 :
-                            (cos_rate == 8) ? 10'd26 :
-                            (cos_rate == 9) ? 10'd23 :
-                            (cos_rate == 10) ? 10'd20 :
-                            (cos_rate == 11) ? 10'd19 :
-                            (cos_rate == 12) ? 10'd17 : 10'd999;
-                end
-            5: begin
-                    LT_1 = (sin_rate == 1) ? 10'd167 :
-                            (sin_rate == 2) ? 10'd83 :
-                            (sin_rate == 3) ? 10'd55 :
-                            (sin_rate == 4) ? 10'd41 :
-                            (sin_rate == 5) ? 10'd33 :
-                            (sin_rate == 6) ? 10'd27 :
-                            (sin_rate == 7) ? 10'd23 :
-                            (sin_rate == 8) ? 10'd20 :
-                            (sin_rate == 9) ? 10'd18 :
-                            (sin_rate == 10) ? 10'd16 :
-                            (sin_rate == 11) ? 10'd15 :
-                            (sin_rate == 12) ? 10'd13 : 10'd999;
-                    LT_2 = (cos_rate == 1) ? 10'd167 :
-                            (cos_rate == 2) ? 10'd83 :
-                            (cos_rate == 3) ? 10'd55 :
-                            (cos_rate == 4) ? 10'd41 :
-                            (cos_rate == 5) ? 10'd33 :
-                            (cos_rate == 6) ? 10'd27 :
-                            (cos_rate == 7) ? 10'd23 :
-                            (cos_rate == 8) ? 10'd20 :
-                            (cos_rate == 9) ? 10'd18 :
-                            (cos_rate == 10) ? 10'd16 :
-                            (cos_rate == 11) ? 10'd15 :
-                            (cos_rate == 12) ? 10'd13 : 10'd999;
-                end
-            6: begin
-                    LT_1 = (sin_rate == 1) ? 10'd139 :
-                            (sin_rate == 2) ? 10'd69 :
-                            (sin_rate == 3) ? 10'd46 :
-                            (sin_rate == 4) ? 10'd34 :
-                            (sin_rate == 5) ? 10'd27 :
-                            (sin_rate == 6) ? 10'd23 :
-                            (sin_rate == 7) ? 10'd19 :
-                            (sin_rate == 8) ? 10'd17 :
-                            (sin_rate == 9) ? 10'd15 :
-                            (sin_rate == 10) ? 10'd13 :
-                            (sin_rate == 11) ? 10'd12 :
-                            (sin_rate == 12) ? 10'd11 : 10'd999;
-                    LT_2 = (cos_rate == 1) ? 10'd139 :
-                            (cos_rate == 2) ? 10'd69 :
-                            (cos_rate == 3) ? 10'd46 :
-                            (cos_rate == 4) ? 10'd34 :
-                            (cos_rate == 5) ? 10'd27 :
-                            (cos_rate == 6) ? 10'd23 :
-                            (cos_rate == 7) ? 10'd19 :
-                            (cos_rate == 8) ? 10'd17 :
-                            (cos_rate == 9) ? 10'd15 :
-                            (cos_rate == 10) ? 10'd13 :
-                            (cos_rate == 11) ? 10'd12 :
-                            (cos_rate == 12) ? 10'd11 : 10'd999;
-                end
-            7: begin
-                    LT_1 = (sin_rate == 1) ? 10'd119 :
-                            (sin_rate == 2) ? 10'd59 :
-                            (sin_rate == 3) ? 10'd39 :
-                            (sin_rate == 4) ? 10'd29 :
-                            (sin_rate == 5) ? 10'd23 :
-                            (sin_rate == 6) ? 10'd19 :
-                            (sin_rate == 7) ? 10'd17 :
-                            (sin_rate == 8) ? 10'd14 :
-                            (sin_rate == 9) ? 10'd13 :
-                            (sin_rate == 10) ? 10'd11 :
-                            (sin_rate == 11) ? 10'd10 :
-                            (sin_rate == 12) ? 10'd9 : 10'd999;
-                    LT_2 = (cos_rate == 1) ? 10'd119 :
-                            (cos_rate == 2) ? 10'd59 :
-                            (cos_rate == 3) ? 10'd39 :
-                            (cos_rate == 4) ? 10'd29 :
-                            (cos_rate == 5) ? 10'd23 :
-                            (cos_rate == 6) ? 10'd19 :
-                            (cos_rate == 7) ? 10'd17 :
-                            (cos_rate == 8) ? 10'd14 :
-                            (cos_rate == 9) ? 10'd13 :
-                            (cos_rate == 10) ? 10'd11 :
-                            (cos_rate == 11) ? 10'd10 :
-                            (cos_rate == 12) ? 10'd9 : 10'd999;
-                end
-            8: begin
-                    LT_1 = (sin_rate == 1) ? 10'd104 :
-                            (sin_rate == 2) ? 10'd52 :
-                            (sin_rate == 3) ? 10'd34 :
-                            (sin_rate == 4) ? 10'd26 :
-                            (sin_rate == 5) ? 10'd20 :
-                            (sin_rate == 6) ? 10'd17 :
-                            (sin_rate == 7) ? 10'd14 :
-                            (sin_rate == 8) ? 10'd13 :
-                            (sin_rate == 9) ? 10'd11 :
-                            (sin_rate == 10) ? 10'd10 :
-                            (sin_rate == 11) ? 10'd9 :
-                            (sin_rate == 12) ? 10'd8 : 10'd999;
-                    LT_2 = (cos_rate == 1) ? 10'd104 :
-                            (cos_rate == 2) ? 10'd52 :
-                            (cos_rate == 3) ? 10'd34 :
-                            (cos_rate == 4) ? 10'd26 :
-                            (cos_rate == 5) ? 10'd20 :
-                            (cos_rate == 6) ? 10'd17 :
-                            (cos_rate == 7) ? 10'd14 :
-                            (cos_rate == 8) ? 10'd13 :
-                            (cos_rate == 9) ? 10'd11 :
-                            (cos_rate == 10) ? 10'd10 :
-                            (cos_rate == 11) ? 10'd9 :
-                            (cos_rate == 12) ? 10'd8 : 10'd999;
-                end
-            default: begin
-                LT_1 = 999;
-                LT_2 = 999;
-            end
-        endcase
     end
+
+    sin_table_rom u_sin_rom (
+        .clk(game_clk),
+        .speed(speed),
+        .sin_rate(sin_rate),
+        .sin_val(LT_1)
+    );
+    cos_table_rom u_cos_rom (
+        .clk(game_clk),
+        .speed(speed),
+        .cos_rate(cos_rate),
+        .cos_val(LT_2)
+    );
+
 
     //[TODO] 在这里发现了极其危险的信号竞争情况！
     //如果在同一个时钟周期中，x信号可能改变，而且还要使用x信号引起连锁的y信号，会出现问题
@@ -292,8 +108,6 @@ import TrianglevalLib::*;
             pos_cal_stat <= IDLE;
         end else begin
             if(pos_cal_stat == IDLE)begin
-                L_counter_1 <= 10'd0;
-                L_counter_2 <= 10'd0;
                 speed <= in_speed;
                 angle <= in_angle;
                 if(speed > 0)begin
@@ -303,26 +117,26 @@ import TrianglevalLib::*;
                 if(angle_area == 2'd0) begin
                     //第一象限, x+sin, y+cos
                     if(L2_flag_1) begin
-                        if(L_counter_1 >= LT_1) begin
+                        if(L_counter_1 >= (LT_1>>1)) begin
                             L_counter_1 <= 10'd0;
                             pos_cal_stat <= IDLE;   //开始新一轮检测
-                            if(out_x < X_MAX) begin
+                            if(out_x < x_max) begin
                                 out_x <= out_x + 1; 
                             end else begin
-                                out_x <= X_MAX;
+                                out_x <= x_max;
                             end
                         end else begin
                             L_counter_1 <= L_counter_1 + 10'd1;
                         end
                     end
                     if(L2_flag_2) begin
-                        if(L_counter_2 >= LT_2) begin
+                        if(L_counter_2 >= (LT_2>>1)) begin
                             L_counter_2 <= 10'd0;
                             pos_cal_stat <= IDLE;
-                            if(out_y < Y_MAX) begin
+                            if(out_y < y_max) begin
                                 out_y <= out_y + 1;
                             end else begin
-                                out_y <= Y_MAX;
+                                out_y <= y_max;
                             end
                         end else begin
                             L_counter_2 <= L_counter_2 + 10'd1;
@@ -331,26 +145,26 @@ import TrianglevalLib::*;
                 end else if(angle_area == 2'd1) begin
                     //第二象限，x+cos, y-sin
                     if(L2_flag_1) begin
-                        if(L_counter_1 >= LT_1) begin
+                        if(L_counter_1 >= (LT_1>>1)) begin
                             L_counter_1 <= 10'd0;
                             pos_cal_stat <= IDLE;
-                            if(out_y > Y_MIN) begin
+                            if(out_y > y_min) begin
                                 out_y <= out_y - 1; 
                             end else begin
-                                out_y <= Y_MIN;
+                                out_y <= y_min;
                             end
                         end else begin
                             L_counter_1 <= L_counter_1 + 10'd1;
                         end
                     end
                     if(L2_flag_2) begin
-                        if(L_counter_2 >= LT_2) begin
+                        if(L_counter_2 >= (LT_2>>1)) begin
                             L_counter_2 <= 10'd0;
                             pos_cal_stat <= IDLE;
-                            if(out_x < X_MAX) begin
+                            if(out_x < x_max) begin
                                 out_x <= out_x + 1;
                             end else begin
-                                out_x <= X_MAX;
+                                out_x <= x_max;
                             end
                         end else begin
                             L_counter_2 <= L_counter_2 + 10'd1;
@@ -359,26 +173,26 @@ import TrianglevalLib::*;
                 end else if(angle_area == 2'd2) begin
                     //第三象限，x-sin, y-cos
                     if(L2_flag_1) begin
-                        if(L_counter_1 >= LT_1) begin
+                        if(L_counter_1 >= (LT_1>>1)) begin
                             L_counter_1 <= 10'd0;
                             pos_cal_stat <= IDLE;
-                            if(out_x > X_MIN) begin
+                            if(out_x > x_min) begin
                                 out_x <= out_x - 1; 
                             end else begin
-                                out_x <= X_MIN;
+                                out_x <= x_min;
                             end
                         end else begin
                             L_counter_1 <= L_counter_1 + 10'd1;
                         end
                     end
                     if(L2_flag_2) begin
-                        if(L_counter_2 >= LT_2) begin
+                        if(L_counter_2 >= (LT_2>>1)) begin
                             L_counter_2 <= 10'd0;
                             pos_cal_stat <= IDLE;
-                            if(out_y > Y_MIN) begin
+                            if(out_y > y_min) begin
                                 out_y <= out_y - 1;
                             end else begin
-                                out_y <= Y_MIN;
+                                out_y <= y_min;
                             end
                         end else begin
                             L_counter_2 <= L_counter_2 + 10'd1;
@@ -387,26 +201,26 @@ import TrianglevalLib::*;
                 end else begin
                     //第四象限，x-cos, y+sin
                     if(L2_flag_1) begin
-                        if(L_counter_1 >= LT_1) begin
+                        if(L_counter_1 >= (LT_1>>1)) begin
                             L_counter_1 <= 10'd0;
                             pos_cal_stat <= IDLE;
-                            if(out_y < Y_MAX) begin
+                            if(out_y < y_max) begin
                                 out_y <= out_y + 1; 
                             end else begin
-                                out_y <= Y_MAX;
+                                out_y <= y_max;
                             end
                         end else begin
                             L_counter_1 <= L_counter_1 + 10'd1;
                         end
                     end
                     if(L2_flag_2) begin
-                        if(L_counter_2 >= LT_2) begin
+                        if(L_counter_2 >= (LT_2>>1)) begin
                             L_counter_2 <= 10'd0;
                             pos_cal_stat <= IDLE;
-                            if(out_x > X_MIN) begin
+                            if(out_x > x_min) begin
                                 out_x <= out_x - 1;
                             end else begin
-                                out_x <= X_MIN;
+                                out_x <= x_min;
                             end
                         end else begin
                             L_counter_2 <= L_counter_2 + 10'd1;

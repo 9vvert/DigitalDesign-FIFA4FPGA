@@ -7,6 +7,8 @@
 module async_ImgLoader(
     //数据总信息
     // output reg [31:0]debug_number,
+    input clk_100m,
+    input rst,
     input imgloader_ui_clk,       // 仍旧使用显存的时钟频率
     input ui_rst,
     input load_start,           //开始加载一个命令
@@ -32,6 +34,7 @@ module async_ImgLoader(
     // 执行一轮，可以拷贝512字节
     // JUDGE负责在每一轮开始时进行判断，包括是否有剩余的字节，以及是否够512字节
     localparam [2:0] IDLE = 3'd0, JUDGE = 3'd1, SD_RD = 3'd2, SDRAM_WR = 3'd3, DONE = 3'd4, WAIT=3'd5;
+    
     reg [2:0] loader_stat;
     reg [31:0] remain_bytes;        //剩余需要读的字节数
     //起始即使最后一周期不用读取512字节，让SDRAM读取额外的也没有影响。只要使用的时候及时终止即可
@@ -81,38 +84,40 @@ module async_ImgLoader(
                 if( (~last_sd_read_end) & loader_sd_read_end)begin
                     loader_curr_sd_addr <= loader_curr_sd_addr + 512;   //在读取完毕后再开始更新
                     loader_info[7:4] <=loader_info[7:4] + 1;
-                    for (i = 0; i < 512; i = i + 1) begin
-                        buffer[i] <= loader_sd_buffer[i];
-                    end
+                    // for (i = 0; i < 512; i = i + 1) begin
+                    //     buffer[i] <= loader_sd_buffer[i];
+                    // end
                     loader_sd_read_start <= 1'b0;
-                    loader_stat <= WAIT;
+                    loader_stat <= SDRAM_WR;
                     sector_counter <= 'd0;
                 end
             end else if(loader_stat == WAIT)begin
                 //[TODO]2025.5.28修改端序
-                loader_sdram_buffer[15:8] <= buffer[8*sector_counter];
-                loader_sdram_buffer[7:0] <= buffer[8*sector_counter+1];
-                loader_sdram_buffer[31:24] <= buffer[8*sector_counter+2];
-                loader_sdram_buffer[23:16] <= buffer[8*sector_counter+3];
-                loader_sdram_buffer[47:40] <= buffer[8*sector_counter+4];
-                loader_sdram_buffer[39:32] <= buffer[8*sector_counter+5];
-                loader_sdram_buffer[63:56] <= buffer[8*sector_counter+6];
-                loader_sdram_buffer[55:48] <= buffer[8*sector_counter+7];
+                //5.29 更新：加了一个缓冲状态反而不能正确加载
+                loader_sdram_buffer[15:8] <= loader_sd_buffer[8*sector_counter];
+                loader_sdram_buffer[7:0] <= loader_sd_buffer[8*sector_counter+1];
+                loader_sdram_buffer[31:24] <= loader_sd_buffer[8*sector_counter+2];
+                loader_sdram_buffer[23:16] <= loader_sd_buffer[8*sector_counter+3];
+                loader_sdram_buffer[47:40] <= loader_sd_buffer[8*sector_counter+4];
+                loader_sdram_buffer[39:32] <= loader_sd_buffer[8*sector_counter+5];
+                loader_sdram_buffer[63:56] <= loader_sd_buffer[8*sector_counter+6];
+                loader_sdram_buffer[55:48] <= loader_sd_buffer[8*sector_counter+7];
                 loader_stat <= SDRAM_WR;
             end else if(loader_stat == SDRAM_WR)begin
                 // debug: 先等4秒，每次展示2个字节，然后才开始写
+                
                 loader_sdram_cmd <= 2;
                 if( (~last_sdram_write_end) & loader_sdram_write_end)begin   //捕捉上升时刻
                     loader_info[23:8] <= loader_info[23:8] + 1;
                     loader_sdram_cmd <= 0;      // 及时撤销命令 
                     delay_show_counter <= 64'd0;
                     loader_curr_sdram_addr <= loader_curr_sdram_addr + 8;
-                    sector_counter <= sector_counter + 1;
                     // 2025/5/15发现的第三个错误，这里不应该用512！是64，否则会死循环
                     if(sector_counter == 63)begin
                         sector_counter <= 0;
                         loader_stat <= JUDGE;   //开启下一个扇区
                     end else begin
+                        sector_counter <= sector_counter + 1;
                         loader_stat <= WAIT;    //在开启下一轮写之前，可能需要延时
                                                     //更新：似乎不需要延时，因为上面检测的是上升沿，而不是单纯的电平高低
                     end

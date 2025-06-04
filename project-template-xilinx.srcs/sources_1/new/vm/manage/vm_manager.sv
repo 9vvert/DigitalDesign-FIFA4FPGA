@@ -10,12 +10,12 @@ parameter MB = 1024*KB;
 // 这些BUF的开始位置不需要随着分辨率改变
 // parameter BUF1_START = 16*MB, BUF2_START = 18*MB, BG_FRAME_START = 20*MB;
 parameter BG_FRAME_START = 20*MB;
-parameter OBJ_NUM = 1;
+parameter OBJ_NUM = 24;
 import type_declare::*;
 module vm_manager
 // 测试阶段，只绘制2个物体 
 (
-    output reg [15:0]debug_number,
+    output reg [31:0]debug_number,
     input clk_100m,       // 100MHz
     input rst,
     input clk_locked,     // 复位信号
@@ -71,14 +71,13 @@ module vm_manager
     output out_ui_rst
 );
     // /***********  SDRAM  ************/
-    reg [2:0] sdram_controller_stat;    //
     wire ui_clk;                 // 由SDRAM输出
     wire ui_rst;
-    reg [1:0]sdram_cmd;
-    reg [29:0]sdram_addr;
-    reg [63:0]sdram_write_data;
-    reg [63:0]sdram_read_data;
-    reg cmd_done;
+    wire [1:0]sdram_cmd;
+    wire [29:0]sdram_addr;
+    wire [63:0]sdram_write_data;
+    wire [63:0]sdram_read_data;
+    wire cmd_done;
     wire sdram_init_calib_complete; //检测到为高的时候，SDRAM正式进入可用状态
     sdram_IO u_sdram_IO(
         .ui_clk(ui_clk),
@@ -114,10 +113,10 @@ module vm_manager
     );
 
     /*************   SD卡    *************/
-    reg sd_read_start;
-    reg sd_read_end;
-    reg [31:0] sd_addr;
-    reg [7:0] sd_buffer[511:0];
+    wire sd_read_start;
+    wire sd_read_end;
+    wire [31:0] sd_addr;
+    wire [7:0] sd_buffer[511:0];
     sd_IO u_sd_IO(
         .ui_clk(ui_clk),
         .rst(~clk_locked),
@@ -305,7 +304,7 @@ module vm_manager
     wire [19:0] render_sram_addr;
     wire [31:0] render_sram_din;
     vm_renderer u_vm_renderer(
-        // .debug_number(debug_number),
+        .debug_number(debug_number),
         .vm_renderer_ui_clk(ui_clk),
         .ui_rst(ui_rst),
         //和上层的接口
@@ -385,6 +384,26 @@ module vm_manager
     //     .debug_number(debug_number)
     // );
 
+    /**************** SDRAM信号仲裁 *****************/
+
+    assign sdram_cmd = (manager_stat == INIT) ? init_sdram_cmd:
+                        (manager_stat == FILL) ? render_sdram_cmd :
+                        (manager_stat == RENDER) ? render_sdram_cmd:
+                            bg_sdram_cmd;
+
+    assign sdram_addr = (manager_stat == INIT) ? init_curr_sdram_addr :
+                        (manager_stat == FILL) ? render_operate_addr :
+                        (manager_stat == RENDER) ? render_operate_addr:
+                            bg_sdram_addr;
+    assign sdram_write_data = (manager_stat == INIT) ? init_sdram_buffer :  
+                        (manager_stat == FILL) ? render_write_data:
+                        (manager_stat == RENDER) ? render_write_data:
+                            render_write_data;
+
+    /****************  SD卡信号仲裁 ****************/
+    assign sd_read_start = init_sd_read_start;
+    assign sd_addr = init_curr_sd_addr;
+
     /*****************  SRAM信号仲裁  *****************/
     assign sram_io_req= (manager_stat == SWITCH) ? switch_sram_io_req:
                         (manager_stat == RENDER) ? render_sram_io_req:
@@ -447,7 +466,7 @@ module vm_manager
             copy_done <= 0;
             bg_delay_counter <= 0;
 
-            debug_number <= 0;
+            // debug_number <= 0;
             // bg_square
             for(integer k=0; k<32; k=k+1)begin
                 bg_square[k].enable <= 0;
@@ -465,17 +484,11 @@ module vm_manager
                 end
                 INIT:begin
                     init_start <= 1;
-                    sd_read_start <= init_sd_read_start;
-                    sd_addr <= init_curr_sd_addr;
-                    sdram_cmd <= init_sdram_cmd;
-                    sdram_addr <= init_curr_sdram_addr;
-                    sdram_write_data <= init_sdram_buffer;
                     //资源装载
                     //[TODO]这里进行信号的分配，将SDRAM_IO和vm_init连接起来
 
                     if(init_end)begin
-                        sd_read_start <= 1'b0;  //信号归位
-                        sdram_cmd <= 2'd0;
+                        init_start <= 1'b0;  //信号归位
                         manager_stat <= IDLE;
                     end
                 end
@@ -532,9 +545,7 @@ module vm_manager
                     //[TODO] 重要：外部需要确保enable=0的优先级为0，排在最后面
                     draw_begin <= 1'b1;
                     render_type <= 1;   //背景填补
-                    sdram_cmd <= render_sdram_cmd;
-                    sdram_addr <= render_operate_addr;
-                    sdram_write_data <= render_write_data;
+                    
                     //  index[0]的优先级最高
                     render_param <= bg_square1[ fill_counter ];
                     
@@ -550,15 +561,12 @@ module vm_manager
                     if(render_counter < OBJ_NUM)begin
                         draw_begin <= 1'b1;
                         render_type <= 0;   //图形绘制
-                        sdram_cmd <= render_sdram_cmd;
-                        sdram_addr <= render_operate_addr;
-                        sdram_write_data <= render_write_data;
                         // [TODO]这里进行数据的初步处理，并给render_param赋值
                         // 31是vpos最大的一个，这里应该从vpos小的图形开始渲染
                         //[TODO] 这里会不会因为继承enable属性导致渲染错误？
                         render_param <= render_param_buffer[ index[render_counter] ];
-                        debug_number[15:8] <= render_param_buffer[ index[render_counter] ].hpos[7:0];
-                        debug_number[7:0] <= render_param_buffer[ index[render_counter] ].vpos[7:0];
+                        // debug_number[15:8] <= render_param_buffer[ index[render_counter] ].hpos[7:0];
+                        // debug_number[7:0] <= render_param_buffer[ index[render_counter] ].vpos[7:0];
                         // [TODO]在这里，将当前的渲染参数（只用坐标）赋给bg_square,供下一帧使用
                         if(~last_draw_end & draw_end)begin
                             //[TODO]不能写在外面，否则会执行多次
@@ -605,8 +613,6 @@ module vm_manager
                     manager_stat <= IDLE;
                 end
                 SWITCH_BG: begin
-                    sdram_cmd <= bg_sdram_cmd;
-                    sdram_addr <= bg_sdram_addr;
                     switch_bg_index <= input_bg_index;   //[TODO]后续这里对接具体的数据
                     tmp_bg <= input_bg_index;        //供vm_renderer使用
                     switch_bg_begin <= 1;

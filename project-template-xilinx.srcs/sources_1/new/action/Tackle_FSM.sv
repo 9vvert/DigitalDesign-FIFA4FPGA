@@ -1,124 +1,97 @@
 module Tackle_FSM
 // TOL_DIS: 判定半径, TOL_ANGLE: 判定角度, （不需要判定速度）
+import type_declare::PlayerInfo, type_declare::BallInfo;
 #(parameter TOL_DIS1 = 40, TOL_DIS2 = 10, TOL_ANGLE = 9)
 (
     input Tackle_FSM_game_clk,
     input rst,
-
     //和上层HFSM模块的通信协议，捕捉上升沿
-    input tackle_start,
-    output reg Tackle_FSM_done,
-    //用于打断动作
-    input cancel,
-
+    input hold,         
+    input tackle_enable,            // 连接到外界的cmd上
+    output reg tackle_use_follow,       // 是否使用追踪机
     input PlayerInfo self_info,
     input BallInfo ball_info,
-    
-    output MoveControl tackle_ctrl,
-    //向上层传递的信息，主要用于汇报动作是否成功
-    output reg [1:0] message    // 1:成功， 2：失败， 0：未定义
+    output reg tackle_signal,           //直接连接到上层的tackle_signal
+    output reg tackle_done          // 向外界通知动作结束，但是不保证是否成功
 );
 
 import AngleLib::*;
 import TrianglevalLib::*;
 import LineLib::*;
-    /**************************************/
-    //DIS_JUDGE: 距离判定。不论何时，一旦距离超过，就会导致状态机结束，返回失败
-    //ANG_JUDGE: 角度判定，重点是“人和球连线的角度”和
-    localparam IDLE = 6'd0, SOFT_JUDGE = 6'd1, STRICT_JUDGE = 6'd2, 
-        FOLLOW = 6'd3, DONE = 6'd4;
-    
-    /**********  内置追随机   *********/
-    reg follow_enable;
-    reg follow_AE;
-    reg follow_AS;
-    reg follow_WE;
-    reg follow_WS;
-    follow u_follow(
-        .game_clk(Tackle_FSM_game_clk),
-        .rst(rst),
-        .enable(follow_enable),       // 只在enable = 1时工作，而且会实时读取obj_angle, obj_speed, aim_speed的数值
-        .obj_x(player_x),
-        .obj_y(player_y),
-        .obj_angle(player_angle),
-        .obj_speed(player_speed),
-        .aim_x(football_x),
-        .aim_y(football_y),
-    //输出的控制信号
-        .A_enable(follow_AE),
-        .A_signal(follow_AS),
-        .W_enable(follow_WE),
-        .W_signal(follow_WS)
-    );
-    //
-    reg ready;
-    reg last_tackle_start;    
-    reg [5:0] Tackle_FSM_stat;
 
-    reg [7:0] player_football_angle;       //张角
-    reg [7:0] delta_angle;
-    reg [1:0] delta_pos;   //相对位置
-
-    always@(posedge Tackle_FSM_game_clk) begin
-        if(rst) begin
-            ready <= 1'b0;
-            last_tackle_start <= 1'b0;
-            Tackle_FSM_stat <= IDLE;
-            follow_enable <= 1'b0;
-            A_enable <= 1'b0;
-            W_enable <= 1'b0;    
-            Tackle_FSM_done <= 1'b0;
+    logic [31:0] curr_distance;       // 人和球的距离
+    logic [7:0] rel_angle;          // 人的朝向 和 人与球连线 的夹角
+    logic [7:0] line_angle;
+    // 球必须在地上才能抢
+    always_comb begin
+        curr_distance = distance(self_info.x, self_info.y, ball_info.x, ball_info.y);
+        line_angle = vec2angle(self_info.x, self_info.y, ball_info.x, ball_info.y);
+        rel_angle = rel_angle_val(line_angle, self_info.angle);
+    end
+    reg [3:0] Tackle_stat;
+    reg [3:0] wait_counter;
+    reg done_delay_counter;
+    localparam [3:0] IDLE=0, FOLLOW=1, WAIT=2, DONE=3;
+    always@(posedge Tackle_FSM_game_clk)begin
+        if(rst)begin
+            Tackle_stat <= IDLE;
+            tackle_signal <= 0;
+            tackle_done <= 0;
+            wait_counter <= 0;
+            done_delay_counter<=0;
         end else begin
-            ready = (last_tackle_start == 1'b0) && (tackle_start == 1'b1);
-            last_tackle_start = tackle_start;   // 这里十分危险，一定要使用阻塞赋值
-            if(Tackle_FSM_stat == IDLE) begin
-                //捕捉ready的上升沿
-                follow_enable <= 1'b0;     
-                A_enable <= 1'b0;
-                W_enable <= 1'b0;    
-                if(ready) begin
-                    Tackle_FSM_stat <= STRICT_JUDGE;
-                end else begin
-                    Tackle_FSM_stat <= IDLE;
+            if(Tackle_stat == IDLE)begin
+                tackle_done <= 0;
+                tackle_use_follow <= 0;
+                tackle_signal <= 0;
+                if(tackle_enable)begin
+                    Tackle_stat <= FOLLOW;
                 end
-            end else if(Tackle_FSM_stat == STRICT_JUDGE) begin
-                // STRICT_JUDGE: 同时判断距离和角度，如果都在合适范围内则成功，否则转入SOFT_JUDGE
-                player_football_angle = vec2angle(.x1(player_x), .y1(player_y), .x2(football_x), .y2(football_y));
-                delta_angle = rel_angle_val(player_angle, player_football_angle);
-                delta_pos = rel_angle_pos(player_angle, player_football_angle);
-                if(delta_angle < TOL_ANGLE && 
-                compare_distance(.x1(player_x), .y1(player_y), .x2(football_x), .y2(football_y), .r(TOL_DIS2)) == 2) begin
-                    message <= 2'd1;        //判定成功
-                    Tackle_FSM_done <= 1'b1;
-                    Tackle_FSM_stat <= DONE;
+            end else if(Tackle_stat == FOLLOW)begin
+                if(~tackle_enable)begin
+                    //第一种情况，抢断中止
+                    tackle_use_follow <= 0;
+                    tackle_signal <= 0;
+                    Tackle_stat <= DONE;
+                end else if(curr_distance > 2500)begin
+                    //超过范围，记为失败
+                    tackle_use_follow <= 0;
+                    tackle_signal <= 0;
+                    Tackle_stat <= DONE;
+                end else if( curr_distance > 100 || rel_angle > 18) begin
+                    //在范围内，但是距离或者角度不合适，需要继续调整
+                    tackle_use_follow <= 1;
+                    tackle_signal <= 0;
+                    Tackle_stat <= FOLLOW;
+                end else begin      // 距离和角度都符合要求，抢断成功
+                    tackle_use_follow <= 0;
+                    tackle_signal <= 1;        //拉高tackle信号
+                    Tackle_stat <= WAIT;
+                    wait_counter <= 0;      //每次开启WAIT阶段都清空计数器
+                end 
+            end else if(Tackle_stat == WAIT)begin
+                if(hold)begin       // 成功拿到持球权，结束
+                    tackle_signal <= 0;
+                    Tackle_stat <= DONE;
                 end else begin
-                    Tackle_FSM_stat <= SOFT_JUDGE;
+                    if(wait_counter >= 8)begin
+                        //超时，大概率是因为中途被别人抢断
+                        tackle_signal <= 0;
+                        wait_counter <= 0;
+                        Tackle_stat<= DONE;
+                    end else begin
+                        wait_counter <= wait_counter + 1;
+                    end
                 end
-            end else if(Tackle_FSM_stat == SOFT_JUDGE) begin
-                if(compare_distance(.x1(player_x), .y1(player_y), .x2(football_x), .y2(football_y), .r(TOL_DIS1)) == 1) begin
-                    message <= 2'd2;    //距离超过指定距离，认为失败
-                    Tackle_FSM_done <= 1'b1;
-                    Tackle_FSM_stat <= DONE;
-                end else begin
-                    Tackle_FSM_stat <= FOLLOW;
-                end
-            end else if(Tackle_FSM_stat == FOLLOW) begin
-                //调整角度
-                follow_enable <= 1'b1;      // 至少进入一次FOLLOW状态后才能开启追随机
-                A_enable <= follow_AE;
-                A_signal <= follow_AS;
-                W_enable <= follow_WE;
-                W_signal <= follow_WS;      //及时传递信号
-                Tackle_FSM_stat <= STRICT_JUDGE;
-            end else if(Tackle_FSM_stat == DONE) begin
-                follow_enable <= 1'b0;
-                Tackle_FSM_done <= 1'b0;           //将信号再次拉低
-                A_enable <= 1'b0;
-                W_enable <= 1'b0;
-                Tackle_FSM_stat <= IDLE;
             end else begin
-                Tackle_FSM_stat <= DONE;
+                tackle_done <= 1;
+                if(done_delay_counter == 0)begin        //延时一个周期释放
+                    done_delay_counter <= 1;
+                end else begin
+                    done_delay_counter <= 0;
+                    Tackle_stat <= IDLE;
+                end
             end
         end
-    end
+    end 
 endmodule

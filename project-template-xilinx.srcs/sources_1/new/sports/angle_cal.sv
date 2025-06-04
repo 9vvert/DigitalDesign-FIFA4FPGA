@@ -1,13 +1,13 @@
 module angle_caculator
 
 // 人物在任何时候都会有一个朝向，因此不用额外设置“无方向”这种特殊情况
-#(parameter INIT_ANGLE = 0, W_T = 24)
+#(parameter INIT_ANGLE = 0, W_T = 24, KEEPER=0)     //如果是门将，应该有更高的六火星
 (
     input game_clk,
     input rst,
     input enable,
     input signal,       // 0代表顺时针，1代表逆时针
-
+    input delay,
     output reg[7:0] angle,
 
     //扩展
@@ -28,7 +28,7 @@ module angle_caculator
             angle_counter <= 6'd0;
         end else begin
             if(enable) begin
-                if(angle_counter == W_T - 1) begin
+                if(angle_counter >= ( KEEPER ? 11 :delay ? 47 : 23) ) begin
                     angle_counter <= 6'd0;
                     if(signal) begin    //逆时针
                         if(angle == 8'd0) begin

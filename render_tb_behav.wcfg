@@ -3,639 +3,604 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="move_tb_behav.wdb" id="1">
+      <db_ref path="game_FSM_tb_behav.wdb" id="1">
          <top_modules>
             <top_module name="AngleLib" />
             <top_module name="LineLib" />
             <top_module name="TrianglevalLib" />
+            <top_module name="ai_package" />
+            <top_module name="field_package" />
+            <top_module name="game_FSM_tb" />
             <top_module name="glbl" />
-            <top_module name="move_tb" />
             <top_module name="type_declare" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="54345000fs"></ZoomStartTime>
-      <ZoomEndTime time="58845001fs"></ZoomEndTime>
-      <Cursor1Time time="55573252fs"></Cursor1Time>
+      <ZoomStartTime time="2498049960fs"></ZoomStartTime>
+      <ZoomEndTime time="2620049961fs"></ZoomEndTime>
+      <Cursor1Time time="2529949960fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="192"></NameColumnWidth>
-      <ValueColumnWidth column_width="83"></ValueColumnWidth>
+      <NameColumnWidth column_width="204"></NameColumnWidth>
+      <ValueColumnWidth column_width="104"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="152" />
+   <WVObjectSize size="142" />
    <wave_markers>
       <marker time="7199975000" label="" />
       <marker time="40151155000" label="" />
-      <marker time="1621335000" label="" />
       <marker time="56225000" label="" />
+      <marker time="1621335000" label="" />
    </wave_markers>
-   <wvobject fp_name="/move_tb/u_game/game_clk" type="logic">
-      <obj_property name="ElementShortName">game_clk</obj_property>
-      <obj_property name="ObjectShortName">game_clk</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/ai_game_clk" type="logic">
+      <obj_property name="ElementShortName">ai_game_clk</obj_property>
+      <obj_property name="ObjectShortName">ai_game_clk</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/ps2_clk" type="logic">
-      <obj_property name="ElementShortName">ps2_clk</obj_property>
-      <obj_property name="ObjectShortName">ps2_clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/rst" type="logic">
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/rst" type="logic">
       <obj_property name="ElementShortName">rst</obj_property>
       <obj_property name="ObjectShortName">rst</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/debug_number" type="array">
-      <obj_property name="ElementShortName">debug_number[31:0]</obj_property>
-      <obj_property name="ObjectShortName">debug_number[31:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/hold_index" type="array">
+      <obj_property name="ElementShortName">hold_index[3:0]</obj_property>
+      <obj_property name="ObjectShortName">hold_index[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/pmod_io1" type="logic">
-      <obj_property name="ElementShortName">pmod_io1</obj_property>
-      <obj_property name="ObjectShortName">pmod_io1</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/selected_index" type="array">
+      <obj_property name="ElementShortName">selected_index[3:0]</obj_property>
+      <obj_property name="ObjectShortName">selected_index[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/pmod_io2" type="logic">
-      <obj_property name="ElementShortName">pmod_io2</obj_property>
-      <obj_property name="ObjectShortName">pmod_io2</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/pmod_io3" type="logic">
-      <obj_property name="ElementShortName">pmod_io3</obj_property>
-      <obj_property name="ObjectShortName">pmod_io3</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/pmod_io4" type="logic">
-      <obj_property name="ElementShortName">pmod_io4</obj_property>
-      <obj_property name="ObjectShortName">pmod_io4</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/player_info" type="array">
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/player_info" type="array">
       <obj_property name="ElementShortName">player_info[9:0]</obj_property>
       <obj_property name="ObjectShortName">player_info[9:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/ball_info" type="array">
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/ball_info" type="array">
       <obj_property name="ElementShortName">ball_info</obj_property>
       <obj_property name="ObjectShortName">ball_info</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/game_bg" type="array">
-      <obj_property name="ElementShortName">game_bg[5:0]</obj_property>
-      <obj_property name="ObjectShortName">game_bg[5:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/decision" type="array">
+      <obj_property name="ElementShortName">decision[4:0][31:0]</obj_property>
+      <obj_property name="ObjectShortName">decision[4:0][31:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/cmd_left_angle" type="array">
-      <obj_property name="ElementShortName">cmd_left_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">cmd_left_angle[7:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/area_angle1" type="array">
+      <obj_property name="ElementShortName">area_angle1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">area_angle1[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/cmd_right_angle" type="array">
-      <obj_property name="ElementShortName">cmd_right_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">cmd_right_angle[7:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/area_angle2" type="array">
+      <obj_property name="ElementShortName">area_angle2[7:0]</obj_property>
+      <obj_property name="ObjectShortName">area_angle2[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/cmd_action_cmd" type="array">
-      <obj_property name="ElementShortName">cmd_action_cmd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">cmd_action_cmd[7:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/no_holder" type="logic">
+      <obj_property name="ElementShortName">no_holder</obj_property>
+      <obj_property name="ObjectShortName">no_holder</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/const_init" type="array">
-      <obj_property name="ElementShortName">const_init[9:0]</obj_property>
-      <obj_property name="ObjectShortName">const_init[9:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/self_hold" type="logic">
+      <obj_property name="ElementShortName">self_hold</obj_property>
+      <obj_property name="ObjectShortName">self_hold</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/football_const_init" type="array">
-      <obj_property name="ElementShortName">football_const_init</obj_property>
-      <obj_property name="ObjectShortName">football_const_init</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/AD_flag" type="logic">
+      <obj_property name="ElementShortName">AD_flag</obj_property>
+      <obj_property name="ObjectShortName">AD_flag</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/football_free_init" type="array">
-      <obj_property name="ElementShortName">football_free_init</obj_property>
-      <obj_property name="ObjectShortName">football_free_init</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/decision_stat" type="array">
+      <obj_property name="ElementShortName">decision_stat[5:0]</obj_property>
+      <obj_property name="ObjectShortName">decision_stat[5:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/free_init" type="array">
-      <obj_property name="ElementShortName">free_init[9:0]</obj_property>
-      <obj_property name="ObjectShortName">free_init[9:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/ai_hold" type="logic">
+      <obj_property name="ElementShortName">ai_hold</obj_property>
+      <obj_property name="ObjectShortName">ai_hold</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/tackle_signal" type="array">
-      <obj_property name="ElementShortName">tackle_signal[9:0]</obj_property>
-      <obj_property name="ObjectShortName">tackle_signal[9:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/free_player_info" type="array">
+      <obj_property name="ElementShortName">free_player_info[2:0]</obj_property>
+      <obj_property name="ObjectShortName">free_player_info[2:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/shoot_signal" type="array">
-      <obj_property name="ElementShortName">shoot_signal[9:0]</obj_property>
-      <obj_property name="ObjectShortName">shoot_signal[9:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/free_player_index" type="array">
+      <obj_property name="ElementShortName">free_player_index[2:0][3:0]</obj_property>
+      <obj_property name="ObjectShortName">free_player_index[2:0][3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/switch_signal" type="array">
-      <obj_property name="ElementShortName">switch_signal[9:0][3:0]</obj_property>
-      <obj_property name="ObjectShortName">switch_signal[9:0][3:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/free_player_ball_dis" type="array">
+      <obj_property name="ElementShortName">free_player_ball_dis[2:0][31:0]</obj_property>
+      <obj_property name="ObjectShortName">free_player_ball_dis[2:0][31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/football_being_held" type="logic">
-      <obj_property name="ElementShortName">football_being_held</obj_property>
-      <obj_property name="ObjectShortName">football_being_held</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/sorted_dis_index" type="array">
+      <obj_property name="ElementShortName">sorted_dis_index[2:0][3:0]</obj_property>
+      <obj_property name="ObjectShortName">sorted_dis_index[2:0][3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/player_hold" type="array">
-      <obj_property name="ElementShortName">player_hold[9:0]</obj_property>
-      <obj_property name="ObjectShortName">player_hold[9:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/sleep_counter" type="array">
+      <obj_property name="ElementShortName">sleep_counter[9:0]</obj_property>
+      <obj_property name="ObjectShortName">sleep_counter[9:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/player_selected" type="array">
-      <obj_property name="ElementShortName">player_selected[9:0]</obj_property>
-      <obj_property name="ObjectShortName">player_selected[9:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/last_selected_index" type="array">
+      <obj_property name="ElementShortName">last_selected_index[3:0]</obj_property>
+      <obj_property name="ObjectShortName">last_selected_index[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/player_game_clk" type="logic">
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/TEAM" type="array">
+      <obj_property name="ElementShortName">TEAM[31:0]</obj_property>
+      <obj_property name="ObjectShortName">TEAM[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/CHECK_SELECT" type="array">
+      <obj_property name="ElementShortName">CHECK_SELECT[5:0]</obj_property>
+      <obj_property name="ObjectShortName">CHECK_SELECT[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/DELAY" type="array">
+      <obj_property name="ElementShortName">DELAY[5:0]</obj_property>
+      <obj_property name="ObjectShortName">DELAY[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/LOAD_INFO" type="array">
+      <obj_property name="ElementShortName">LOAD_INFO[5:0]</obj_property>
+      <obj_property name="ObjectShortName">LOAD_INFO[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/CHECK_AD" type="array">
+      <obj_property name="ElementShortName">CHECK_AD[5:0]</obj_property>
+      <obj_property name="ObjectShortName">CHECK_AD[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/CAL_DISTANCE" type="array">
+      <obj_property name="ElementShortName">CAL_DISTANCE[5:0]</obj_property>
+      <obj_property name="ObjectShortName">CAL_DISTANCE[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/SORT" type="array">
+      <obj_property name="ElementShortName">SORT[5:0]</obj_property>
+      <obj_property name="ObjectShortName">SORT[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/ALLOCATE_D" type="array">
+      <obj_property name="ElementShortName">ALLOCATE_D[5:0]</obj_property>
+      <obj_property name="ObjectShortName">ALLOCATE_D[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/GEN_PARAM_D" type="array">
+      <obj_property name="ElementShortName">GEN_PARAM_D[5:0]</obj_property>
+      <obj_property name="ObjectShortName">GEN_PARAM_D[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/ALLOCATE_A" type="array">
+      <obj_property name="ElementShortName">ALLOCATE_A[5:0]</obj_property>
+      <obj_property name="ObjectShortName">ALLOCATE_A[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/GEN_PARAM_A" type="array">
+      <obj_property name="ElementShortName">GEN_PARAM_A[5:0]</obj_property>
+      <obj_property name="ObjectShortName">GEN_PARAM_A[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree1/SLEEP" type="array">
+      <obj_property name="ElementShortName">SLEEP[5:0]</obj_property>
+      <obj_property name="ObjectShortName">SLEEP[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/ai_game_clk" type="logic">
+      <obj_property name="ElementShortName">ai_game_clk</obj_property>
+      <obj_property name="ObjectShortName">ai_game_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/hold_index" type="array">
+      <obj_property name="ElementShortName">hold_index[3:0]</obj_property>
+      <obj_property name="ObjectShortName">hold_index[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/selected_index" type="array">
+      <obj_property name="ElementShortName">selected_index[3:0]</obj_property>
+      <obj_property name="ObjectShortName">selected_index[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/player_info" type="array">
+      <obj_property name="ElementShortName">player_info[9:0]</obj_property>
+      <obj_property name="ObjectShortName">player_info[9:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/ball_info" type="array">
+      <obj_property name="ElementShortName">ball_info</obj_property>
+      <obj_property name="ObjectShortName">ball_info</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/decision" type="array">
+      <obj_property name="ElementShortName">decision[4:0][31:0]</obj_property>
+      <obj_property name="ObjectShortName">decision[4:0][31:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/area_angle1" type="array">
+      <obj_property name="ElementShortName">area_angle1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">area_angle1[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/area_angle2" type="array">
+      <obj_property name="ElementShortName">area_angle2[7:0]</obj_property>
+      <obj_property name="ObjectShortName">area_angle2[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/no_holder" type="logic">
+      <obj_property name="ElementShortName">no_holder</obj_property>
+      <obj_property name="ObjectShortName">no_holder</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/self_hold" type="logic">
+      <obj_property name="ElementShortName">self_hold</obj_property>
+      <obj_property name="ObjectShortName">self_hold</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/AD_flag" type="logic">
+      <obj_property name="ElementShortName">AD_flag</obj_property>
+      <obj_property name="ObjectShortName">AD_flag</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/decision_stat" type="array">
+      <obj_property name="ElementShortName">decision_stat[5:0]</obj_property>
+      <obj_property name="ObjectShortName">decision_stat[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/ai_hold" type="logic">
+      <obj_property name="ElementShortName">ai_hold</obj_property>
+      <obj_property name="ObjectShortName">ai_hold</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/free_player_info" type="array">
+      <obj_property name="ElementShortName">free_player_info[2:0]</obj_property>
+      <obj_property name="ObjectShortName">free_player_info[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/free_player_index" type="array">
+      <obj_property name="ElementShortName">free_player_index[2:0][3:0]</obj_property>
+      <obj_property name="ObjectShortName">free_player_index[2:0][3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/free_player_ball_dis" type="array">
+      <obj_property name="ElementShortName">free_player_ball_dis[2:0][31:0]</obj_property>
+      <obj_property name="ObjectShortName">free_player_ball_dis[2:0][31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/sorted_dis_index" type="array">
+      <obj_property name="ElementShortName">sorted_dis_index[2:0][3:0]</obj_property>
+      <obj_property name="ObjectShortName">sorted_dis_index[2:0][3:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/sleep_counter" type="array">
+      <obj_property name="ElementShortName">sleep_counter[9:0]</obj_property>
+      <obj_property name="ObjectShortName">sleep_counter[9:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/last_selected_index" type="array">
+      <obj_property name="ElementShortName">last_selected_index[3:0]</obj_property>
+      <obj_property name="ObjectShortName">last_selected_index[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/TEAM" type="array">
+      <obj_property name="ElementShortName">TEAM[31:0]</obj_property>
+      <obj_property name="ObjectShortName">TEAM[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/CHECK_SELECT" type="array">
+      <obj_property name="ElementShortName">CHECK_SELECT[5:0]</obj_property>
+      <obj_property name="ObjectShortName">CHECK_SELECT[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/DELAY" type="array">
+      <obj_property name="ElementShortName">DELAY[5:0]</obj_property>
+      <obj_property name="ObjectShortName">DELAY[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/LOAD_INFO" type="array">
+      <obj_property name="ElementShortName">LOAD_INFO[5:0]</obj_property>
+      <obj_property name="ObjectShortName">LOAD_INFO[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/CHECK_AD" type="array">
+      <obj_property name="ElementShortName">CHECK_AD[5:0]</obj_property>
+      <obj_property name="ObjectShortName">CHECK_AD[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/CAL_DISTANCE" type="array">
+      <obj_property name="ElementShortName">CAL_DISTANCE[5:0]</obj_property>
+      <obj_property name="ObjectShortName">CAL_DISTANCE[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/SORT" type="array">
+      <obj_property name="ElementShortName">SORT[5:0]</obj_property>
+      <obj_property name="ObjectShortName">SORT[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/ALLOCATE_D" type="array">
+      <obj_property name="ElementShortName">ALLOCATE_D[5:0]</obj_property>
+      <obj_property name="ObjectShortName">ALLOCATE_D[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/GEN_PARAM_D" type="array">
+      <obj_property name="ElementShortName">GEN_PARAM_D[5:0]</obj_property>
+      <obj_property name="ObjectShortName">GEN_PARAM_D[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/ALLOCATE_A" type="array">
+      <obj_property name="ElementShortName">ALLOCATE_A[5:0]</obj_property>
+      <obj_property name="ObjectShortName">ALLOCATE_A[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/GEN_PARAM_A" type="array">
+      <obj_property name="ElementShortName">GEN_PARAM_A[5:0]</obj_property>
+      <obj_property name="ObjectShortName">GEN_PARAM_A[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_ai_controller/u_decision_tree2/SLEEP" type="array">
+      <obj_property name="ElementShortName">SLEEP[5:0]</obj_property>
+      <obj_property name="ObjectShortName">SLEEP[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/player_game_clk" type="logic">
       <obj_property name="ElementShortName">player_game_clk</obj_property>
       <obj_property name="ObjectShortName">player_game_clk</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/rst" type="logic">
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/rst" type="logic">
       <obj_property name="ElementShortName">rst</obj_property>
       <obj_property name="ObjectShortName">rst</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/cmd_left_angle" type="array">
-      <obj_property name="ElementShortName">cmd_left_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">cmd_left_angle[7:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/enable" type="logic">
+      <obj_property name="ElementShortName">enable</obj_property>
+      <obj_property name="ObjectShortName">enable</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/cmd_right_angle" type="array">
-      <obj_property name="ElementShortName">cmd_right_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">cmd_right_angle[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/cmd_action_cmd" type="array">
-      <obj_property name="ElementShortName">cmd_action_cmd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">cmd_action_cmd[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/hold" type="logic">
-      <obj_property name="ElementShortName">hold</obj_property>
-      <obj_property name="ObjectShortName">hold</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/selected" type="logic">
-      <obj_property name="ElementShortName">selected</obj_property>
-      <obj_property name="ObjectShortName">selected</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/ball_info" type="array">
-      <obj_property name="ElementShortName">ball_info</obj_property>
-      <obj_property name="ObjectShortName">ball_info</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/self_info" type="array">
-      <obj_property name="ElementShortName">self_info</obj_property>
-      <obj_property name="ObjectShortName">self_info</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/out_const" type="array">
-      <obj_property name="ElementShortName">out_const</obj_property>
-      <obj_property name="ObjectShortName">out_const</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/out_free" type="array">
-      <obj_property name="ElementShortName">out_free</obj_property>
-      <obj_property name="ObjectShortName">out_free</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/pos_x" type="array">
-      <obj_property name="ElementShortName">pos_x[11:0]</obj_property>
-      <obj_property name="ObjectShortName">pos_x[11:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/pos_y" type="array">
-      <obj_property name="ElementShortName">pos_y[11:0]</obj_property>
-      <obj_property name="ObjectShortName">pos_y[11:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/speed" type="array">
-      <obj_property name="ElementShortName">speed[7:0]</obj_property>
-      <obj_property name="ObjectShortName">speed[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/angle" type="array">
-      <obj_property name="ElementShortName">angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">angle[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/anim_stat" type="array">
-      <obj_property name="ElementShortName">anim_stat[3:0]</obj_property>
-      <obj_property name="ObjectShortName">anim_stat[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/move_ctrl" type="array">
-      <obj_property name="ElementShortName">move_ctrl</obj_property>
-      <obj_property name="ObjectShortName">move_ctrl</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/ai_left_angle" type="array">
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/ai_left_angle" type="array">
       <obj_property name="ElementShortName">ai_left_angle[7:0]</obj_property>
       <obj_property name="ObjectShortName">ai_left_angle[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/ai_right_angle" type="array">
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/ai_right_angle" type="array">
       <obj_property name="ElementShortName">ai_right_angle[7:0]</obj_property>
       <obj_property name="ObjectShortName">ai_right_angle[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/ai_action_cmd" type="array">
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/ai_action_cmd" type="array">
       <obj_property name="ElementShortName">ai_action_cmd[7:0]</obj_property>
       <obj_property name="ObjectShortName">ai_action_cmd[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/input_left_angle" type="array">
-      <obj_property name="ElementShortName">input_left_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">input_left_angle[7:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/cmd_left_angle" type="array">
+      <obj_property name="ElementShortName">cmd_left_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">cmd_left_angle[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/input_right_angle" type="array">
-      <obj_property name="ElementShortName">input_right_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">input_right_angle[7:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/cmd_right_angle" type="array">
+      <obj_property name="ElementShortName">cmd_right_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">cmd_right_angle[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/input_action_cmd" type="array">
-      <obj_property name="ElementShortName">input_action_cmd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">input_action_cmd[7:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/cmd_action_cmd" type="array">
+      <obj_property name="ElementShortName">cmd_action_cmd[7:0]</obj_property>
+      <obj_property name="ObjectShortName">cmd_action_cmd[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/PLAYER_INIT_X" type="array">
-      <obj_property name="ElementShortName">PLAYER_INIT_X[31:0]</obj_property>
-      <obj_property name="ObjectShortName">PLAYER_INIT_X[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/PLAYER_INIT_Y" type="array">
-      <obj_property name="ElementShortName">PLAYER_INIT_Y[31:0]</obj_property>
-      <obj_property name="ObjectShortName">PLAYER_INIT_Y[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/PLAYER_INIT_V" type="array">
-      <obj_property name="ElementShortName">PLAYER_INIT_V[31:0]</obj_property>
-      <obj_property name="ObjectShortName">PLAYER_INIT_V[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/PLAYER_INIT_ANGLE" type="array">
-      <obj_property name="ElementShortName">PLAYER_INIT_ANGLE[31:0]</obj_property>
-      <obj_property name="ObjectShortName">PLAYER_INIT_ANGLE[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/PLAYER_INDEX" type="array">
-      <obj_property name="ElementShortName">PLAYER_INDEX[31:0]</obj_property>
-      <obj_property name="ObjectShortName">PLAYER_INDEX[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/game_clk" type="logic">
-      <obj_property name="ElementShortName">game_clk</obj_property>
-      <obj_property name="ObjectShortName">game_clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/rst" type="logic">
-      <obj_property name="ElementShortName">rst</obj_property>
-      <obj_property name="ObjectShortName">rst</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/in_angle" type="array">
-      <obj_property name="ElementShortName">in_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">in_angle[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/in_speed" type="array">
-      <obj_property name="ElementShortName">in_speed[7:0]</obj_property>
-      <obj_property name="ObjectShortName">in_speed[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/out_x" type="array">
-      <obj_property name="ElementShortName">out_x[11:0]</obj_property>
-      <obj_property name="ObjectShortName">out_x[11:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/out_y" type="array">
-      <obj_property name="ElementShortName">out_y[11:0]</obj_property>
-      <obj_property name="ObjectShortName">out_y[11:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/set_pos_enable" type="logic">
-      <obj_property name="ElementShortName">set_pos_enable</obj_property>
-      <obj_property name="ObjectShortName">set_pos_enable</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/set_x_val" type="array">
-      <obj_property name="ElementShortName">set_x_val[11:0]</obj_property>
-      <obj_property name="ObjectShortName">set_x_val[11:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/set_y_val" type="array">
-      <obj_property name="ElementShortName">set_y_val[11:0]</obj_property>
-      <obj_property name="ObjectShortName">set_y_val[11:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/angle" type="array">
-      <obj_property name="ElementShortName">angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">angle[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/speed" type="array">
-      <obj_property name="ElementShortName">speed[7:0]</obj_property>
-      <obj_property name="ObjectShortName">speed[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/L_counter_1" type="array">
-      <obj_property name="ElementShortName">L_counter_1[9:0]</obj_property>
-      <obj_property name="ObjectShortName">L_counter_1[9:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/LT_1" type="array">
-      <obj_property name="ElementShortName">LT_1[9:0]</obj_property>
-      <obj_property name="ObjectShortName">LT_1[9:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/L_counter_2" type="array">
-      <obj_property name="ElementShortName">L_counter_2[9:0]</obj_property>
-      <obj_property name="ObjectShortName">L_counter_2[9:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/LT_2" type="array">
-      <obj_property name="ElementShortName">LT_2[9:0]</obj_property>
-      <obj_property name="ObjectShortName">LT_2[9:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/convert_angle" type="array">
-      <obj_property name="ElementShortName">convert_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">convert_angle[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/angle_area" type="array">
-      <obj_property name="ElementShortName">angle_area[1:0]</obj_property>
-      <obj_property name="ObjectShortName">angle_area[1:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/L2_flag_1" type="logic">
-      <obj_property name="ElementShortName">L2_flag_1</obj_property>
-      <obj_property name="ObjectShortName">L2_flag_1</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/L2_flag_2" type="logic">
-      <obj_property name="ElementShortName">L2_flag_2</obj_property>
-      <obj_property name="ObjectShortName">L2_flag_2</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/sin_rate" type="array">
-      <obj_property name="ElementShortName">sin_rate[7:0]</obj_property>
-      <obj_property name="ObjectShortName">sin_rate[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/cos_rate" type="array">
-      <obj_property name="ElementShortName">cos_rate[7:0]</obj_property>
-      <obj_property name="ObjectShortName">cos_rate[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/pos_cal_stat" type="array">
-      <obj_property name="ElementShortName">pos_cal_stat[1:0]</obj_property>
-      <obj_property name="ObjectShortName">pos_cal_stat[1:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/X_MIN" type="array">
-      <obj_property name="ElementShortName">X_MIN[31:0]</obj_property>
-      <obj_property name="ObjectShortName">X_MIN[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/X_MAX" type="array">
-      <obj_property name="ElementShortName">X_MAX[31:0]</obj_property>
-      <obj_property name="ObjectShortName">X_MAX[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/Y_MIN" type="array">
-      <obj_property name="ElementShortName">Y_MIN[31:0]</obj_property>
-      <obj_property name="ObjectShortName">Y_MIN[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/Y_MAX" type="array">
-      <obj_property name="ElementShortName">Y_MAX[31:0]</obj_property>
-      <obj_property name="ObjectShortName">Y_MAX[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/INIT_X" type="array">
-      <obj_property name="ElementShortName">INIT_X[31:0]</obj_property>
-      <obj_property name="ObjectShortName">INIT_X[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/INIT_Y" type="array">
-      <obj_property name="ElementShortName">INIT_Y[31:0]</obj_property>
-      <obj_property name="ObjectShortName">INIT_Y[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/IDLE" type="array">
-      <obj_property name="ElementShortName">IDLE[1:0]</obj_property>
-      <obj_property name="ObjectShortName">IDLE[1:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_position_caculator/COUNT" type="array">
-      <obj_property name="ElementShortName">COUNT[1:0]</obj_property>
-      <obj_property name="ObjectShortName">COUNT[1:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/game_clk" type="logic">
-      <obj_property name="ElementShortName">game_clk</obj_property>
-      <obj_property name="ObjectShortName">game_clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/rst" type="logic">
-      <obj_property name="ElementShortName">rst</obj_property>
-      <obj_property name="ObjectShortName">rst</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/enable" type="logic">
-      <obj_property name="ElementShortName">enable</obj_property>
-      <obj_property name="ObjectShortName">enable</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/signal" type="logic">
-      <obj_property name="ElementShortName">signal</obj_property>
-      <obj_property name="ObjectShortName">signal</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/speed" type="array">
-      <obj_property name="ElementShortName">speed[7:0]</obj_property>
-      <obj_property name="ObjectShortName">speed[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/set_speed_enable" type="logic">
-      <obj_property name="ElementShortName">set_speed_enable</obj_property>
-      <obj_property name="ObjectShortName">set_speed_enable</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/set_speed_val" type="array">
-      <obj_property name="ElementShortName">set_speed_val[7:0]</obj_property>
-      <obj_property name="ObjectShortName">set_speed_val[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/acceler_counter" type="array">
-      <obj_property name="ElementShortName">acceler_counter[9:0]</obj_property>
-      <obj_property name="ObjectShortName">acceler_counter[9:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/V_MIN" type="array">
-      <obj_property name="ElementShortName">V_MIN[31:0]</obj_property>
-      <obj_property name="ObjectShortName">V_MIN[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/V_MAX" type="array">
-      <obj_property name="ElementShortName">V_MAX[31:0]</obj_property>
-      <obj_property name="ObjectShortName">V_MAX[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/V_INIT" type="array">
-      <obj_property name="ElementShortName">V_INIT[31:0]</obj_property>
-      <obj_property name="ObjectShortName">V_INIT[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_speed_caculator/A_T" type="array">
-      <obj_property name="ElementShortName">A_T[31:0]</obj_property>
-      <obj_property name="ObjectShortName">A_T[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_angle_cacluator/game_clk" type="logic">
-      <obj_property name="ElementShortName">game_clk</obj_property>
-      <obj_property name="ObjectShortName">game_clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_angle_cacluator/rst" type="logic">
-      <obj_property name="ElementShortName">rst</obj_property>
-      <obj_property name="ObjectShortName">rst</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_angle_cacluator/enable" type="logic">
-      <obj_property name="ElementShortName">enable</obj_property>
-      <obj_property name="ObjectShortName">enable</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_angle_cacluator/signal" type="logic">
-      <obj_property name="ElementShortName">signal</obj_property>
-      <obj_property name="ObjectShortName">signal</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_angle_cacluator/angle" type="array">
-      <obj_property name="ElementShortName">angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">angle[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_angle_cacluator/set_angle_enable" type="logic">
-      <obj_property name="ElementShortName">set_angle_enable</obj_property>
-      <obj_property name="ObjectShortName">set_angle_enable</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_angle_cacluator/set_angle_val" type="array">
-      <obj_property name="ElementShortName">set_angle_val[7:0]</obj_property>
-      <obj_property name="ObjectShortName">set_angle_val[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_angle_cacluator/angle_counter" type="array">
-      <obj_property name="ElementShortName">angle_counter[5:0]</obj_property>
-      <obj_property name="ObjectShortName">angle_counter[5:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_angle_cacluator/INIT_ANGLE" type="array">
-      <obj_property name="ElementShortName">INIT_ANGLE[31:0]</obj_property>
-      <obj_property name="ObjectShortName">INIT_ANGLE[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/u_angle_cacluator/W_T" type="array">
-      <obj_property name="ElementShortName">W_T[31:0]</obj_property>
-      <obj_property name="ObjectShortName">W_T[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/HFSM_game_clk" type="logic">
-      <obj_property name="ElementShortName">HFSM_game_clk</obj_property>
-      <obj_property name="ObjectShortName">HFSM_game_clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/rst" type="logic">
-      <obj_property name="ElementShortName">rst</obj_property>
-      <obj_property name="ObjectShortName">rst</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/debug_number" type="array">
-      <obj_property name="ElementShortName">debug_number[31:0]</obj_property>
-      <obj_property name="ObjectShortName">debug_number[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/hold" type="logic">
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/hold" type="logic">
       <obj_property name="ElementShortName">hold</obj_property>
       <obj_property name="ObjectShortName">hold</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/self_info" type="array">
-      <obj_property name="ElementShortName">self_info</obj_property>
-      <obj_property name="ObjectShortName">self_info</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/selected" type="logic">
+      <obj_property name="ElementShortName">selected</obj_property>
+      <obj_property name="ObjectShortName">selected</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/ball_info" type="array">
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/targeted" type="logic">
+      <obj_property name="ElementShortName">targeted</obj_property>
+      <obj_property name="ObjectShortName">targeted</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/ball_info" type="array">
       <obj_property name="ElementShortName">ball_info</obj_property>
       <obj_property name="ObjectShortName">ball_info</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/left_angle" type="array">
-      <obj_property name="ElementShortName">left_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">left_angle[7:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/tackle_signal" type="logic">
+      <obj_property name="ElementShortName">tackle_signal</obj_property>
+      <obj_property name="ObjectShortName">tackle_signal</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/right_angle" type="array">
-      <obj_property name="ElementShortName">right_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">right_angle[7:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/shoot_signal" type="logic">
+      <obj_property name="ElementShortName">shoot_signal</obj_property>
+      <obj_property name="ObjectShortName">shoot_signal</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/action_cmd" type="array">
-      <obj_property name="ElementShortName">action_cmd[7:0]</obj_property>
-      <obj_property name="ObjectShortName">action_cmd[7:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/switch_signal" type="logic">
+      <obj_property name="ElementShortName">switch_signal</obj_property>
+      <obj_property name="ObjectShortName">switch_signal</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/select_index" type="array">
-      <obj_property name="ElementShortName">select_index[2:0]</obj_property>
-      <obj_property name="ObjectShortName">select_index[2:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/move_ctrl" type="array">
-      <obj_property name="ElementShortName">move_ctrl</obj_property>
-      <obj_property name="ObjectShortName">move_ctrl</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/player_tackle_signal" type="logic">
-      <obj_property name="ElementShortName">player_tackle_signal</obj_property>
-      <obj_property name="ObjectShortName">player_tackle_signal</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/player_shoot_signal" type="logic">
-      <obj_property name="ElementShortName">player_shoot_signal</obj_property>
-      <obj_property name="ObjectShortName">player_shoot_signal</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/const_ball_parameter" type="array">
-      <obj_property name="ElementShortName">const_ball_parameter</obj_property>
-      <obj_property name="ObjectShortName">const_ball_parameter</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/free_ball_parameter" type="array">
-      <obj_property name="ElementShortName">free_ball_parameter</obj_property>
-      <obj_property name="ObjectShortName">free_ball_parameter</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/action_message" type="logic">
-      <obj_property name="ElementShortName">action_message</obj_property>
-      <obj_property name="ObjectShortName">action_message</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/pre_switch_index" type="array">
-      <obj_property name="ElementShortName">pre_switch_index[2:0]</obj_property>
-      <obj_property name="ObjectShortName">pre_switch_index[2:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/anim_stat" type="array">
-      <obj_property name="ElementShortName">anim_stat[3:0]</obj_property>
-      <obj_property name="ObjectShortName">anim_stat[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/basic_ctrl" type="array">
-      <obj_property name="ElementShortName">basic_ctrl</obj_property>
-      <obj_property name="ObjectShortName">basic_ctrl</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/move_anim_stat" type="array">
-      <obj_property name="ElementShortName">move_anim_stat[3:0]</obj_property>
-      <obj_property name="ObjectShortName">move_anim_stat[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/switch_start" type="logic">
-      <obj_property name="ElementShortName">switch_start</obj_property>
-      <obj_property name="ObjectShortName">switch_start</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/switch_done" type="logic">
-      <obj_property name="ElementShortName">switch_done</obj_property>
-      <obj_property name="ObjectShortName">switch_done</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/switch_message" type="array">
-      <obj_property name="ElementShortName">switch_message[3:0]</obj_property>
-      <obj_property name="ObjectShortName">switch_message[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/player_stat" type="array">
-      <obj_property name="ElementShortName">player_stat[5:0]</obj_property>
-      <obj_property name="ObjectShortName">player_stat[5:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/PLAYER_MAX_V" type="array">
-      <obj_property name="ElementShortName">PLAYER_MAX_V[31:0]</obj_property>
-      <obj_property name="ObjectShortName">PLAYER_MAX_V[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/INIT_STAT" type="array">
-      <obj_property name="ElementShortName">INIT_STAT[31:0]</obj_property>
-      <obj_property name="ObjectShortName">INIT_STAT[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/IDLE" type="array">
-      <obj_property name="ElementShortName">IDLE[7:0]</obj_property>
-      <obj_property name="ObjectShortName">IDLE[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/TACKLE" type="array">
-      <obj_property name="ElementShortName">TACKLE[7:0]</obj_property>
-      <obj_property name="ObjectShortName">TACKLE[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/GROUND_SHOOT" type="array">
-      <obj_property name="ElementShortName">GROUND_SHOOT[7:0]</obj_property>
-      <obj_property name="ObjectShortName">GROUND_SHOOT[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/SWITCH" type="array">
-      <obj_property name="ElementShortName">SWITCH[7:0]</obj_property>
-      <obj_property name="ObjectShortName">SWITCH[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/debug_number" type="array">
-      <obj_property name="ElementShortName">debug_number[31:0]</obj_property>
-      <obj_property name="ObjectShortName">debug_number[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/Move_FSM_game_clk" type="logic">
-      <obj_property name="ElementShortName">Move_FSM_game_clk</obj_property>
-      <obj_property name="ObjectShortName">Move_FSM_game_clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/rst" type="logic">
-      <obj_property name="ElementShortName">rst</obj_property>
-      <obj_property name="ObjectShortName">rst</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/hold" type="logic">
-      <obj_property name="ElementShortName">hold</obj_property>
-      <obj_property name="ObjectShortName">hold</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/sprint" type="logic">
-      <obj_property name="ElementShortName">sprint</obj_property>
-      <obj_property name="ObjectShortName">sprint</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/left_angle" type="array">
-      <obj_property name="ElementShortName">left_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">left_angle[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/self_info" type="array">
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/self_info" type="array">
       <obj_property name="ElementShortName">self_info</obj_property>
       <obj_property name="ObjectShortName">self_info</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/basic_ctrl" type="array">
-      <obj_property name="ElementShortName">basic_ctrl</obj_property>
-      <obj_property name="ObjectShortName">basic_ctrl</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/out_const" type="array">
+      <obj_property name="ElementShortName">out_const</obj_property>
+      <obj_property name="ObjectShortName">out_const</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/move_anim_stat" type="array">
-      <obj_property name="ElementShortName">move_anim_stat[3:0]</obj_property>
-      <obj_property name="ObjectShortName">move_anim_stat[3:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/out_free" type="array">
+      <obj_property name="ElementShortName">out_free</obj_property>
+      <obj_property name="ObjectShortName">out_free</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/rel_pos" type="array">
-      <obj_property name="ElementShortName">rel_pos[1:0]</obj_property>
-      <obj_property name="ObjectShortName">rel_pos[1:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/shoot_level" type="array">
+      <obj_property name="ElementShortName">shoot_level[2:0]</obj_property>
+      <obj_property name="ObjectShortName">shoot_level[2:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/rel_angle" type="array">
-      <obj_property name="ElementShortName">rel_angle[7:0]</obj_property>
-      <obj_property name="ObjectShortName">rel_angle[7:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/pos_x" type="array">
+      <obj_property name="ElementShortName">pos_x[11:0]</obj_property>
+      <obj_property name="ObjectShortName">pos_x[11:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/anim_counter" type="array">
-      <obj_property name="ElementShortName">anim_counter[9:0]</obj_property>
-      <obj_property name="ObjectShortName">anim_counter[9:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/pos_y" type="array">
+      <obj_property name="ElementShortName">pos_y[11:0]</obj_property>
+      <obj_property name="ObjectShortName">pos_y[11:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/anim_T" type="array">
-      <obj_property name="ElementShortName">anim_T[9:0]</obj_property>
-      <obj_property name="ObjectShortName">anim_T[9:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/speed" type="array">
+      <obj_property name="ElementShortName">speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">speed[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/anim_switch_stat" type="array">
-      <obj_property name="ElementShortName">anim_switch_stat[1:0]</obj_property>
-      <obj_property name="ObjectShortName">anim_switch_stat[1:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/angle" type="array">
+      <obj_property name="ElementShortName">angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">angle[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/special_flag" type="logic">
-      <obj_property name="ElementShortName">special_flag</obj_property>
-      <obj_property name="ObjectShortName">special_flag</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/anim_stat" type="array">
+      <obj_property name="ElementShortName">anim_stat[3:0]</obj_property>
+      <obj_property name="ObjectShortName">anim_stat[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/HOLDER_MAX_V" type="array">
-      <obj_property name="ElementShortName">HOLDER_MAX_V[31:0]</obj_property>
-      <obj_property name="ObjectShortName">HOLDER_MAX_V[31:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/move_ctrl" type="array">
+      <obj_property name="ElementShortName">move_ctrl</obj_property>
+      <obj_property name="ObjectShortName">move_ctrl</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/FREE_MAX_V" type="array">
-      <obj_property name="ElementShortName">FREE_MAX_V[31:0]</obj_property>
-      <obj_property name="ObjectShortName">FREE_MAX_V[31:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/input_left_angle" type="array">
+      <obj_property name="ElementShortName">input_left_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">input_left_angle[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/move_tb/u_game/u_player_1/U_HFSM/u_Move_FSM/CHARGE_MAX_V" type="array">
-      <obj_property name="ElementShortName">CHARGE_MAX_V[31:0]</obj_property>
-      <obj_property name="ObjectShortName">CHARGE_MAX_V[31:0]</obj_property>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/input_right_angle" type="array">
+      <obj_property name="ElementShortName">input_right_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">input_right_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/input_action_cmd" type="array">
+      <obj_property name="ElementShortName">input_action_cmd[7:0]</obj_property>
+      <obj_property name="ObjectShortName">input_action_cmd[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/PLAYER_INIT_X" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_X[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_X[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/PLAYER_INIT_Y" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_Y[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_Y[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/PLAYER_INIT_V" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_V[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_V[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/PLAYER_INIT_ANGLE" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_ANGLE[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_ANGLE[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/PLAYER_INDEX" type="array">
+      <obj_property name="ElementShortName">PLAYER_INDEX[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INDEX[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/KEEPER" type="array">
+      <obj_property name="ElementShortName">KEEPER[31:0]</obj_property>
+      <obj_property name="ObjectShortName">KEEPER[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/XMIN" type="array">
+      <obj_property name="ElementShortName">XMIN[31:0]</obj_property>
+      <obj_property name="ObjectShortName">XMIN[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/XMAX" type="array">
+      <obj_property name="ElementShortName">XMAX[31:0]</obj_property>
+      <obj_property name="ObjectShortName">XMAX[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/YMIN" type="array">
+      <obj_property name="ElementShortName">YMIN[31:0]</obj_property>
+      <obj_property name="ObjectShortName">YMIN[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_2/YMAX" type="array">
+      <obj_property name="ElementShortName">YMAX[31:0]</obj_property>
+      <obj_property name="ObjectShortName">YMAX[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/player_game_clk" type="logic">
+      <obj_property name="ElementShortName">player_game_clk</obj_property>
+      <obj_property name="ObjectShortName">player_game_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/enable" type="logic">
+      <obj_property name="ElementShortName">enable</obj_property>
+      <obj_property name="ObjectShortName">enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/ai_left_angle" type="array">
+      <obj_property name="ElementShortName">ai_left_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">ai_left_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/ai_right_angle" type="array">
+      <obj_property name="ElementShortName">ai_right_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">ai_right_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/ai_action_cmd" type="array">
+      <obj_property name="ElementShortName">ai_action_cmd[7:0]</obj_property>
+      <obj_property name="ObjectShortName">ai_action_cmd[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/cmd_left_angle" type="array">
+      <obj_property name="ElementShortName">cmd_left_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">cmd_left_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/cmd_right_angle" type="array">
+      <obj_property name="ElementShortName">cmd_right_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">cmd_right_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/cmd_action_cmd" type="array">
+      <obj_property name="ElementShortName">cmd_action_cmd[7:0]</obj_property>
+      <obj_property name="ObjectShortName">cmd_action_cmd[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/hold" type="logic">
+      <obj_property name="ElementShortName">hold</obj_property>
+      <obj_property name="ObjectShortName">hold</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/selected" type="logic">
+      <obj_property name="ElementShortName">selected</obj_property>
+      <obj_property name="ObjectShortName">selected</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/targeted" type="logic">
+      <obj_property name="ElementShortName">targeted</obj_property>
+      <obj_property name="ObjectShortName">targeted</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/ball_info" type="array">
+      <obj_property name="ElementShortName">ball_info</obj_property>
+      <obj_property name="ObjectShortName">ball_info</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/tackle_signal" type="logic">
+      <obj_property name="ElementShortName">tackle_signal</obj_property>
+      <obj_property name="ObjectShortName">tackle_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/shoot_signal" type="logic">
+      <obj_property name="ElementShortName">shoot_signal</obj_property>
+      <obj_property name="ObjectShortName">shoot_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/switch_signal" type="logic">
+      <obj_property name="ElementShortName">switch_signal</obj_property>
+      <obj_property name="ObjectShortName">switch_signal</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/self_info" type="array">
+      <obj_property name="ElementShortName">self_info</obj_property>
+      <obj_property name="ObjectShortName">self_info</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/out_const" type="array">
+      <obj_property name="ElementShortName">out_const</obj_property>
+      <obj_property name="ObjectShortName">out_const</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/out_free" type="array">
+      <obj_property name="ElementShortName">out_free</obj_property>
+      <obj_property name="ObjectShortName">out_free</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/shoot_level" type="array">
+      <obj_property name="ElementShortName">shoot_level[2:0]</obj_property>
+      <obj_property name="ObjectShortName">shoot_level[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/pos_x" type="array">
+      <obj_property name="ElementShortName">pos_x[11:0]</obj_property>
+      <obj_property name="ObjectShortName">pos_x[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/pos_y" type="array">
+      <obj_property name="ElementShortName">pos_y[11:0]</obj_property>
+      <obj_property name="ObjectShortName">pos_y[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/speed" type="array">
+      <obj_property name="ElementShortName">speed[7:0]</obj_property>
+      <obj_property name="ObjectShortName">speed[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/angle" type="array">
+      <obj_property name="ElementShortName">angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/anim_stat" type="array">
+      <obj_property name="ElementShortName">anim_stat[3:0]</obj_property>
+      <obj_property name="ObjectShortName">anim_stat[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/move_ctrl" type="array">
+      <obj_property name="ElementShortName">move_ctrl</obj_property>
+      <obj_property name="ObjectShortName">move_ctrl</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/input_left_angle" type="array">
+      <obj_property name="ElementShortName">input_left_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">input_left_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/input_right_angle" type="array">
+      <obj_property name="ElementShortName">input_right_angle[7:0]</obj_property>
+      <obj_property name="ObjectShortName">input_right_angle[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/input_action_cmd" type="array">
+      <obj_property name="ElementShortName">input_action_cmd[7:0]</obj_property>
+      <obj_property name="ObjectShortName">input_action_cmd[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/PLAYER_INIT_X" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_X[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_X[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/PLAYER_INIT_Y" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_Y[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_Y[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/PLAYER_INIT_V" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_V[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_V[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/PLAYER_INIT_ANGLE" type="array">
+      <obj_property name="ElementShortName">PLAYER_INIT_ANGLE[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INIT_ANGLE[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/PLAYER_INDEX" type="array">
+      <obj_property name="ElementShortName">PLAYER_INDEX[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PLAYER_INDEX[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/KEEPER" type="array">
+      <obj_property name="ElementShortName">KEEPER[31:0]</obj_property>
+      <obj_property name="ObjectShortName">KEEPER[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/XMIN" type="array">
+      <obj_property name="ElementShortName">XMIN[31:0]</obj_property>
+      <obj_property name="ObjectShortName">XMIN[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/XMAX" type="array">
+      <obj_property name="ElementShortName">XMAX[31:0]</obj_property>
+      <obj_property name="ObjectShortName">XMAX[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/YMIN" type="array">
+      <obj_property name="ElementShortName">YMIN[31:0]</obj_property>
+      <obj_property name="ObjectShortName">YMIN[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/game_FSM_tb/u_game/u_player_1/YMAX" type="array">
+      <obj_property name="ElementShortName">YMAX[31:0]</obj_property>
+      <obj_property name="ObjectShortName">YMAX[31:0]</obj_property>
    </wvobject>
 </wave_config>

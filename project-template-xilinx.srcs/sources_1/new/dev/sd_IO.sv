@@ -65,7 +65,7 @@ module sd_IO(
     localparam STATE_FINISH = 3'd2; //[TODO]删去冗余状态
     localparam IDLE = 3'd3;         //闲置状态
     localparam DONE = 3'd4;
-
+    reg done_delay_counter;
     reg [8:0] read_byte;            // 每次读取一个字节
     always @(posedge clk_sd_spi) begin
         if (rst) begin
@@ -73,9 +73,11 @@ module sd_IO(
             sdc_read <= 1'b0;
             state_reg <= IDLE;
             read_byte <= 9'b0;
+            done_delay_counter <= 0;
         end else begin
             casez(state_reg)
                 IDLE:begin
+                    read_end <= 0;
                     if(read_start)begin //捕捉上升沿
                         state_reg <= STATE_INIT;
                         sdc_address <= sd_src_addr;
@@ -96,12 +98,18 @@ module sd_IO(
                     end
                     if (read_byte == 9'd511) begin      //读取完一整个扇区
                         read_end <= 1'b1;       //结束标志，拉高
+                        done_delay_counter <= 0;
                         state_reg <= DONE;
                     end
                 end
                 default: begin
-                    read_end <= 1'b0;
-                    state_reg <= IDLE;
+                    read_end <= 1;
+                    if(done_delay_counter == 0)begin
+                        done_delay_counter <= 1;
+                    end else begin
+                        done_delay_counter <= 0;
+                        state_reg <= IDLE;
+                    end
                 end
             endcase
         end

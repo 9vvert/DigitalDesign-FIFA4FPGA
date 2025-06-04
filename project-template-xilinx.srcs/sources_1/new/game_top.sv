@@ -25,7 +25,10 @@ module game_top(
     input wire pmod1_io2,    // PMOD 接口引脚 2
     output wire pmod1_io3,    // PMOD 接口引脚 3
     output wire pmod1_io4,    // PMOD 接口引脚 4
-
+    output wire pmod2_io1,    // PMOD 接口引脚 1
+    input wire pmod2_io2,    // PMOD 接口引脚 2
+    output wire pmod2_io3,    // PMOD 接口引脚 3
+    output wire pmod2_io4,    // PMOD 接口引脚 4
     // 4MB SRAM 内存
     inout  wire [31:0] base_ram_data,   // SRAM 数据
     output wire [19:0] base_ram_addr,   // SRAM 地址
@@ -157,22 +160,34 @@ module game_top(
     /***************  game  ********************/
     PlayerInfo player_info[9:0];
     BallInfo ball_info;
+    wire [2:0] shoot_level[9:0];
+    wire [3:0] player_hold_index;
     wire [5:0] game_bg;
+    wire [3:0]points_1,points_2;
+    wire switch_bg_signal;
     game u_game(
-        .debug_number(number[31:16]),
+        // .debug_number(number[31:16]),
         .game_clk(game_clk),
         .ps2_clk(ps2_clk),
         .rst(game_rst),
+        .debug_number(number[15:0]),
         //
-        .pmod_io1(pmod1_io1),
-        .pmod_io2(pmod1_io2),
-        .pmod_io3(pmod1_io3),
-        .pmod_io4(pmod1_io4),
+        .pmod1_io1(pmod1_io1),
+        .pmod1_io2(pmod1_io2),
+        .pmod1_io3(pmod1_io3),
+        .pmod1_io4(pmod1_io4),
+        .pmod2_io1(pmod2_io1),
+        .pmod2_io2(pmod2_io2),
+        .pmod2_io3(pmod2_io3),
+        .pmod2_io4(pmod2_io4),
         //
         .game_bg(game_bg),
         .player_info(player_info),
-        .ball_info(ball_info)
-
+        .ball_info(ball_info),
+        .player_hold_index(player_hold_index),
+        .shoot_level(shoot_level),
+        .points_1(points_1),
+        .points_2(points_2)
     );
     
 
@@ -198,11 +213,17 @@ module game_top(
     sprite_generator u_sprite_generator(
         .sprite_generator_ui_clk(ui_clk),
         .ui_rst(ui_rst),
+        .sprite_generator_game_clk(game_clk),
+        .rst(game_rst),
         .game_bg(game_bg),
         .player_info(player_info),
         .ball_info(ball_info),
         .render_param(in_render_param),      // 输出到in_render_param中，作为vm_manager的输入
         .output_bg_index(output_bg_index),
+        .player_hold_index(player_hold_index),
+        .shoot_level(shoot_level),
+        .points_1(points_1),
+        .points_2(points_2),
         .game_bg_change(game_bg_change),
         .bg_change_done(bg_change_done)
     );
@@ -210,7 +231,7 @@ module game_top(
 
     vm_manager u_vm_manager
     (
-        .debug_number(number[15:0]),
+        // .debug_number(number),
         .clk_100m(clk_100m),       // 100MHz
         .rst(rst),
         .clk_locked(clk_locked),     // 复位信号
