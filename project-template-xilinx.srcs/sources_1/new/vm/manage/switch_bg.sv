@@ -115,5 +115,4 @@ module switch_bg
             last_cmd_done <= cmd_done;
         end
     end
-
 endmodule

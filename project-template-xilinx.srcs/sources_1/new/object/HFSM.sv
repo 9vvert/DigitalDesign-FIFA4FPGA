@@ -82,7 +82,6 @@ module HFSM
 
     /**********   Tackle_FSM   *************/
     //用于打断动作
-    MoveControl tackle_ctrl;
     wire tackle_use_follow;
     wire tackle_done;
     wire tackle_enable;

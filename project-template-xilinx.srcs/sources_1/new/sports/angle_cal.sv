@@ -1,7 +1,7 @@
 module angle_caculator
 
 // 人物在任何时候都会有一个朝向，因此不用额外设置“无方向”这种特殊情况
-#(parameter INIT_ANGLE = 0, W_T = 24, KEEPER=0)     //如果是门将，应该有更高的六火星
+#(parameter INIT_ANGLE = 0, W_T = 24, KEEPER=0)     //如果是门将，应该有更高的灵活性
 (
     input game_clk,
     input rst,

@@ -93,7 +93,6 @@ module async_ImgLoader(
                 end
             end else if(loader_stat == WAIT)begin
                 //[TODO]2025.5.28修改端序
-                //5.29 更新：加了一个缓冲状态反而不能正确加载
                 loader_sdram_buffer[15:8] <= loader_sd_buffer[8*sector_counter];
                 loader_sdram_buffer[7:0] <= loader_sd_buffer[8*sector_counter+1];
                 loader_sdram_buffer[31:24] <= loader_sd_buffer[8*sector_counter+2];
@@ -104,8 +103,6 @@ module async_ImgLoader(
                 loader_sdram_buffer[55:48] <= loader_sd_buffer[8*sector_counter+7];
                 loader_stat <= SDRAM_WR;
             end else if(loader_stat == SDRAM_WR)begin
-                // debug: 先等4秒，每次展示2个字节，然后才开始写
-                
                 loader_sdram_cmd <= 2;
                 if( (~last_sdram_write_end) & loader_sdram_write_end)begin   //捕捉上升时刻
                     loader_info[23:8] <= loader_info[23:8] + 1;

@@ -154,5 +154,4 @@ module sprite_generator(
             end
         end
     end 
-
 endmodule

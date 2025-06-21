@@ -2,7 +2,6 @@
 // 可操作者和AI球员分布 / 持球者是谁 / 球的状态 / 
 
 module object_controller
-#(parameter SELECT_INDEX1 = 1, SELECT_INDEX2 = 6)
 (
     input controller_game_clk,
     input rst,

@@ -20,8 +20,6 @@ import AngleLib::*;
 import TrianglevalLib::*;
 import LineLib::*;
     /**************************************/
-    //DIS_JUDGE: 距离判定。不论何时，一旦距离超过，就会导致状态机结束，返回失败
-    //ANG_JUDGE: 角度判定，重点是“人和球连线的角度”和
     localparam  [3:0]IDLE=0, ACCUMULATE=1, WAIT=2, DONE=3; 
 
     reg [3:0] GroundShoot_FSM_stat;
@@ -99,5 +97,4 @@ import LineLib::*;
             end
         end
     end
-
 endmodule
